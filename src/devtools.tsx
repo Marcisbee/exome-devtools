@@ -3,7 +3,7 @@ import { useStore } from "exome/preact";
 import { render } from "preact";
 import { useState } from "preact/hooks";
 
-import styles from './devtools.module.css';
+import styles from "./devtools.module.css";
 
 function getExomeName(instance: Exome) {
 	return getExomeId(instance).replace(/-[a-z0-9]+$/gi, "");
@@ -24,6 +24,7 @@ class DevtoolsActionsStore extends Exome {
 	public active?: string;
 	public actions: Action[] = [];
 	public instances = new Map<string, Exome>();
+	public count = new Map<string, number[]>();
 
 	constructor(public maxAge: number) {
 		super();
@@ -35,6 +36,11 @@ class DevtoolsActionsStore extends Exome {
 
 	public addAction(action: Action) {
 		this.actions.push(action);
+
+		const actionId = `${getExomeId(action.instance)}.${action.name}`;
+		if (!this.count.has(actionId)) {
+			this.count.set(actionId, []);
+		}
 
 		if (this.actions.length > this.maxAge) {
 			this.actions.shift();
@@ -359,7 +365,7 @@ interface DevtoolsStateProps {
 
 function DevtoolsState({ store }: DevtoolsStateProps) {
 	const [active, setActive] = useState<string | null>();
-	const { instances } = useStore(store.actions);
+	const { instances, count } = useStore(store.actions);
 
 	return (
 		<>
@@ -435,6 +441,32 @@ function DevtoolsState({ store }: DevtoolsStateProps) {
 
 						<br />
 
+						{/* <div>
+							Actions called:
+							<pre
+								style={{
+									padding: 10,
+									backgroundColor: "#f0f0f0",
+									fontSize: 10,
+									width: "100%",
+								}}
+							>
+								{JSON.stringify(
+									{
+										times: count.get(active)?.length,
+										avgTime: `${(
+											count.get(active)!.reduce((a, b) => a + b, 0) /
+											count.get(active)!.length
+										).toFixed(1)}ms`,
+									},
+									null,
+									2,
+								)}
+							</pre>
+						</div>
+
+						<br /> */}
+
 						<div>
 							Actions:
 							<pre
@@ -445,7 +477,61 @@ function DevtoolsState({ store }: DevtoolsStateProps) {
 									width: "100%",
 								}}
 							>
-								{JSON.stringify(
+								{Object.getOwnPropertyNames(
+									Object.getPrototypeOf(instances.get(active)),
+								)
+									.filter(
+										(key) =>
+											key !== "constructor" &&
+											typeof Object.getOwnPropertyDescriptor(
+												Object.getPrototypeOf(instances.get(active)),
+												key,
+											)?.get !== "function",
+									)
+									.map((name) => {
+										const actionCount = count.get(
+											`${getExomeId(instances.get(active)!)}.${name}`,
+										);
+
+										if (!actionCount) {
+											return (
+												<div>
+													<strong>{name}</strong>
+
+													<pre>
+														{JSON.stringify(
+															{
+																times: 0,
+															},
+															null,
+															2,
+														)}
+													</pre>
+												</div>
+											);
+										}
+
+										return (
+											<div>
+												<strong>{name}</strong>
+
+												<pre>
+													{JSON.stringify(
+														{
+															times: actionCount.length,
+															avgTime: `${(
+																actionCount.reduce((a, b) => a + b, 0) /
+																actionCount.length
+															).toFixed(1)}ms`,
+														},
+														null,
+														2,
+													)}
+												</pre>
+											</div>
+										);
+									})}
+								{/* {JSON.stringify(
 									Object.getOwnPropertyNames(
 										Object.getPrototypeOf(instances.get(active)),
 									).filter(
@@ -480,7 +566,7 @@ function DevtoolsState({ store }: DevtoolsStateProps) {
 										return value;
 									},
 									2,
-								)}
+								)} */}
 							</pre>
 						</div>
 					</>
@@ -560,7 +646,7 @@ export function inlineDevtools({
 	const target = document.createElement("div");
 	document.body.appendChild(target);
 	const devtoolsStore = new DevtoolsStore(maxAge);
-	const { addAction, addInstance } = devtoolsStore.actions;
+	const { addAction, addInstance, count } = devtoolsStore.actions;
 
 	render(<Devtools name={name} devtoolsStore={devtoolsStore} />, target);
 
@@ -595,6 +681,7 @@ export function inlineDevtools({
 			return;
 		}
 
+		const actionId = `${getExomeId(instance)}.${name}`;
 		const storeName = getExomeName(instance);
 
 		if (ignoreListStores.indexOf(storeName) > -1) {
@@ -623,6 +710,8 @@ export function inlineDevtools({
 
 		return () => {
 			action.time = performance.now() - start;
+			count.get(actionId)!.push(action.time);
+
 			depth -= 1;
 
 			update(devtoolsStore);

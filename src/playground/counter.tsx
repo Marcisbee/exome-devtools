@@ -3,7 +3,7 @@ import { useStore } from "exome/preact";
 
 export class CounterStore extends Exome {
 	public count = 0;
-	public double() {
+	public get double() {
 		return this.count * 2;
 	}
 
