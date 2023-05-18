@@ -1,0 +1,35 @@
+{
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true,
+			"correctness": {
+				"noUnreachable": "error",
+				"noUnusedVariables": "error",
+				"noRenderReturnValue": "off"
+			},
+			"a11y": {
+				"useKeyWithClickEvents": "off",
+				"useKeyWithMouseEvents": "off",
+				"noAutofocus": "off",
+				"noSvgWithoutTitle": "off"
+			},
+			"style": {
+				"noImplicitBoolean": "off",
+				"useBlockStatements": "off",
+				"noNonNullAssertion": "off"
+			},
+			"security": {
+				"noDangerouslySetInnerHtml": "off"
+			},
+			"complexity": {
+				"useFlatMap": "off"
+			},
+			"suspicious": {
+				"noExplicitAny": "off",
+				"noPrototypeBuiltins": "off",
+				"noAssignInExpressions": "off"
+			}
+		}
+	}
+}

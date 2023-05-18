@@ -1,0 +1,26 @@
+{
+	"name": "exome-devtools",
+	"version": "0.1.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"dev": "node scripts/dev.mjs",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Marcisbee/exome-devtools.git"
+	},
+	"author": "Marcis <marcisbergmanis@gmail.com>",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/Marcisbee/exome-devtools/issues"
+	},
+	"homepage": "https://github.com/Marcisbee/exome-devtools#readme",
+	"devDependencies": {
+		"esbuild": "^0.17.19",
+		"esbuild-plugin-lightningcss-modules": "^0.1.0",
+		"exome": "^2.0.2",
+		"preact": "^10.14.1"
+	}
+}
