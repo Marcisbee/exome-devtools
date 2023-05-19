@@ -5,6 +5,7 @@ import { useState } from "preact/hooks";
 
 import styles from "./devtools.module.css";
 import { hexToColor, lerpMultipleColors } from "./utils/color-lerp";
+import { exploreExomeInstance } from "./utils/explore-exome-instance";
 
 function getExomeName(instance: Exome) {
 	return getExomeId(instance).replace(/-[a-z0-9]+$/gi, "");
@@ -393,6 +394,10 @@ function DevtoolsState({ store }: DevtoolsStateProps) {
 	const [active, setActive] = useState<string | null>();
 	const { instances, count } = useStore(store.actions);
 
+	const instanceDetails = active
+		? exploreExomeInstance(instances.get(active)!)
+		: undefined;
+
 	return (
 		<>
 			<div className={styles.actionsLeft}>
@@ -417,7 +422,7 @@ function DevtoolsState({ store }: DevtoolsStateProps) {
 			</div>
 
 			<div className={styles.actionsRight}>
-				{active ? (
+				{active && instanceDetails ? (
 					<>
 						<div>
 							<strong>{active}</strong>
@@ -427,173 +432,68 @@ function DevtoolsState({ store }: DevtoolsStateProps) {
 
 						<div>
 							State:
-							<pre
-								style={{
-									padding: 10,
-									backgroundColor: "#f0f0f0",
-									fontSize: 10,
-									width: "100%",
-								}}
-							>
-								{JSON.stringify(
-									{ ...instances.get(active) },
-									(_key, value) => {
-										if (value == null || typeof value !== "object") {
-											return value;
-										}
+							<hr />
+							{instanceDetails.state.map((name) => (
+								<div>
+									<strong>{name}</strong>:{" "}
+									<span>{JSON.stringify(instances.get(active)[name])}</span>
+								</div>
+							))}
 
-										if (value instanceof Exome) {
-											return {
-												$$exome_id: getExomeId(value),
-											};
-										}
-
-										if (
-											value.constructor !== Array &&
-											value.constructor !== Object &&
-											value.constructor !== Date
-										) {
-											return {
-												$$exome_class: value.constructor.name,
-											};
-										}
-
-										return value;
-									},
-									2,
-								)}
-							</pre>
+							{instanceDetails.getters.map((name) => (
+								<div>
+									<strong>
+										{name} <mark>getter</mark>
+									</strong>
+									: <button type="button">show value</button>
+								</div>
+							))}
 						</div>
 
 						<br />
 
-						{/* <div>
-							Actions called:
-							<pre
-								style={{
-									padding: 10,
-									backgroundColor: "#f0f0f0",
-									fontSize: 10,
-									width: "100%",
-								}}
-							>
-								{JSON.stringify(
-									{
-										times: count.get(active)?.length,
-										avgTime: `${(
-											count.get(active)!.reduce((a, b) => a + b, 0) /
-											count.get(active)!.length
-										).toFixed(1)}ms`,
-									},
-									null,
-									2,
-								)}
-							</pre>
-						</div>
-
-						<br /> */}
-
 						<div>
 							Actions:
-							<pre
-								style={{
-									padding: 10,
-									backgroundColor: "#f0f0f0",
-									fontSize: 10,
-									width: "100%",
-								}}
-							>
-								{Object.getOwnPropertyNames(
-									Object.getPrototypeOf(instances.get(active)),
-								)
-									.filter(
-										(key) =>
-											key !== "constructor" &&
-											typeof Object.getOwnPropertyDescriptor(
-												Object.getPrototypeOf(instances.get(active)),
-												key,
-											)?.get !== "function",
-									)
-									.map((name) => {
-										const actionCount = count.get(
-											`${getExomeId(instances.get(active)!)}.${name}`,
-										);
+							<hr />
+							{instanceDetails.silentActions.map((name) => (
+								<div>
+									<strong>
+										{name} <mark>silent</mark>
+									</strong>
+								</div>
+							))}
 
-										if (!actionCount) {
-											return (
-												<div>
-													<strong>{name}</strong>
+							{instanceDetails.actions.map((name) => {
+								const actionCount = count.get(
+									`${getExomeId(instances.get(active)!)}.${name}`,
+								);
+								const fnString = Object.getOwnPropertyDescriptor(
+									Object.getPrototypeOf(instances.get(active)!),
+									name,
+								)?.value.toString();
 
-													<pre>
-														{JSON.stringify(
-															{
-																times: 0,
-															},
-															null,
-															2,
-														)}
-													</pre>
-												</div>
-											);
-										}
+								return (
+									<div>
+										<strong title={fnString}>{name}</strong>
 
-										return (
-											<div>
-												<strong>{name}</strong>
-
-												<pre>
-													{JSON.stringify(
-														{
+										<pre style={{ fontSize: 10 }}>
+											{JSON.stringify(
+												!actionCount
+													? {
+															times: 0,
+													  }
+													: {
 															times: actionCount.length,
 															avgTime: `${(
 																actionCount.reduce((a, b) => a + b, 0) /
 																actionCount.length
 															).toFixed(1)}ms`,
-														},
-														null,
-														2,
-													)}
-												</pre>
-											</div>
-										);
-									})}
-								{/* {JSON.stringify(
-									Object.getOwnPropertyNames(
-										Object.getPrototypeOf(instances.get(active)),
-									).filter(
-										(key) =>
-											key !== "constructor" &&
-											typeof Object.getOwnPropertyDescriptor(
-												Object.getPrototypeOf(instances.get(active)),
-												key,
-											)?.get !== "function",
-									),
-									(_key, value) => {
-										if (value == null || typeof value !== "object") {
-											return value;
-										}
-
-										if (value instanceof Exome) {
-											return {
-												$$exome_id: getExomeId(value),
-											};
-										}
-
-										if (
-											value.constructor !== Array &&
-											value.constructor !== Object &&
-											value.constructor !== Date
-										) {
-											return {
-												$$exome_class: value.constructor.name,
-											};
-										}
-
-										return value;
-									},
-									2,
-								)} */}
-							</pre>
+													  },
+											)}
+										</pre>
+									</div>
+								);
+							})}
 						</div>
 					</>
 				) : (
