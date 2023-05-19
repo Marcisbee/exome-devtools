@@ -4,9 +4,23 @@ import { render } from "preact";
 import { useState } from "preact/hooks";
 
 import styles from "./devtools.module.css";
+import { hexToColor, lerpMultipleColors } from "./utils/color-lerp";
 
 function getExomeName(instance: Exome) {
 	return getExomeId(instance).replace(/-[a-z0-9]+$/gi, "");
+}
+
+const timingColor = lerpMultipleColors({
+	0: 0x8bc34a,
+	1: 0xf44336,
+});
+
+function getTimingColor(time?: number) {
+	if (time == null) {
+		return;
+	}
+
+	return hexToColor(timingColor(Math.min(1, time / 100)));
 }
 
 interface Action {
@@ -167,7 +181,13 @@ function DevtoolsActionsList({ store }: DevtoolsActionsListProps) {
 							{time === undefined ? (
 								<small style={{ opacity: 0.4 }}>waiting...</small>
 							) : (
-								<small style={{ opacity: 0.4 }}>({time.toFixed(1)}ms)</small>
+								<small
+									style={{
+										color: getTimingColor(time),
+									}}
+								>
+									({time.toFixed(1)}ms)
+								</small>
 							)}
 						</span>
 					</button>
@@ -216,8 +236,14 @@ function DevtoolsActionsContent({ store }: DevtoolsActionsContentProps) {
 					</g>
 				</svg>
 				Timing:{" "}
-				{action.time === undefined ? "Waiting..." : action.time.toFixed(1)}
-				<small>ms</small>
+				<span
+					style={{
+						color: getTimingColor(action.time),
+					}}
+				>
+					{action.time === undefined ? "Waiting..." : action.time.toFixed(1)}
+					<small>ms</small>
+				</span>
 			</div>
 
 			<br />

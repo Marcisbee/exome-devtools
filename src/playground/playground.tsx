@@ -1,4 +1,5 @@
 import { CounterComponent } from "./counter";
+import { JokeComponent } from "./joke";
 
 export function Playground() {
 	return (
@@ -6,6 +7,13 @@ export function Playground() {
 			<div>
 				{"<CounterComponent>"}
 				<CounterComponent />
+			</div>
+
+			<br />
+
+			<div>
+				{"<JokeComponent>"}
+				<JokeComponent />
 			</div>
 		</div>
 	);
