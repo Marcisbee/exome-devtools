@@ -41,17 +41,12 @@ interface Action {
 }
 
 class DevtoolsActionsStore extends Exome {
-	public active?: string;
 	public actions: Action[] = [];
 	public instances = new Map<string, Exome>();
 	public count = new Map<string, number[]>();
 
 	constructor(public maxAge: number) {
 		super();
-	}
-
-	public setActive(active: string) {
-		this.active = active;
 	}
 
 	public addAction(action: Action) {
@@ -73,17 +68,12 @@ class DevtoolsActionsStore extends Exome {
 }
 
 class DevtoolsStore extends Exome {
-	public tab: "actions" | "state" | "performance" = "actions";
 	public actions: DevtoolsActionsStore;
 
 	constructor(public maxAge: number) {
 		super();
 
 		this.actions = new DevtoolsActionsStore(maxAge);
-	}
-
-	public setTab(tab: DevtoolsStore["tab"]) {
-		this.tab = tab;
 	}
 }
 
@@ -787,7 +777,7 @@ export function inlineDevtools({
 
 			depth -= 1;
 
-			update(devtoolsStore);
+			update(devtoolsStore.actions);
 			// devtoolsStore.addAction({
 			//   id: String(Math.random()),
 			//   name,

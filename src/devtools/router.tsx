@@ -59,26 +59,7 @@ export function RouterOutlet({ routes }: RouterOutletProps) {
 				[url],
 			)}
 		>
-			<div
-				style={{
-					position: "absolute",
-					fontSize: 10,
-					backgroundColor: "rgba(255,255,255,0.8)",
-					zIndex: 2,
-				}}
-			>
-				{JSON.stringify(
-					{
-						testUrl,
-						depth,
-						params: routeParams,
-					},
-					null,
-					" ",
-				)}
-			</div>
-
-			{RouteComponent ? <RouteComponent /> : <strong>404</strong>}
+			{RouteComponent ? <RouteComponent /> : null}
 		</routerContext.Provider>
 	);
 }
