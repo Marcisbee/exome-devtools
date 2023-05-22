@@ -1,13 +1,14 @@
 import { Exome, Middleware, getExomeId, update } from "exome";
 import { useStore } from "exome/preact";
-import { render } from "preact";
-import { useState } from "preact/hooks";
+import { createContext, render } from "preact";
+import { useContext, useMemo, useState } from "preact/hooks";
 
 import styles from "./devtools.module.css";
 import { hexToColor, lerpMultipleColors } from "./utils/color-lerp";
 import { exploreExomeInstance } from "./utils/explore-exome-instance";
 import { exomeToJson } from "./utils/exome-to-json";
 import { getDiff } from "./utils/get-diff";
+import { RouterOutlet, RouterStore, routerContext } from "./devtools/router";
 
 function getExomeName(instance: Exome) {
 	return getExomeId(instance).replace(/-[a-z0-9]+$/gi, "");
@@ -86,75 +87,121 @@ class DevtoolsStore extends Exome {
 	}
 }
 
+const devtoolsContext = createContext<DevtoolsStore>(null as any);
+
 interface DevtoolsProps {
 	name: string;
 	devtoolsStore: DevtoolsStore;
 }
 
 function Devtools({ name, devtoolsStore }: DevtoolsProps) {
-	const { actions, tab, setTab } = useStore(devtoolsStore);
+	const router = useMemo(() => new RouterStore("actions"), []);
+	const routes = useMemo(
+		() => ({
+			actions: RouteDevtoolsActions,
+			state: RouteDevtoolsState,
+			performance: RouteDevtoolsPerformance,
+		}),
+		[],
+	);
 
 	return (
-		<div className={styles.devtools}>
-			<div className={styles.head}>
-				<div>
-					<strong>{name}</strong>
-				</div>
+		<devtoolsContext.Provider value={devtoolsStore}>
+			<routerContext.Provider value={{ router, depth: 0 }}>
+				<div className={styles.devtools}>
+					<div className={styles.head}>
+						<div>
+							<strong>{name}</strong>
+						</div>
 
-				<div>
-					<button type="button" onClick={() => setTab("actions")}>
-						Actions
-					</button>
-					<button type="button" onClick={() => setTab("state")}>
-						State
-					</button>
-					<button type="button" onClick={() => setTab("performance")}>
-						Performance
-					</button>
-				</div>
-			</div>
+						<div>
+							<button
+								type="button"
+								onClick={() => {
+									router.navigate("actions");
+								}}
+							>
+								Actions
+							</button>
+							<button
+								type="button"
+								onClick={() => {
+									router.navigate("state");
+								}}
+							>
+								State
+							</button>
+							<button
+								type="button"
+								onClick={() => {
+									router.navigate("performance");
+								}}
+							>
+								Performance
+							</button>
+						</div>
+					</div>
 
-			{tab === "actions" && (
-				<div className={styles.body}>
-					<DevtoolsActionsList store={actions} />
-					<DevtoolsActionsContent store={devtoolsStore} />
+					<RouterOutlet routes={routes} />
 				</div>
-			)}
+			</routerContext.Provider>
+		</devtoolsContext.Provider>
+	);
+}
 
-			{tab === "state" && (
-				<div className={styles.body}>
-					<DevtoolsState store={devtoolsStore} />
-				</div>
-			)}
+function RouteDevtoolsActions() {
+	const routes = useMemo(
+		() => ({
+			$actionId: DevtoolsActionsContent,
+			"*": DevtoolsActionsContent,
+		}),
+		[],
+	);
 
-			{tab === "performance" && (
-				<div className={styles.body}>
-					<DevtoolsPerformance store={devtoolsStore} />
-				</div>
-			)}
+	return (
+		<div className={styles.body}>
+			<DevtoolsActionsList />
+			<RouterOutlet routes={routes} />
 		</div>
 	);
 }
 
-interface DevtoolsActionsListProps {
-	store: DevtoolsActionsStore;
+function RouteDevtoolsState() {
+	return (
+		<div className={styles.body}>
+			<DevtoolsState />
+		</div>
+	);
 }
 
-function DevtoolsActionsList({ store }: DevtoolsActionsListProps) {
-	const { active, actions, setActive } = useStore(store);
+function RouteDevtoolsPerformance() {
+	return (
+		<div className={styles.body}>
+			<DevtoolsPerformance />
+		</div>
+	);
+}
+
+function DevtoolsActionsList() {
+	const { router } = useContext(routerContext);
+	const { url, navigate } = useStore(router);
+	const devtoolsStore = useContext(devtoolsContext);
+	const { actions } = useStore(devtoolsStore.actions);
 
 	return (
 		<div className={styles.actionsLeft}>
 			{actions.map(({ id, depth, instance, name, time }) => {
+				const actionUrl = `actions/${id}`;
+
 				return (
 					<button
 						key={id}
 						type="button"
-						className={[styles.actionButton, active === id && styles.action]
+						className={[styles.actionButton, url === actionUrl && styles.action]
 							.filter(Boolean)
 							.join(" ")}
 						onClick={() => {
-							setActive(id);
+							navigate(actionUrl);
 						}}
 					>
 						<small style={{ opacity: 0.4 }}>
@@ -202,13 +249,11 @@ function DevtoolsActionsList({ store }: DevtoolsActionsListProps) {
 	);
 }
 
-interface DevtoolsActionsContentProps {
-	store: DevtoolsStore;
-}
-
-function DevtoolsActionsContent({ store }: DevtoolsActionsContentProps) {
-	const { actions, active } = useStore(store.actions);
-	const action = actions.find(({ id }) => active === id);
+function DevtoolsActionsContent() {
+	const store = useContext(devtoolsContext);
+	const { params } = useContext(routerContext);
+	const { actions } = useStore(store.actions);
+	const action = actions.find(({ id }) => params?.actionId === id);
 
 	if (!action) {
 		return <div className={styles.actionsRight}>No Action Selected</div>;
@@ -435,11 +480,8 @@ function DevtoolsActionsContent({ store }: DevtoolsActionsContentProps) {
 	);
 }
 
-interface DevtoolsStateProps {
-	store: DevtoolsStore;
-}
-
-function DevtoolsState({ store }: DevtoolsStateProps) {
+function DevtoolsState() {
+	const store = useContext(devtoolsContext);
 	const [active, setActive] = useState<string | null>();
 	const { instances, count } = useStore(store.actions);
 
@@ -504,7 +546,13 @@ function DevtoolsState({ store }: DevtoolsStateProps) {
 								{instanceDetails.state.map((name) => (
 									<div>
 										<strong>{name}</strong>:{" "}
-										<span>{JSON.stringify(instances.get(active)[name])}</span>
+										<span>
+											{JSON.stringify(
+												(instances.get(active) as any)[name],
+												null,
+												2,
+											)}
+										</span>
 									</div>
 								))}
 
@@ -595,11 +643,8 @@ function DevtoolsState({ store }: DevtoolsStateProps) {
 	);
 }
 
-interface DevtoolsPerformanceProps {
-	store: DevtoolsStore;
-}
-
-function DevtoolsPerformance({ store }: DevtoolsPerformanceProps) {
+function DevtoolsPerformance() {
+	const store = useContext(devtoolsContext);
 	const { actions } = useStore(store.actions);
 
 	let nn = 0;
@@ -682,6 +727,10 @@ export function inlineDevtools({
 		}
 
 		if (instance instanceof DevtoolsStore) {
+			return;
+		}
+
+		if (instance instanceof RouterStore) {
 			return;
 		}
 
