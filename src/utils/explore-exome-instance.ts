@@ -27,7 +27,8 @@ export function exploreExomeInstance(instance: Exome) {
 		}
 
 		const isGetter = typeof descriptor(proto, methodName)?.get === "function";
-		console.log(methodName, descriptor(proto, methodName));
+		// console.log(methodName, descriptor(proto, methodName));
+		// console.dir(proto[methodName]);
 
 		if (isGetter) {
 			output.getters.push(methodName);

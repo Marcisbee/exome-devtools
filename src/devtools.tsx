@@ -14,7 +14,7 @@ import {
 import { RouteDevtoolsActions } from "./routes/actions";
 import { getExomeName } from "./utils/get-exome-name";
 import { RouteDevtoolsState } from "./routes/state";
-import { RouteDevtoolsPerformance } from "./routes/performance";
+import { RouteDevtoolsProfiler } from "./routes/profiler";
 
 interface DevtoolsProps {
 	name: string;
@@ -24,7 +24,7 @@ interface DevtoolsProps {
 const routes = {
 	actions: RouteDevtoolsActions,
 	state: RouteDevtoolsState,
-	performance: RouteDevtoolsPerformance,
+	profiler: RouteDevtoolsProfiler,
 };
 
 function Devtools({ name, devtoolsStore }: DevtoolsProps) {
@@ -59,10 +59,10 @@ function Devtools({ name, devtoolsStore }: DevtoolsProps) {
 							<button
 								type="button"
 								onClick={() => {
-									router.navigate("performance");
+									router.navigate("profiler");
 								}}
 							>
-								Performance
+								Profiler
 							</button>
 						</div>
 					</div>

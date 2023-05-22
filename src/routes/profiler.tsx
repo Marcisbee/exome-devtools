@@ -5,7 +5,7 @@ import { devtoolsContext } from "../store";
 import styles from "../devtools.module.css";
 import { routerContext } from "../devtools/router";
 
-export function RouteDevtoolsPerformance() {
+export function RouteDevtoolsProfiler() {
 	const { router } = useContext(routerContext);
 	const store = useContext(devtoolsContext);
 	const { actions } = useStore(store.actions);
