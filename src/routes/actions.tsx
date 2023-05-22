@@ -1,6 +1,6 @@
 import { Exome, getExomeId } from "exome";
 import { useStore } from "exome/preact";
-import { useContext, useMemo } from "preact/hooks";
+import { useContext } from "preact/hooks";
 
 import { RouterOutlet, routerContext } from "../devtools/router";
 import { getDiff } from "../utils/get-diff";
@@ -9,18 +9,16 @@ import { getExomeName } from "../utils/get-exome-name";
 import { getTimingColor } from "../utils/get-timing-color";
 import styles from "../devtools.module.css";
 
+const routes = {
+	$actionId: DevtoolsActionsContent,
+	"*": DevtoolsActionsContent,
+};
+
 export function RouteDevtoolsActions() {
 	const { router } = useContext(routerContext);
 	const { url, navigate } = useStore(router);
 	const devtoolsStore = useContext(devtoolsContext);
 	const { actions } = useStore(devtoolsStore.actions);
-	const routes = useMemo(
-		() => ({
-			$actionId: DevtoolsActionsContent,
-			"*": DevtoolsActionsContent,
-		}),
-		[],
-	);
 
 	return (
 		<div className={styles.body}>
@@ -92,7 +90,7 @@ export function RouteDevtoolsActions() {
 
 function DevtoolsActionsContent() {
 	const store = useContext(devtoolsContext);
-	const { params } = useContext(routerContext);
+	const { router, params } = useContext(routerContext);
 	const { actions } = useStore(store.actions);
 	const action = actions.find(({ id }) => params?.actionId === id);
 
@@ -107,7 +105,18 @@ function DevtoolsActionsContent() {
 	return (
 		<div className={styles.actionsRight}>
 			<h3>
-				<span>{instanceName}.</span>
+				<span>
+					{/* rome-ignore lint/a11y/useValidAnchor: <explanation> */}
+					<a
+						href="javascript:void(0);"
+						onClick={() => {
+							router.navigate(`state/${getExomeId(action.instance)}`);
+						}}
+					>
+						{instanceName}
+					</a>
+					.
+				</span>
 				<strong>{action.name}</strong>
 			</h3>
 

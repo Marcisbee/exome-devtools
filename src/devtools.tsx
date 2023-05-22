@@ -1,7 +1,6 @@
 import { Exome, Middleware, getExomeId, update } from "exome";
-import { useStore } from "exome/preact";
 import { render } from "preact";
-import { useContext, useMemo } from "preact/hooks";
+import { useMemo } from "preact/hooks";
 
 import styles from "./devtools.module.css";
 import { exomeToJson } from "./utils/exome-to-json";
@@ -15,22 +14,21 @@ import {
 import { RouteDevtoolsActions } from "./routes/actions";
 import { getExomeName } from "./utils/get-exome-name";
 import { RouteDevtoolsState } from "./routes/state";
+import { RouteDevtoolsPerformance } from "./routes/performance";
 
 interface DevtoolsProps {
 	name: string;
 	devtoolsStore: DevtoolsStore;
 }
 
+const routes = {
+	actions: RouteDevtoolsActions,
+	state: RouteDevtoolsState,
+	performance: RouteDevtoolsPerformance,
+};
+
 function Devtools({ name, devtoolsStore }: DevtoolsProps) {
 	const router = useMemo(() => new RouterStore("actions"), []);
-	const routes = useMemo(
-		() => ({
-			actions: RouteDevtoolsActions,
-			state: RouteDevtoolsState,
-			performance: RouteDevtoolsPerformance,
-		}),
-		[],
-	);
 
 	return (
 		<devtoolsContext.Provider value={devtoolsStore}>
@@ -73,63 +71,6 @@ function Devtools({ name, devtoolsStore }: DevtoolsProps) {
 				</div>
 			</routerContext.Provider>
 		</devtoolsContext.Provider>
-	);
-}
-
-function RouteDevtoolsPerformance() {
-	return (
-		<div className={styles.body}>
-			<DevtoolsPerformance />
-		</div>
-	);
-}
-
-function DevtoolsPerformance() {
-	const store = useContext(devtoolsContext);
-	const { actions } = useStore(store.actions);
-
-	let nn = 0;
-
-	return (
-		<div style={{ flex: 1, width: "100%" }}>
-			<div>Not fully implemented</div>
-			<div
-				style={{
-					whiteSpace: "nowrap",
-					backgroundColor: "#f0f0f0",
-					padding: 10,
-					overflowX: "scroll",
-					overflowY: "hidden",
-				}}
-			>
-				{actions.map(({ time, name, now, depth }, index) => {
-					const diff = index ? now - nn : 0;
-
-					if (index) {
-						nn = now;
-					}
-
-					if (depth > 1) {
-						return null;
-					}
-
-					return (
-						<span
-							style={{
-								display: "inline-block",
-								width: Math.max(Math.floor(time!), 3),
-								overflow: "hidden",
-								border: "1px solid #fff",
-								backgroundColor: "orange",
-								marginLeft: diff / 100,
-							}}
-						>
-							{name}
-						</span>
-					);
-				})}
-			</div>
-		</div>
 	);
 }
 

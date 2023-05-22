@@ -1,6 +1,6 @@
 import { getExomeId } from "exome";
 import { useStore } from "exome/preact";
-import { useContext, useMemo } from "preact/hooks";
+import { useContext } from "preact/hooks";
 
 import { devtoolsContext } from "../store";
 import { RouterOutlet, routerContext } from "../devtools/router";
@@ -8,18 +8,16 @@ import { getExomeName } from "../utils/get-exome-name";
 import { exploreExomeInstance } from "../utils/explore-exome-instance";
 import styles from "../devtools.module.css";
 
+const routes = {
+	$storeId: DevtoolsStateContent,
+	"*": DevtoolsStateContent,
+};
+
 export function RouteDevtoolsState() {
 	const store = useContext(devtoolsContext);
 	const { router } = useContext(routerContext);
 	const { url, navigate } = useStore(router);
 	const { instances } = useStore(store.actions);
-	const routes = useMemo(
-		() => ({
-			$storeId: DevtoolsStateContent,
-			"*": DevtoolsStateContent,
-		}),
-		[],
-	);
 
 	return (
 		<div className={styles.body}>
