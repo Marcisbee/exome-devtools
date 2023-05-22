@@ -47,7 +47,7 @@ export function RouteDevtoolsProfiler() {
 									marginLeft: diff / 100,
 								}}
 								onClick={() => {
-									router.navigate(`actions/${id}`);
+									router.navigate(`actions/${id}`, "actions");
 								}}
 							>
 								{name}

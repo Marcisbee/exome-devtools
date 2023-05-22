@@ -1,17 +1,188 @@
-import { getExomeId } from "exome";
+import { type Exome, getExomeId } from "exome";
 import { useStore } from "exome/preact";
 import { useContext } from "preact/hooks";
 
-import { devtoolsContext } from "../store";
+import { DevtoolsActionsStore, devtoolsContext } from "../store";
 import { RouterOutlet, routerContext } from "../devtools/router";
 import { getExomeName } from "../utils/get-exome-name";
 import { exploreExomeInstance } from "../utils/explore-exome-instance";
+import { GetterValue } from "../components/getter-value/getter-value";
 import styles from "../devtools.module.css";
 
 const routes = {
 	$storeId: DevtoolsStateContent,
 	"*": DevtoolsStateContent,
 };
+
+interface StoreExploreProps {
+	instance: Exome;
+	count: DevtoolsActionsStore["count"];
+}
+
+function StoreExplore({ instance, count }: StoreExploreProps) {
+	const instanceDetails = exploreExomeInstance(instance);
+
+	return (
+		<div>
+			<div style={{ marginBottom: 10 }}>
+				<input placeholder="Filter" type="text" style={{ float: "right" }} />
+				<h3 style={{ color: "#fb8c00" }}>{getExomeName(instance)}</h3>
+			</div>
+
+			<pre
+				style={{
+					padding: 10,
+					backgroundColor: "#fff",
+					fontSize: 12,
+					width: "100%",
+					borderTop: "1px solid #ccc",
+				}}
+			>
+				<span style={{ display: "block", marginBottom: 10, color: "#ccc" }}>
+					state
+				</span>
+
+				{instanceDetails.state.map((name) => (
+					<div
+						style={{
+							paddingLeft: 20,
+							marginBottom: 8,
+						}}
+					>
+						<span style={{ color: "#673ab7" }}>{name}</span>:{" "}
+						<span style={{ color: "#222" }}>
+							{JSON.stringify((instance as any)[name], null, 2)}
+						</span>
+					</div>
+				))}
+
+				{instanceDetails.getters.map((name) => (
+					<div
+						style={{
+							paddingLeft: 20,
+							marginBottom: 8,
+						}}
+					>
+						<span style={{ color: "#673ab7" }}>
+							{name}{" "}
+							<i style={{ fontWeight: "normal", opacity: 0.5, fontSize: 10 }}>
+								(getter)
+							</i>
+						</span>
+						:{" "}
+						<span style={{ color: "#222" }}>
+							<GetterValue
+								key={`getter::${name}::${Math.random()}`}
+								source={instance}
+								field={name}
+							/>
+						</span>
+					</div>
+				))}
+			</pre>
+
+			<pre
+				style={{
+					padding: 10,
+					backgroundColor: "#fff",
+					fontSize: 12,
+					width: "100%",
+					borderTop: "1px solid #ccc",
+				}}
+			>
+				<span style={{ display: "block", marginBottom: 10, color: "#ccc" }}>
+					actions
+				</span>
+
+				{instanceDetails.actions.map((name) => {
+					const actionCount = count.get(`${getExomeId(instance)}.${name}`);
+					const fnString = Object.getOwnPropertyDescriptor(
+						Object.getPrototypeOf(instance),
+						name,
+					)?.value.toString();
+
+					return (
+						<div
+							style={{
+								paddingLeft: 20,
+								marginBottom: 8,
+							}}
+						>
+							<span title={fnString} style={{ color: "#673ab7" }}>
+								{name}(){" "}
+							</span>
+
+							{actionCount?.length ? (
+								<span>
+									<span
+										style={{
+											display: "inline-block",
+											padding: "0 5px",
+											backgroundColor: "#f0f0f0",
+										}}
+									>
+										{actionCount.length}x
+									</span>
+									<span
+										style={{
+											display: "inline-block",
+											borderLeft: "2px solid #fff",
+											padding: "0 5px",
+											backgroundColor: "#f5f5f5",
+										}}
+									>{`~${(
+										actionCount.reduce((a, b) => a + b, 0) / actionCount.length
+									).toFixed(1)}ms`}</span>
+								</span>
+							) : (
+								<span
+									style={{
+										display: "inline-block",
+										padding: "0 5px",
+										backgroundColor: "#f0f0f0",
+									}}
+								>
+									0x
+								</span>
+							)}
+						</div>
+					);
+				})}
+
+				{instanceDetails.silentActions.map((name) => (
+					<div
+						style={{
+							paddingLeft: 20,
+							marginBottom: 8,
+						}}
+					>
+						<span style={{ color: "#673ab7" }}>
+							{name}(){" "}
+							<i style={{ fontWeight: "normal", opacity: 0.5, fontSize: 10 }}>
+								(silent)
+							</i>
+						</span>
+					</div>
+				))}
+			</pre>
+
+			{/* <pre
+				style={{
+					padding: 10,
+					backgroundColor: "#fff",
+					fontSize: 12,
+					width: "100%",
+					borderTop: "1px solid #ccc",
+				}}
+			>
+
+				<div style={{ marginTop: 10 }}>
+					<span>{"}"}</span>
+				</div>
+			</pre> */}
+		</div>
+	);
+}
 
 export function RouteDevtoolsState() {
 	const store = useContext(devtoolsContext);
@@ -36,7 +207,7 @@ export function RouteDevtoolsState() {
 								.filter(Boolean)
 								.join(" ")}
 							onClick={() => {
-								navigate(storeUrl);
+								navigate(storeUrl, "state");
 							}}
 						>
 							<small style={{ opacity: 0.4 }}>
@@ -58,138 +229,15 @@ export function DevtoolsStateContent() {
 	const store = useContext(devtoolsContext);
 	const { params } = useContext(routerContext);
 	const { instances, count } = useStore(store.actions);
+	const instance = instances.get(params?.storeId)!;
 
-	const instanceDetails = params?.storeId
-		? exploreExomeInstance(instances.get(params.storeId)!)
-		: undefined;
+	if (!instance || !params?.storeId) {
+		return <div className={styles.actionsRight}>No store selected</div>;
+	}
 
 	return (
 		<div className={styles.actionsRight}>
-			{params?.storeId && instanceDetails ? (
-				<>
-					<h3>{params.storeId}</h3>
-
-					<br />
-
-					<div>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							width="1em"
-							height="1em"
-							viewBox="0 0 256 256"
-						>
-							<g fill="currentColor">
-								<path
-									d="M216 80c0 26.51-39.4 48-88 48s-88-21.49-88-48s39.4-48 88-48s88 21.49 88 48Z"
-									opacity=".2"
-								/>
-								<path d="M128 24c-53.83 0-96 24.6-96 56v96c0 31.4 42.17 56 96 56s96-24.6 96-56V80c0-31.4-42.17-56-96-56Zm80 104c0 9.62-7.88 19.43-21.61 26.92C170.93 163.35 150.19 168 128 168s-42.93-4.65-58.39-13.08C55.88 147.43 48 137.62 48 128v-16.64c17.06 15 46.23 24.64 80 24.64s62.94-9.68 80-24.64ZM69.61 53.08C85.07 44.65 105.81 40 128 40s42.93 4.65 58.39 13.08C200.12 60.57 208 70.38 208 80s-7.88 19.43-21.61 26.92C170.93 115.35 150.19 120 128 120s-42.93-4.65-58.39-13.08C55.88 99.43 48 89.62 48 80s7.88-19.43 21.61-26.92Zm116.78 149.84C170.93 211.35 150.19 216 128 216s-42.93-4.65-58.39-13.08C55.88 195.43 48 185.62 48 176v-16.64c17.06 15 46.23 24.64 80 24.64s62.94-9.68 80-24.64V176c0 9.62-7.88 19.43-21.61 26.92Z" />
-							</g>
-						</svg>
-						State:
-						<pre
-							style={{
-								padding: 10,
-								backgroundColor: "#f0f0f0",
-								fontSize: 10,
-								width: "100%",
-							}}
-						>
-							{instanceDetails.state.map((name) => (
-								<div>
-									<strong>{name}</strong>:{" "}
-									<span>
-										{JSON.stringify(
-											(instances.get(params.storeId) as any)[name],
-											null,
-											2,
-										)}
-									</span>
-								</div>
-							))}
-
-							{instanceDetails.getters.map((name) => (
-								<div>
-									<strong>
-										{name} <mark>getter</mark>
-									</strong>
-									: <button type="button">show value</button>
-								</div>
-							))}
-						</pre>
-					</div>
-
-					<br />
-
-					<div>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							width="1em"
-							height="1em"
-							viewBox="0 0 256 256"
-						>
-							<g fill="currentColor">
-								<path
-									d="M216 80c0 26.51-39.4 48-88 48s-88-21.49-88-48s39.4-48 88-48s88 21.49 88 48Z"
-									opacity=".2"
-								/>
-								<path d="M128 24c-53.83 0-96 24.6-96 56v96c0 31.4 42.17 56 96 56s96-24.6 96-56V80c0-31.4-42.17-56-96-56Zm80 104c0 9.62-7.88 19.43-21.61 26.92C170.93 163.35 150.19 168 128 168s-42.93-4.65-58.39-13.08C55.88 147.43 48 137.62 48 128v-16.64c17.06 15 46.23 24.64 80 24.64s62.94-9.68 80-24.64ZM69.61 53.08C85.07 44.65 105.81 40 128 40s42.93 4.65 58.39 13.08C200.12 60.57 208 70.38 208 80s-7.88 19.43-21.61 26.92C170.93 115.35 150.19 120 128 120s-42.93-4.65-58.39-13.08C55.88 99.43 48 89.62 48 80s7.88-19.43 21.61-26.92Zm116.78 149.84C170.93 211.35 150.19 216 128 216s-42.93-4.65-58.39-13.08C55.88 195.43 48 185.62 48 176v-16.64c17.06 15 46.23 24.64 80 24.64s62.94-9.68 80-24.64V176c0 9.62-7.88 19.43-21.61 26.92Z" />
-							</g>
-						</svg>
-						Actions:
-						<pre
-							style={{
-								padding: 10,
-								backgroundColor: "#f0f0f0",
-								fontSize: 10,
-								width: "100%",
-							}}
-						>
-							{instanceDetails.actions.map((name) => {
-								const actionCount = count.get(
-									`${getExomeId(instances.get(params.storeId)!)}.${name}`,
-								);
-								const fnString = Object.getOwnPropertyDescriptor(
-									Object.getPrototypeOf(instances.get(params.storeId)!),
-									name,
-								)?.value.toString();
-
-								return (
-									<div>
-										<strong title={fnString}>{name} </strong>
-
-										<span>
-											{JSON.stringify(
-												!actionCount
-													? {
-															times: 0,
-													  }
-													: {
-															times: actionCount.length,
-															avgTime: `${(
-																actionCount.reduce((a, b) => a + b, 0) /
-																actionCount.length
-															).toFixed(1)}ms`,
-													  },
-											)}
-										</span>
-									</div>
-								);
-							})}
-
-							{instanceDetails.silentActions.map((name) => (
-								<div>
-									<strong>
-										{name} <mark>silent</mark>
-									</strong>
-								</div>
-							))}
-						</pre>
-					</div>
-				</>
-			) : (
-				<div>No store selected</div>
-			)}
+			<StoreExplore instance={instance} count={count} />
 		</div>
 	);
 }

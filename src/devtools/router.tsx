@@ -6,13 +6,30 @@ import { useContext, useMemo } from "preact/hooks";
 import { matchRoute } from "../utils/match-route";
 
 export class RouterStore extends Exome {
+	private memoRoutes: Record<string, string | undefined> = {};
+
 	constructor(public url: string, public urlChunks: string[] = url.split("/")) {
 		super();
 	}
 
-	public navigate(url: RouterStore["url"]) {
+	public navigate(url: RouterStore["url"], memoKey?: string) {
 		this.url = url;
 		this.urlChunks = url.split("/");
+
+		if (memoKey) {
+			this.memoRoutes[memoKey] = url;
+		}
+	}
+
+	public navigateMemoFirst(memoKey: string, fallbackUrl: RouterStore["url"]) {
+		const url = this.memoRoutes[memoKey];
+
+		if (url) {
+			this.navigate(url);
+			return;
+		}
+
+		this.navigate(fallbackUrl, memoKey);
 	}
 }
 

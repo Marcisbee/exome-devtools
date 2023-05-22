@@ -29,6 +29,7 @@ const routes = {
 
 function Devtools({ name, devtoolsStore }: DevtoolsProps) {
 	const router = useMemo(() => new RouterStore("actions"), []);
+	const { navigateMemoFirst } = router;
 
 	return (
 		<devtoolsContext.Provider value={devtoolsStore}>
@@ -43,7 +44,7 @@ function Devtools({ name, devtoolsStore }: DevtoolsProps) {
 							<button
 								type="button"
 								onClick={() => {
-									router.navigate("actions");
+									navigateMemoFirst("actions", "actions");
 								}}
 							>
 								Actions
@@ -51,7 +52,7 @@ function Devtools({ name, devtoolsStore }: DevtoolsProps) {
 							<button
 								type="button"
 								onClick={() => {
-									router.navigate("state");
+									navigateMemoFirst("state", "state");
 								}}
 							>
 								State
@@ -59,7 +60,7 @@ function Devtools({ name, devtoolsStore }: DevtoolsProps) {
 							<button
 								type="button"
 								onClick={() => {
-									router.navigate("profiler");
+									navigateMemoFirst("profiler", "profiler");
 								}}
 							>
 								Profiler
@@ -142,7 +143,7 @@ export function inlineDevtools({
 
 		const before = exomeToJson(instance);
 		const id = String(Math.random());
-		const trace = new Error().stack?.split("at ")[6] || "";
+		const trace = new Error().stack?.split(/\n/g)[6] || "";
 
 		const start = performance.now();
 		depth += 1;

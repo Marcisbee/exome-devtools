@@ -37,7 +37,7 @@ export function RouteDevtoolsActions() {
 								.filter(Boolean)
 								.join(" ")}
 							onClick={() => {
-								navigate(actionUrl);
+								navigate(actionUrl, "actions");
 							}}
 						>
 							<small style={{ opacity: 0.4 }}>
@@ -110,7 +110,7 @@ function DevtoolsActionsContent() {
 					<a
 						href="javascript:void(0);"
 						onClick={() => {
-							router.navigate(`state/${getExomeId(action.instance)}`);
+							router.navigate(`state/${getExomeId(action.instance)}`, "state");
 						}}
 					>
 						{instanceName}
@@ -273,34 +273,7 @@ function DevtoolsActionsContent() {
 						width: "100%",
 					}}
 				>
-					{JSON.stringify(
-						action.after,
-						(key, value) => {
-							if (value == null || typeof value !== "object") {
-								return value;
-							}
-
-							if (value instanceof Exome && key !== "") {
-								return {
-									$$exome_id: getExomeId(value),
-								};
-							}
-
-							if (
-								value.constructor.name !== "Array" &&
-								value.constructor.name !== "Object" &&
-								value.constructor.name !== "Date" &&
-								key !== ""
-							) {
-								return {
-									$$exome_class: value.constructor.name,
-								};
-							}
-
-							return value;
-						},
-						2,
-					)}
+					{JSON.stringify(action.after, null, 2)}
 				</pre>
 			</div>
 
