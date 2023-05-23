@@ -132,3 +132,5 @@ dist
 # custom
 /www/index.js
 /www/index.css
+/dist/
+/metafile.json

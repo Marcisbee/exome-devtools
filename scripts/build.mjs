@@ -1,22 +1,24 @@
 // @ts-check
 import * as esbuild from "esbuild";
 import { cssModules } from "esbuild-plugin-lightningcss-modules";
+import { writeFileSync } from "fs";
 
-const ctx = await esbuild.context({
-	entryPoints: ["./src/index.tsx"],
+const result = await esbuild.build({
+	entryPoints: ["./src/devtools.tsx"],
 	bundle: true,
-	outdir: "www",
+	outdir: "dist",
 	format: "esm",
 	platform: "browser",
-	sourcemap: "inline",
+	sourcemap: "external",
 	splitting: true,
 	define: {
 		"process.env.NODE_ENV": JSON.stringify("development"),
 	},
-	minify: false,
+	minify: true,
 	target: "es2015",
 	jsx: "automatic",
 	logLevel: "info",
+	metafile: true,
 
 	plugins: [
 		cssModules({
@@ -37,7 +39,4 @@ const ctx = await esbuild.context({
 	],
 });
 
-await ctx.watch();
-await ctx.serve({
-	servedir: "www",
-});
+writeFileSync("metafile.json", JSON.stringify(result.metafile));

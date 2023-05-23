@@ -165,21 +165,6 @@ function StoreExplore({ instance, count }: StoreExploreProps) {
 					</div>
 				))}
 			</pre>
-
-			{/* <pre
-				style={{
-					padding: 10,
-					backgroundColor: "#fff",
-					fontSize: 12,
-					width: "100%",
-					borderTop: "1px solid #ccc",
-				}}
-			>
-
-				<div style={{ marginTop: 10 }}>
-					<span>{"}"}</span>
-				</div>
-			</pre> */}
 		</div>
 	);
 }

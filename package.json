@@ -2,9 +2,11 @@
 	"name": "exome-devtools",
 	"version": "0.1.0",
 	"description": "",
-	"main": "index.js",
+	"main": "dist/devtools.js",
+	"module": "dist/devtools.js",
 	"scripts": {
 		"dev": "node scripts/dev.mjs",
+		"build": "node scripts/build.mjs",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"repository": {
