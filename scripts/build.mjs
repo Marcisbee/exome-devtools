@@ -12,10 +12,10 @@ const result = await esbuild.build({
 	sourcemap: "external",
 	splitting: true,
 	define: {
-		"process.env.NODE_ENV": JSON.stringify("development"),
+		"process.env.NODE_ENV": JSON.stringify("production"),
 	},
 	minify: true,
-	target: "es2015",
+	target: "es2019",
 	jsx: "automatic",
 	logLevel: "info",
 	metafile: true,
@@ -36,6 +36,22 @@ const result = await esbuild.build({
 			includeFilter: /\.module\.css$/,
 			excludeFilter: /normalize\.css/,
 		}),
+
+		{
+			name: "my-plugin",
+			setup(build) {
+				build.onResolve({ filter: /^exome$/ }, (args) => ({
+					path: args.path,
+					namespace: "my-plugin",
+				}));
+
+				build.onLoad({ filter: /.*/, namespace: "my-plugin" }, () => {
+					const contents =
+						"module.exports = window.__EXOME_DEVTOOLS__ && window.__EXOME_DEVTOOLS__.meta";
+					return { contents };
+				});
+			},
+		},
 	],
 });
 

@@ -105,80 +105,84 @@ export function inlineDevtools({
 	let depth = 0;
 
 	return (instance, name, payload) => {
-		if (!(instance instanceof Exome)) {
-			return;
+		try {
+			if (!(instance instanceof Exome)) {
+				return;
+			}
+
+			if (instance instanceof DevtoolsStore) {
+				return;
+			}
+
+			if (instance instanceof RouterStore) {
+				return;
+			}
+
+			if (instance instanceof DevtoolsActionsStore) {
+				return;
+			}
+
+			if (name === "NEW") {
+				addInstance(instance);
+				return;
+			}
+
+			if (name === "LOAD_STATE") {
+				return;
+			}
+
+			const actionId = `${getExomeId(instance)}.${name}`;
+			const storeName = getExomeName(instance);
+
+			if (ignoreListStores.indexOf(storeName) > -1) {
+				return;
+			}
+
+			if (ignoreListActions.indexOf(`${storeName}.${name}`) > -1) {
+				return;
+			}
+
+			const before = exomeToJson(instance);
+			const id = String(Math.random());
+			const trace = new Error().stack?.split(/\n/g)[6] || "";
+
+			const start = performance.now();
+			depth += 1;
+
+			const action: Action = {
+				id,
+				name,
+				instance,
+				payload,
+				now: start,
+				depth,
+				// time: performance.now() - start,
+				trace,
+
+				before,
+			};
+
+			addAction(action);
+
+			return () => {
+				action.time = performance.now() - start;
+				action.after = exomeToJson(instance);
+				count.get(actionId)!.push(action.time);
+
+				depth -= 1;
+
+				update(devtoolsStore.actions);
+				// devtoolsStore.addAction({
+				//   id: String(Math.random()),
+				//   name,
+				//   instance,
+				//   payload,
+				//   now: start,
+				//   time: performance.now() - start,
+				// });
+			};
+		} catch (_e) {
+			// ignore
 		}
-
-		if (instance instanceof DevtoolsStore) {
-			return;
-		}
-
-		if (instance instanceof RouterStore) {
-			return;
-		}
-
-		if (instance instanceof DevtoolsActionsStore) {
-			return;
-		}
-
-		if (name === "NEW") {
-			addInstance(instance);
-			return;
-		}
-
-		if (name === "LOAD_STATE") {
-			return;
-		}
-
-		const actionId = `${getExomeId(instance)}.${name}`;
-		const storeName = getExomeName(instance);
-
-		if (ignoreListStores.indexOf(storeName) > -1) {
-			return;
-		}
-
-		if (ignoreListActions.indexOf(`${storeName}.${name}`) > -1) {
-			return;
-		}
-
-		const before = exomeToJson(instance);
-		const id = String(Math.random());
-		const trace = new Error().stack?.split(/\n/g)[6] || "";
-
-		const start = performance.now();
-		depth += 1;
-
-		const action: Action = {
-			id,
-			name,
-			instance,
-			payload,
-			now: start,
-			depth,
-			// time: performance.now() - start,
-			trace,
-
-			before,
-		};
-
-		addAction(action);
-
-		return () => {
-			action.time = performance.now() - start;
-			action.after = exomeToJson(instance);
-			count.get(actionId)!.push(action.time);
-
-			depth -= 1;
-
-			update(devtoolsStore.actions);
-			// devtoolsStore.addAction({
-			//   id: String(Math.random()),
-			//   name,
-			//   instance,
-			//   payload,
-			//   now: start,
-			//   time: performance.now() - start,
-			// });
-		};
 	};
 }

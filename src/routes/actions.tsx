@@ -8,6 +8,7 @@ import { devtoolsContext } from "../store";
 import { getExomeName } from "../utils/get-exome-name";
 import { getTimingColor } from "../utils/get-timing-color";
 import styles from "../devtools.module.css";
+import { useQueryFilter } from "../utils/use-query-filter";
 
 const routes = {
 	$actionId: DevtoolsActionsContent,
@@ -18,12 +19,34 @@ export function RouteDevtoolsActions() {
 	const { router } = useContext(routerContext);
 	const { url, navigate } = useStore(router);
 	const devtoolsStore = useContext(devtoolsContext);
-	const { actions } = useStore(devtoolsStore.actions);
+	const { actions: unfilteredActions } = useStore(devtoolsStore.actions);
+
+	const [query, setQuery, filteredActions] = useQueryFilter(
+		unfilteredActions,
+		(action) => action.name,
+	);
 
 	return (
 		<div className={styles.body}>
 			<div className={styles.actionsLeft}>
-				{actions.map(({ id, depth, instance, name, time }) => {
+				<input
+					type="text"
+					placeholder="Filter.."
+					onInput={(e) => {
+						setQuery((e.target as HTMLInputElement)!.value.toLowerCase());
+					}}
+				/>
+
+				{unfilteredActions.length !== filteredActions.length && (
+					<div style={{ opacity: 0.5 }}>
+						<small>
+							{unfilteredActions.length - filteredActions.length} hidden results
+							for query "{query}"
+						</small>
+					</div>
+				)}
+
+				{filteredActions.map(({ id, depth, instance, name, time }) => {
 					const actionUrl = `actions/${id}`;
 
 					return (

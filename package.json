@@ -1,13 +1,21 @@
 {
+	"private": true,
 	"name": "exome-devtools",
 	"version": "0.1.0",
 	"description": "",
-	"main": "dist/devtools.js",
-	"module": "dist/devtools.js",
+	"main": "./dist/devtools.js",
+	"module": "./dist/devtools.js",
 	"scripts": {
 		"dev": "node scripts/dev.mjs",
 		"build": "node scripts/build.mjs",
+		"postbuild": "cat package.json | sed '/\\\"devDependencies\\\"/,/}/ d; /^$/d' | sed 's/\\.\\/dist\\//\\.\\//g' | sed '/\"private\": true,/d' > ./dist/package.json && cp README.md dist && cp LICENSE dist",
 		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"devDependencies": {
+		"esbuild": "^0.17.19",
+		"esbuild-plugin-lightningcss-modules": "^0.1.0",
+		"exome": "^2.0.2",
+		"preact": "^10.14.1"
 	},
 	"repository": {
 		"type": "git",
@@ -18,11 +26,5 @@
 	"bugs": {
 		"url": "https://github.com/Marcisbee/exome-devtools/issues"
 	},
-	"homepage": "https://github.com/Marcisbee/exome-devtools#readme",
-	"devDependencies": {
-		"esbuild": "^0.17.19",
-		"esbuild-plugin-lightningcss-modules": "^0.1.0",
-		"exome": "^2.0.2",
-		"preact": "^10.14.1"
-	}
+	"homepage": "https://github.com/Marcisbee/exome-devtools#readme"
 }

@@ -1,4 +1,4 @@
-import { type Exome, getExomeId } from "exome";
+import { Exome, getExomeId } from "exome";
 import { useStore } from "exome/preact";
 import { useContext } from "preact/hooks";
 
@@ -7,6 +7,7 @@ import { RouterOutlet, routerContext } from "../devtools/router";
 import { getExomeName } from "../utils/get-exome-name";
 import { exploreExomeInstance } from "../utils/explore-exome-instance";
 import { GetterValue } from "../components/getter-value/getter-value";
+import { useQueryFilter } from "../utils/use-query-filter";
 import styles from "../devtools.module.css";
 
 const routes = {
@@ -51,7 +52,33 @@ function StoreExplore({ instance, count }: StoreExploreProps) {
 					>
 						<span style={{ color: "#673ab7" }}>{name}</span>:{" "}
 						<span style={{ color: "#222" }}>
-							{JSON.stringify((instance as any)[name], null, 2)}
+							{JSON.stringify(
+								(instance as any)[name],
+								(_key, value) => {
+									if (value == null || typeof value !== "object") {
+										return value;
+									}
+
+									if (value instanceof Exome) {
+										return {
+											$$exome_id: getExomeId(value),
+										};
+									}
+
+									if (
+										value.constructor !== Array &&
+										value.constructor !== Object &&
+										value.constructor !== Date
+									) {
+										return {
+											$$exome_class: value.constructor.name,
+										};
+									}
+
+									return value;
+								},
+								2,
+							)}
 						</span>
 					</div>
 				))}
@@ -175,32 +202,84 @@ export function RouteDevtoolsState() {
 	const { url, navigate } = useStore(router);
 	const { instances } = useStore(store.actions);
 
+	const unfilteredInstances = [...instances.entries()];
+	const [query, setQuery, filteredInstances] = useQueryFilter(
+		unfilteredInstances,
+		([key]) => key,
+	);
+	const groups = filteredInstances.reduce((acc, [, value]) => {
+		const name = getExomeName(value);
+
+		acc[name] ??= [];
+		acc[name].push(value);
+
+		return acc;
+	}, {} as Record<string, any[]>);
+
 	return (
 		<div className={styles.body}>
 			<div className={styles.actionsLeft}>
-				{[...instances.entries()].map(([key, value]) => {
-					const storeUrl = `state/${key}`;
+				<input
+					type="text"
+					placeholder="Filter.."
+					onInput={(e) => {
+						setQuery((e.target as HTMLInputElement)!.value.toLowerCase());
+					}}
+				/>
 
+				{unfilteredInstances.length !== filteredInstances.length && (
+					<div style={{ opacity: 0.5 }}>
+						<small>
+							{unfilteredInstances.length - filteredInstances.length} hidden
+							results for query "{query}"
+						</small>
+					</div>
+				)}
+
+				{Object.entries(groups).map(([name, values]) => {
 					return (
-						<button
-							key={`state-${key}`}
-							type="button"
-							className={[
-								styles.actionButton,
-								url === storeUrl && styles.action,
-							]
-								.filter(Boolean)
-								.join(" ")}
-							onClick={() => {
-								navigate(storeUrl, "state");
-							}}
-						>
-							<small style={{ opacity: 0.4 }}>
-								{key.split("-").pop()}
-								<br />
-							</small>
-							<span>{getExomeName(value)}</span>
-						</button>
+						<div>
+							<strong
+								style={{
+									fontSize: "12px",
+									fontWeight: "normal",
+									opacity: 0.5,
+									marginTop: "15px",
+									display: "block",
+								}}
+							>
+								{name}
+							</strong>
+							<div>
+								{values.map((value) => {
+									const key = getExomeId(value);
+
+									const storeUrl = `state/${key}`;
+
+									return (
+										<button
+											key={`state-${key}`}
+											type="button"
+											className={[
+												styles.actionButton,
+												url === storeUrl && styles.action,
+											]
+												.filter(Boolean)
+												.join(" ")}
+											onClick={() => {
+												navigate(storeUrl, "state");
+											}}
+										>
+											{/* <small style={{ opacity: 0.4 }}>
+												{key.split("-").pop()}
+												<br />
+											</small> */}
+											<span>{getExomeName(value)}</span>
+										</button>
+									);
+								})}
+							</div>
+						</div>
 					);
 				})}
 			</div>
