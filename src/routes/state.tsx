@@ -9,6 +9,10 @@ import { exploreExomeInstance } from "../utils/explore-exome-instance";
 import { GetterValue } from "../components/getter-value/getter-value";
 import { useQueryFilter } from "../utils/use-query-filter";
 import styles from "../devtools.module.css";
+import {
+	ExplorerLabel,
+	StoreValueExplore,
+} from "../components/value-explorer/value-explorer";
 
 const routes = {
 	$storeId: DevtoolsStateContent,
@@ -46,64 +50,33 @@ function StoreExplore({ instance, count }: StoreExploreProps) {
 				{instanceDetails.state.map((name) => (
 					<div
 						style={{
-							paddingLeft: 20,
-							marginBottom: 8,
+							paddingLeft: 10,
 						}}
 					>
-						<span style={{ color: "#673ab7" }}>{name}</span>:{" "}
-						<span style={{ color: "#222" }}>
-							{JSON.stringify(
-								(instance as any)[name],
-								(_key, value) => {
-									if (value == null || typeof value !== "object") {
-										return value;
-									}
-
-									if (value instanceof Exome) {
-										return {
-											$$exome_id: getExomeId(value),
-										};
-									}
-
-									if (
-										value.constructor !== Array &&
-										value.constructor !== Object &&
-										value.constructor !== Date
-									) {
-										return {
-											$$exome_class: value.constructor.name,
-										};
-									}
-
-									return value;
-								},
-								2,
-							)}
-						</span>
+						<ExplorerLabel label={name} />:{" "}
+						<StoreValueExplore
+							instance={instance}
+							source={instance}
+							name={name}
+						/>
 					</div>
 				))}
 
 				{instanceDetails.getters.map((name) => (
 					<div
 						style={{
-							paddingLeft: 20,
-							marginBottom: 8,
+							paddingLeft: 10,
 						}}
 					>
-						<span style={{ color: "#673ab7" }}>
-							{name}{" "}
-							<i style={{ fontWeight: "normal", opacity: 0.5, fontSize: 10 }}>
-								(getter)
-							</i>
-						</span>
-						:{" "}
-						<span style={{ color: "#222" }}>
-							<GetterValue
-								key={`getter::${name}::${Math.random()}`}
-								source={instance}
-								field={name}
-							/>
-						</span>
+						<ExplorerLabel label={name} />:{" "}
+						<i style={{ fontWeight: "normal", opacity: 0.5, fontSize: 10 }}>
+							(getter)
+						</i>{" "}
+						<GetterValue
+							key={`getter::${name}::${Math.random()}`}
+							source={instance}
+							field={name}
+						/>
 					</div>
 				))}
 			</pre>
@@ -131,12 +104,11 @@ function StoreExplore({ instance, count }: StoreExploreProps) {
 					return (
 						<div
 							style={{
-								paddingLeft: 20,
-								marginBottom: 8,
+								paddingLeft: 10,
 							}}
 						>
-							<span title={fnString} style={{ color: "#673ab7" }}>
-								{name}(){" "}
+							<span title={fnString}>
+								<ExplorerLabel label={`${name}()`} />{" "}
 							</span>
 
 							{actionCount?.length ? (
@@ -179,12 +151,11 @@ function StoreExplore({ instance, count }: StoreExploreProps) {
 				{instanceDetails.silentActions.map((name) => (
 					<div
 						style={{
-							paddingLeft: 20,
-							marginBottom: 8,
+							paddingLeft: 10,
 						}}
 					>
-						<span style={{ color: "#673ab7" }}>
-							{name}(){" "}
+						<span style={{ color: "#881391" }}>
+							<ExplorerLabel label={`${name}()`} />{" "}
 							<i style={{ fontWeight: "normal", opacity: 0.5, fontSize: 10 }}>
 								(silent)
 							</i>
@@ -219,22 +190,38 @@ export function RouteDevtoolsState() {
 	return (
 		<div className={styles.body}>
 			<div className={styles.actionsLeft}>
-				<input
-					type="text"
-					placeholder="Filter.."
-					onInput={(e) => {
-						setQuery((e.target as HTMLInputElement)!.value.toLowerCase());
+				<div
+					style={{
+						position: "sticky",
+						top: 0,
+						zIndex: 1,
+						backgroundColor: "inherit",
 					}}
-				/>
+				>
+					<input
+						type="text"
+						placeholder="Filter.."
+						style={{
+							backgroundColor: "#fff",
+							border: "1px solid #ccc",
+							padding: "6px 10px",
+							width: "100%",
+							borderRadius: 5,
+						}}
+						onInput={(e) => {
+							setQuery((e.target as HTMLInputElement)!.value.toLowerCase());
+						}}
+					/>
 
-				{unfilteredInstances.length !== filteredInstances.length && (
-					<div style={{ opacity: 0.5 }}>
-						<small>
-							{unfilteredInstances.length - filteredInstances.length} hidden
-							results for query "{query}"
-						</small>
-					</div>
-				)}
+					{unfilteredInstances.length !== filteredInstances.length && (
+						<div style={{ opacity: 0.5 }}>
+							<small>
+								{unfilteredInstances.length - filteredInstances.length} hidden
+								results for query "{query}"
+							</small>
+						</div>
+					)}
+				</div>
 
 				{Object.entries(groups).map(([, values]) => {
 					return (

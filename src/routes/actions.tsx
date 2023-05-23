@@ -37,22 +37,38 @@ export function RouteDevtoolsActions() {
 	return (
 		<div className={styles.body}>
 			<div className={styles.actionsLeft}>
-				<input
-					type="text"
-					placeholder="Filter.."
-					onInput={(e) => {
-						setQuery((e.target as HTMLInputElement)!.value.toLowerCase());
+				<div
+					style={{
+						position: "sticky",
+						top: 0,
+						zIndex: 1,
+						backgroundColor: "inherit",
 					}}
-				/>
+				>
+					<input
+						type="text"
+						placeholder="Filter.."
+						style={{
+							backgroundColor: "#fff",
+							border: "1px solid #ccc",
+							padding: "6px 10px",
+							width: "100%",
+							borderRadius: 5,
+						}}
+						onInput={(e) => {
+							setQuery((e.target as HTMLInputElement)!.value.toLowerCase());
+						}}
+					/>
 
-				{unfilteredActions.length !== filteredActions.length && (
-					<div style={{ opacity: 0.5 }}>
-						<small>
-							{unfilteredActions.length - filteredActions.length} hidden results
-							for query "{query}"
-						</small>
-					</div>
-				)}
+					{unfilteredActions.length !== filteredActions.length && (
+						<div style={{ opacity: 0.5 }}>
+							<small>
+								{unfilteredActions.length - filteredActions.length} hidden
+								results for query "{query}"
+							</small>
+						</div>
+					)}
+				</div>
 
 				<div ref={ref}>
 					{filteredActions.map(({ id, depth, instance, name, time }) => {
