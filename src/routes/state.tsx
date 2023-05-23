@@ -236,20 +236,10 @@ export function RouteDevtoolsState() {
 					</div>
 				)}
 
-				{Object.entries(groups).map(([name, values]) => {
+				{Object.entries(groups).map(([, values]) => {
 					return (
 						<div>
-							<strong
-								style={{
-									fontSize: "12px",
-									fontWeight: "normal",
-									opacity: 0.5,
-									marginTop: "15px",
-									display: "block",
-								}}
-							>
-								{name}
-							</strong>
+							<hr />
 							<div>
 								{values.map((value) => {
 									const key = getExomeId(value);

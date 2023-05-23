@@ -1,6 +1,6 @@
 import { Exome, getExomeId } from "exome";
 import { useStore } from "exome/preact";
-import { useContext } from "preact/hooks";
+import { useContext, useLayoutEffect, useRef } from "preact/hooks";
 
 import { RouterOutlet, routerContext } from "../devtools/router";
 import { getDiff } from "../utils/get-diff";
@@ -16,6 +16,7 @@ const routes = {
 };
 
 export function RouteDevtoolsActions() {
+	const ref = useRef<HTMLDivElement>(null);
 	const { router } = useContext(routerContext);
 	const { url, navigate } = useStore(router);
 	const devtoolsStore = useContext(devtoolsContext);
@@ -25,6 +26,13 @@ export function RouteDevtoolsActions() {
 		unfilteredActions,
 		(action) => action.name,
 	);
+
+	useLayoutEffect(() => {
+		ref.current?.lastElementChild?.scrollIntoView({
+			behavior: "auto",
+			block: "start",
+		});
+	}, [unfilteredActions[unfilteredActions.length - 1]]);
 
 	return (
 		<div className={styles.body}>
@@ -46,64 +54,66 @@ export function RouteDevtoolsActions() {
 					</div>
 				)}
 
-				{filteredActions.map(({ id, depth, instance, name, time }) => {
-					const actionUrl = `actions/${id}`;
+				<div ref={ref}>
+					{filteredActions.map(({ id, depth, instance, name, time }) => {
+						const actionUrl = `actions/${id}`;
 
-					return (
-						<button
-							key={id}
-							type="button"
-							className={[
-								styles.actionButton,
-								url === actionUrl && styles.action,
-							]
-								.filter(Boolean)
-								.join(" ")}
-							onClick={() => {
-								navigate(actionUrl, "actions");
-							}}
-						>
-							<small style={{ opacity: 0.4 }}>
-								{getExomeName(instance)}
-								<br />
-							</small>
-							{new Array(depth - 1).fill(null).map(() => (
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									width="1em"
-									height="1em"
-									viewBox="0 0 256 256"
-									style={{
-										width: 16,
-										height: 16,
-										marginTop: -2,
-										marginLeft: -5,
-										color: "inherit",
-									}}
-								>
-									<path
-										fill="currentColor"
-										d="M136 128a8 8 0 1 1-8-8a8 8 0 0 1 8 8Z"
-									/>
-								</svg>
-							))}
-							<span>
-								{name}{" "}
-								{time === undefined ? (
-									<small style={{ opacity: 0.4 }}>waiting...</small>
-								) : (
-									<small
+						return (
+							<button
+								key={id}
+								type="button"
+								className={[
+									styles.actionButton,
+									url === actionUrl && styles.action,
+								]
+									.filter(Boolean)
+									.join(" ")}
+								onClick={() => {
+									navigate(actionUrl, "actions");
+								}}
+							>
+								<small style={{ opacity: 0.4 }}>
+									{getExomeName(instance)}
+									<br />
+								</small>
+								{new Array(depth - 1).fill(null).map(() => (
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										width="1em"
+										height="1em"
+										viewBox="0 0 256 256"
 										style={{
-											color: getTimingColor(time),
+											width: 16,
+											height: 16,
+											marginTop: -2,
+											marginLeft: -5,
+											color: "inherit",
 										}}
 									>
-										({time.toFixed(1)}ms)
-									</small>
-								)}
-							</span>
-						</button>
-					);
-				})}
+										<path
+											fill="currentColor"
+											d="M136 128a8 8 0 1 1-8-8a8 8 0 0 1 8 8Z"
+										/>
+									</svg>
+								))}
+								<span>
+									{name}{" "}
+									{time === undefined ? (
+										<small style={{ opacity: 0.4 }}>waiting...</small>
+									) : (
+										<small
+											style={{
+												color: getTimingColor(time),
+											}}
+										>
+											({time.toFixed(1)}ms)
+										</small>
+									)}
+								</span>
+							</button>
+						);
+					})}
+				</div>
 			</div>
 
 			<RouterOutlet routes={routes} />

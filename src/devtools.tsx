@@ -1,6 +1,6 @@
 import { Exome, Middleware, getExomeId, update } from "exome";
 import { render } from "preact";
-import { useMemo } from "preact/hooks";
+import { useMemo, useState } from "preact/hooks";
 
 import styles from "./devtools.module.css";
 import { exomeToJson } from "./utils/exome-to-json";
@@ -28,14 +28,33 @@ const routes = {
 };
 
 function Devtools({ name, devtoolsStore }: DevtoolsProps) {
+	const [isOpen, setIsOpen] = useState(false);
 	const router = useMemo(() => new RouterStore("actions"), []);
 	const { navigateMemoFirst } = router;
+
+	if (!isOpen) {
+		return (
+			<div className={styles.devtoolsLauncher}>
+				<button type="button" onClick={() => setIsOpen(true)}>
+					devtools
+				</button>
+			</div>
+		);
+	}
 
 	return (
 		<devtoolsContext.Provider value={devtoolsStore}>
 			<routerContext.Provider value={{ router, depth: 0 }}>
 				<div className={styles.devtools}>
 					<div className={styles.head}>
+						<button
+							type="button"
+							onClick={() => setIsOpen(false)}
+							style={{ float: "right" }}
+						>
+							close
+						</button>
+
 						<div>
 							<strong>{name}</strong>
 						</div>
@@ -122,6 +141,12 @@ export function inlineDevtools({
 				return;
 			}
 
+			const storeName = getExomeName(instance);
+
+			if (ignoreListStores.indexOf(storeName) > -1) {
+				return;
+			}
+
 			if (name === "NEW") {
 				addInstance(instance);
 				return;
@@ -132,11 +157,6 @@ export function inlineDevtools({
 			}
 
 			const actionId = `${getExomeId(instance)}.${name}`;
-			const storeName = getExomeName(instance);
-
-			if (ignoreListStores.indexOf(storeName) > -1) {
-				return;
-			}
 
 			if (ignoreListActions.indexOf(`${storeName}.${name}`) > -1) {
 				return;
