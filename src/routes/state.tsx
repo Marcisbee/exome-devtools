@@ -13,6 +13,7 @@ import {
 	ExplorerLabel,
 	StoreValueExplore,
 } from "../components/value-explorer/value-explorer";
+import { HistoryButtonBack } from "../components/history-button/history-button";
 
 const routes = {
 	$storeId: DevtoolsStateContent,
@@ -31,7 +32,9 @@ function StoreExplore({ instance, count }: StoreExploreProps) {
 		<div>
 			<div style={{ marginBottom: 10 }}>
 				<input placeholder="Filter" type="text" style={{ float: "right" }} />
-				<h3 style={{ color: "#fb8c00" }}>{getExomeName(instance)}</h3>
+				<h3 style={{ color: "#fb8c00" }}>
+					<HistoryButtonBack /> {">"} {getExomeName(instance)}
+				</h3>
 			</div>
 
 			<pre

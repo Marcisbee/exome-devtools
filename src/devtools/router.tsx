@@ -1,11 +1,56 @@
-import { Exome } from "exome";
+import { Exome, update } from "exome";
 import { useStore } from "exome/preact";
 import { ComponentType, createContext } from "preact";
 import { useContext, useMemo } from "preact/hooks";
 
 import { matchRoute } from "../utils/match-route";
 
+export class HistoryStore extends Exome {
+	private _past: string[] = [];
+	private _future: string[] = [];
+
+	public get canGoBack() {
+		return this._past.length > 0;
+	}
+
+	public get canGoNext() {
+		return this._future.length > 0;
+	}
+
+	constructor(private router: RouterStore) {
+		super();
+	}
+
+	public back() {
+		this._future.push(this.router.url);
+		this.go(this._past.pop()!);
+	}
+
+	public next() {
+		this._past.push(this.router.url);
+		this.go(this._future.pop()!);
+	}
+
+	public addHistory(url: string) {
+		this._past.push(url);
+		this._future.splice(0, this._future.length);
+
+		if (this._past.length > 10) {
+			this._past.shift();
+		}
+	}
+
+	private go(url: string) {
+		this.router.url = url;
+		this.router.urlChunks = url.split("/");
+
+		update(this.router);
+	}
+}
+
 export class RouterStore extends Exome {
+	public history = new HistoryStore(this);
+
 	private memoRoutes: Record<string, string | undefined> = {};
 
 	constructor(public url: string, public urlChunks: string[] = url.split("/")) {
@@ -13,6 +58,8 @@ export class RouterStore extends Exome {
 	}
 
 	public navigate(url: RouterStore["url"], memoKey?: string) {
+		this.history.addHistory(this.url);
+
 		this.url = url;
 		this.urlChunks = url.split("/");
 
