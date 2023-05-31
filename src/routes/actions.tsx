@@ -3,7 +3,7 @@ import { useStore } from "exome/preact";
 import { useContext, useLayoutEffect, useRef } from "preact/hooks";
 
 import { RouterOutlet, routerContext } from "../devtools/router";
-import { getDiff } from "../utils/get-diff";
+import { getDiff, undefinedDiff } from "../utils/get-diff";
 import { devtoolsContext } from "../store";
 import { getExomeName } from "../utils/get-exome-name";
 import { getTimingColor } from "../utils/get-timing-color";
@@ -138,6 +138,73 @@ export function RouteDevtoolsActions() {
 	);
 }
 
+function DiffProperty({ before, diff }: { before: any; diff: any }) {
+	if (diff === undefined) {
+		return null;
+	}
+
+	if (
+		!diff ||
+		!before ||
+		typeof diff !== "object" ||
+		typeof before !== typeof diff ||
+		(diff === undefined && before !== undefined) ||
+		(diff !== undefined && before === undefined)
+	) {
+		const diffValues = [
+			before !== undefined && before !== undefinedDiff && (
+				<span style={{ backgroundColor: "rgb(239, 154, 154)" }}>
+					{JSON.stringify(before, null, 1)}
+				</span>
+			),
+			diff !== undefined && diff !== undefinedDiff && (
+				<span style={{ backgroundColor: "rgb(156, 204, 101)" }}>
+					{JSON.stringify(diff, null, 1)}
+				</span>
+			),
+		];
+
+		return (
+			<span>
+				{diffValues[0]}
+				{diffValues[0] && diffValues[1] && " => "}
+				{diffValues[1]}
+			</span>
+		);
+	}
+
+	return (
+		<>
+			{"{"}
+			{Object.entries(diff).map(([key, b]) => {
+				return (
+					<div style={{ paddingLeft: 10 }}>
+						<span>{key}</span>: <DiffProperty before={before?.[key]} diff={b} />
+					</div>
+				);
+			})}
+			{"}"}
+		</>
+	);
+}
+
+function DiffObject({ before, after }: { before: any; after: any }) {
+	const diff = getDiff(before, after || {});
+
+	return (
+		<pre
+			style={{
+				padding: 10,
+				backgroundColor: "#f0f0f0",
+				fontSize: 10,
+				width: "100%",
+			}}
+		>
+			<DiffProperty before={before} diff={diff} />
+		</pre>
+	);
+}
+
 function DevtoolsActionsContent() {
 	const store = useContext(devtoolsContext);
 	const { router, params } = useContext(routerContext);
@@ -149,8 +216,6 @@ function DevtoolsActionsContent() {
 	}
 
 	const instanceName = getExomeName(action.instance);
-
-	const diff = getDiff(action.before, action.after || {});
 
 	return (
 		<div className={styles.actionsRight}>
@@ -273,6 +338,27 @@ function DevtoolsActionsContent() {
 					</g>
 				</svg>
 				Diff:
+				<DiffObject before={action.before} after={action.after} />
+			</div>
+
+			<br />
+
+			<div>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="1em"
+					height="1em"
+					viewBox="0 0 256 256"
+				>
+					<g fill="currentColor">
+						<path
+							d="M216 80c0 26.51-39.4 48-88 48s-88-21.49-88-48s39.4-48 88-48s88 21.49 88 48Z"
+							opacity=".2"
+						/>
+						<path d="M128 24c-53.83 0-96 24.6-96 56v96c0 31.4 42.17 56 96 56s96-24.6 96-56V80c0-31.4-42.17-56-96-56Zm80 104c0 9.62-7.88 19.43-21.61 26.92C170.93 163.35 150.19 168 128 168s-42.93-4.65-58.39-13.08C55.88 147.43 48 137.62 48 128v-16.64c17.06 15 46.23 24.64 80 24.64s62.94-9.68 80-24.64ZM69.61 53.08C85.07 44.65 105.81 40 128 40s42.93 4.65 58.39 13.08C200.12 60.57 208 70.38 208 80s-7.88 19.43-21.61 26.92C170.93 115.35 150.19 120 128 120s-42.93-4.65-58.39-13.08C55.88 99.43 48 89.62 48 80s7.88-19.43 21.61-26.92Zm116.78 149.84C170.93 211.35 150.19 216 128 216s-42.93-4.65-58.39-13.08C55.88 195.43 48 185.62 48 176v-16.64c17.06 15 46.23 24.64 80 24.64s62.94-9.68 80-24.64V176c0 9.62-7.88 19.43-21.61 26.92Z" />
+					</g>
+				</svg>
+				Before:
 				<pre
 					style={{
 						padding: 10,
@@ -281,20 +367,7 @@ function DevtoolsActionsContent() {
 						width: "100%",
 					}}
 				>
-					{Object.entries(diff).map(([key, [before, after]]) => (
-						<div>
-							<strong>{key}</strong>:{" "}
-							<span>
-								<mark style={{ backgroundColor: "#ef9a9a" }}>
-									{JSON.stringify(before, null, 1)}
-								</mark>
-								{" => "}
-								<mark style={{ backgroundColor: "#9ccc65" }}>
-									{JSON.stringify(after, null, 1)}
-								</mark>
-							</span>
-						</div>
-					))}
+					{JSON.stringify(action.before, null, 2)}
 				</pre>
 			</div>
 
@@ -315,7 +388,7 @@ function DevtoolsActionsContent() {
 						<path d="M128 24c-53.83 0-96 24.6-96 56v96c0 31.4 42.17 56 96 56s96-24.6 96-56V80c0-31.4-42.17-56-96-56Zm80 104c0 9.62-7.88 19.43-21.61 26.92C170.93 163.35 150.19 168 128 168s-42.93-4.65-58.39-13.08C55.88 147.43 48 137.62 48 128v-16.64c17.06 15 46.23 24.64 80 24.64s62.94-9.68 80-24.64ZM69.61 53.08C85.07 44.65 105.81 40 128 40s42.93 4.65 58.39 13.08C200.12 60.57 208 70.38 208 80s-7.88 19.43-21.61 26.92C170.93 115.35 150.19 120 128 120s-42.93-4.65-58.39-13.08C55.88 99.43 48 89.62 48 80s7.88-19.43 21.61-26.92Zm116.78 149.84C170.93 211.35 150.19 216 128 216s-42.93-4.65-58.39-13.08C55.88 195.43 48 185.62 48 176v-16.64c17.06 15 46.23 24.64 80 24.64s62.94-9.68 80-24.64V176c0 9.62-7.88 19.43-21.61 26.92Z" />
 					</g>
 				</svg>
-				Instance:
+				After:
 				<pre
 					style={{
 						padding: 10,

@@ -4,7 +4,12 @@ import { useMemo, useState } from "preact/hooks";
 
 import styles from "./devtools.module.css";
 import { exomeToJson } from "./utils/exome-to-json";
-import { RouterOutlet, RouterStore, routerContext } from "./devtools/router";
+import {
+	HistoryStore,
+	RouterOutlet,
+	RouterStore,
+	routerContext,
+} from "./devtools/router";
 import {
 	Action,
 	DevtoolsActionsStore,
@@ -134,6 +139,10 @@ export function inlineDevtools({
 			}
 
 			if (instance instanceof RouterStore) {
+				return;
+			}
+
+			if (instance instanceof HistoryStore) {
 				return;
 			}
 

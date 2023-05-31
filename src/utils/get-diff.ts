@@ -1,27 +1,46 @@
-export function getDiff(a: Record<string, any>, b: Record<string, any>) {
-	const output: Record<string, any[]> = {};
+export const undefinedDiff = new (class {})();
 
-	const aKeys = Object.keys(a);
-	const bKeys = Object.keys(b);
-	const allKeys = aKeys.concat(bKeys);
-
-	for (const key of allKeys) {
-		const aValue = a[key];
-		const bValue = b[key];
-
-		if (aValue === bValue) {
-			continue;
-		}
-
-		if (output[key]) {
-			continue;
-		}
-
-		output[key] = [
-			aValue != null ? aValue : null,
-			bValue != null ? bValue : null,
-		];
+export function getDiff(a: any, b: any) {
+	if (a === b) {
+		return undefined;
 	}
 
-	return output;
+	if (b === undefined && a !== undefined) {
+		return undefinedDiff;
+	}
+
+	if (
+		a !== null &&
+		typeof a === "object" &&
+		b !== null &&
+		typeof b === "object"
+	) {
+		const aKeys = Object.keys(a);
+		const bKeys = Object.keys(b);
+
+		if (aKeys.length === 0 && bKeys.length === 0) {
+			return undefined;
+		}
+
+		const allKeys = aKeys.concat(bKeys);
+		const output: Record<string, any> = {};
+
+		for (const key of allKeys) {
+			const diff = getDiff(a[key], b[key]);
+
+			if (diff === undefined) {
+				continue;
+			}
+
+			output[key] = diff;
+		}
+
+		if (!Object.keys(output).length) {
+			return undefined;
+		}
+
+		return output;
+	}
+
+	return b;
 }
