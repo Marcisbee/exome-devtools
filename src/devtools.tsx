@@ -112,6 +112,10 @@ export function inlineDevtools({
 	ignoreListActions = [],
 	ignoreListStores = [],
 }: InlineDevtoolsOptions): Middleware {
+	if (typeof document === 'undefined') {
+		return () => {};
+	}
+
 	const target = document.createElement("div");
 	document.body.appendChild(target);
 	const devtoolsStore = new DevtoolsStore(maxAge);
