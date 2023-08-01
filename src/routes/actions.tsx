@@ -1,6 +1,6 @@
 import { Exome, getExomeId } from "exome";
 import { useStore } from "exome/preact";
-import { useContext, useLayoutEffect, useRef } from "preact/hooks";
+import { useContext, useLayoutEffect, useMemo, useRef } from "preact/hooks";
 
 import { RouterOutlet, routerContext } from "../devtools/router";
 import { getDiff, undefinedDiff } from "../utils/get-diff";
@@ -10,6 +10,7 @@ import { getTimingColor } from "../utils/get-timing-color";
 import styles from "../devtools.module.css";
 import { useQueryFilter } from "../utils/use-query-filter";
 import { HistoryButtonBack } from "../components/history-button/history-button";
+import { useResize } from "../utils/use-resize";
 
 const routes = {
 	$actionId: DevtoolsActionsContent,
@@ -22,6 +23,8 @@ export function RouteDevtoolsActions() {
 	const { url, navigate } = useStore(router);
 	const devtoolsStore = useContext(devtoolsContext);
 	const { actions: unfilteredActions } = useStore(devtoolsStore.actions);
+	const maxWidth = useMemo(() => window.innerWidth / 2, []);
+	const [refResizeTarget, onMouseDown, width] = useResize(250, "e", "side-panel");
 
 	const [query, setQuery, filteredActions] = useQueryFilter(
 		unfilteredActions,
@@ -37,99 +40,113 @@ export function RouteDevtoolsActions() {
 
 	return (
 		<div className={styles.body}>
-			<div className={styles.actionsLeft}>
+			<div
+				className={styles.actionsLeftWrapper}
+				ref={refResizeTarget}
+				style={{
+					width: Math.min(maxWidth, Math.max(200, width)),
+				}}
+			>
 				<div
-					style={{
-						position: "sticky",
-						top: 0,
-						zIndex: 1,
-						backgroundColor: "inherit",
-					}}
-				>
-					<input
-						type="text"
-						placeholder="Filter.."
+					className={styles.resizerRight}
+					onMouseDown={onMouseDown}
+				/>
+
+				<div className={styles.actionsLeft}>
+
+					<div
 						style={{
-							backgroundColor: "#fff",
-							border: "1px solid #ccc",
-							padding: "6px 10px",
-							width: "100%",
-							borderRadius: 5,
+							position: "sticky",
+							top: 0,
+							zIndex: 1,
+							backgroundColor: "inherit",
 						}}
-						onInput={(e) => {
-							setQuery((e.target as HTMLInputElement)!.value.toLowerCase());
-						}}
-					/>
+					>
+						<input
+							type="text"
+							placeholder="Filter.."
+							style={{
+								backgroundColor: "#fff",
+								border: "1px solid #ccc",
+								padding: "6px 10px",
+								width: "100%",
+								borderRadius: 5,
+							}}
+							onInput={(e) => {
+								setQuery((e.target as HTMLInputElement)!.value.toLowerCase());
+							}}
+						/>
 
-					{unfilteredActions.length !== filteredActions.length && (
-						<div style={{ opacity: 0.5 }}>
-							<small>
-								{unfilteredActions.length - filteredActions.length} hidden
-								results for query "{query}"
-							</small>
-						</div>
-					)}
-				</div>
-
-				<div ref={ref}>
-					{filteredActions.map(({ id, depth, instance, name, time }) => {
-						const actionUrl = `actions/${id}`;
-
-						return (
-							<button
-								key={id}
-								type="button"
-								className={[
-									styles.actionButton,
-									url === actionUrl && styles.action,
-								]
-									.filter(Boolean)
-									.join(" ")}
-								onClick={() => {
-									navigate(actionUrl, "actions");
-								}}
-							>
-								<small style={{ opacity: 0.4 }}>
-									{getExomeName(instance)}
-									<br />
+						{unfilteredActions.length !== filteredActions.length && (
+							<div style={{ opacity: 0.5 }}>
+								<small>
+									{unfilteredActions.length - filteredActions.length} hidden
+									results for query "{query}"
 								</small>
-								{new Array(depth - 1).fill(null).map(() => (
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										width="1em"
-										height="1em"
-										viewBox="0 0 256 256"
-										style={{
-											width: 16,
-											height: 16,
-											marginTop: -2,
-											marginLeft: -5,
-											color: "inherit",
-										}}
-									>
-										<path
-											fill="currentColor"
-											d="M136 128a8 8 0 1 1-8-8a8 8 0 0 1 8 8Z"
-										/>
-									</svg>
-								))}
-								<span>
-									{name}{" "}
-									{time === undefined ? (
-										<small style={{ opacity: 0.4 }}>waiting...</small>
-									) : (
-										<small
+							</div>
+						)}
+					</div>
+
+					<div ref={ref}>
+						{filteredActions.map(({ id, depth, instance, name, time }) => {
+							const actionUrl = `actions/${id}`;
+
+							return (
+								<button
+									key={id}
+									type="button"
+									className={[
+										styles.actionButton,
+										url === actionUrl && styles.action,
+									]
+										.filter(Boolean)
+										.join(" ")}
+									onClick={() => {
+										navigate(actionUrl, "actions");
+									}}
+								>
+									<small style={{ opacity: 0.4 }}>
+										{getExomeName(instance)}
+										<br />
+									</small>
+									{new Array(depth - 1).fill(null).map(() => (
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											width="1em"
+											height="1em"
+											viewBox="0 0 256 256"
 											style={{
-												color: getTimingColor(time),
+												width: 16,
+												height: 16,
+												marginTop: -2,
+												marginLeft: -5,
+												color: "inherit",
 											}}
 										>
-											({time.toFixed(1)}ms)
-										</small>
-									)}
-								</span>
-							</button>
-						);
-					})}
+											<path
+												fill="currentColor"
+												d="M136 128a8 8 0 1 1-8-8a8 8 0 0 1 8 8Z"
+											/>
+										</svg>
+									))}
+									<span>
+										{name}{" "}
+										{time === undefined ? (
+											<small style={{ opacity: 0.4 }}>waiting...</small>
+										) : (
+											<small
+												style={{
+													color: getTimingColor(time),
+												}}
+											>
+												({time.toFixed(1)}ms)
+											</small>
+										)}
+									</span>
+								</button>
+							);
+						})}
+					</div>
 				</div>
 			</div>
 

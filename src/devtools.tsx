@@ -20,6 +20,7 @@ import { RouteDevtoolsActions } from "./routes/actions";
 import { getExomeName } from "./utils/get-exome-name";
 import { RouteDevtoolsState } from "./routes/state";
 import { RouteDevtoolsProfiler } from "./routes/profiler";
+import { useResize } from "./utils/use-resize";
 
 interface DevtoolsProps {
 	name: string;
@@ -36,6 +37,8 @@ function Devtools({ name, devtoolsStore }: DevtoolsProps) {
 	const [isOpen, setIsOpen] = useState(false);
 	const router = useMemo(() => new RouterStore("actions"), []);
 	const { navigateMemoFirst } = router;
+	const maxHeight = useMemo(() => window.innerHeight / 1.5, []);
+	const [refResizeTarget, onMouseDown, height] = useResize(500, "n");
 
 	if (!isOpen) {
 		return (
@@ -50,7 +53,18 @@ function Devtools({ name, devtoolsStore }: DevtoolsProps) {
 	return (
 		<devtoolsContext.Provider value={devtoolsStore}>
 			<routerContext.Provider value={{ router, depth: 0 }}>
-				<div className={styles.devtools}>
+				<div
+					ref={refResizeTarget}
+					className={styles.devtools}
+					style={{
+						height: Math.min(maxHeight, Math.max(300, height)),
+					}}
+				>
+					<div
+						className={styles.resizerTop}
+						onMouseDown={onMouseDown}
+					/>
+
 					<div className={styles.head}>
 						<button
 							type="button"

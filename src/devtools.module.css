@@ -34,6 +34,50 @@
 	}
 }
 
+.resizerTop {
+	height: 8px;
+	width: 100%;
+	left: 0;
+	top: -4px;
+	right: 0;
+	cursor: ns-resize;
+}
+
+.resizerRight {
+	height: 100%;
+	width: 8px;
+	bottom: 0;
+	top: 0;
+	right: -4px;
+	cursor: ew-resize;
+}
+
+.resizerTop,
+.resizerRight {
+	position: absolute;
+	z-index: 2;
+	background-color: transparent;
+
+	&:hover {
+		background-color: rgba(0,0,0,0.1);
+	}
+
+	&:active {
+		background-color: rgba(0,0,0,0.2);
+
+		&:before {
+			display: block;
+			content: "";
+			position: fixed;
+			left: 0;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			z-index: 1;
+		}
+	}
+}
+
 .head {
   display: block;
   height: 80px;
@@ -46,8 +90,14 @@
   height: calc(100% - 80px);
 }
 
+.actionsLeftWrapper {
+	width: 20%;
+	position: relative;
+}
+
 .actionsLeft {
-  width: 20%;
+  width: 100%;
+  height: 100%;
   overflow-x: hidden;
   overflow-y: auto;
   padding: 10px;

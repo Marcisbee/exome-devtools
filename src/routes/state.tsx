@@ -1,6 +1,6 @@
 import { Exome, getExomeId } from "exome";
 import { useStore } from "exome/preact";
-import { useContext } from "preact/hooks";
+import { useContext, useMemo } from "preact/hooks";
 
 import { DevtoolsActionsStore, devtoolsContext } from "../store";
 import { RouterOutlet, routerContext } from "../devtools/router";
@@ -14,6 +14,7 @@ import {
 	StoreValueExplore,
 } from "../components/value-explorer/value-explorer";
 import { HistoryButtonBack } from "../components/history-button/history-button";
+import { useResize } from "../utils/use-resize";
 
 const routes = {
 	$storeId: DevtoolsStateContent,
@@ -175,6 +176,8 @@ export function RouteDevtoolsState() {
 	const { router } = useContext(routerContext);
 	const { url, navigate } = useStore(router);
 	const { instances } = useStore(store.actions);
+	const maxWidth = useMemo(() => window.innerWidth / 2, []);
+	const [refResizeTarget, onMouseDown, width] = useResize(250, "e", "side-panel");
 
 	const unfilteredInstances = [...instances.entries()];
 	const [query, setQuery, filteredInstances] = useQueryFilter(
@@ -192,76 +195,89 @@ export function RouteDevtoolsState() {
 
 	return (
 		<div className={styles.body}>
-			<div className={styles.actionsLeft}>
+			<div
+				className={styles.actionsLeftWrapper}
+				ref={refResizeTarget}
+				style={{
+					width: Math.min(maxWidth, Math.max(200, width)),
+				}}
+			>
 				<div
-					style={{
-						position: "sticky",
-						top: 0,
-						zIndex: 1,
-						backgroundColor: "inherit",
-					}}
-				>
-					<input
-						type="text"
-						placeholder="Filter.."
+					className={styles.resizerRight}
+					onMouseDown={onMouseDown}
+				/>
+
+				<div className={styles.actionsLeft}>
+					<div
 						style={{
-							backgroundColor: "#fff",
-							border: "1px solid #ccc",
-							padding: "6px 10px",
-							width: "100%",
-							borderRadius: 5,
+							position: "sticky",
+							top: 0,
+							zIndex: 1,
+							backgroundColor: "inherit",
 						}}
-						onInput={(e) => {
-							setQuery((e.target as HTMLInputElement)!.value.toLowerCase());
-						}}
-					/>
+					>
+						<input
+							type="text"
+							placeholder="Filter.."
+							style={{
+								backgroundColor: "#fff",
+								border: "1px solid #ccc",
+								padding: "6px 10px",
+								width: "100%",
+								borderRadius: 5,
+							}}
+							onInput={(e) => {
+								setQuery((e.target as HTMLInputElement)!.value.toLowerCase());
+							}}
+						/>
 
-					{unfilteredInstances.length !== filteredInstances.length && (
-						<div style={{ opacity: 0.5 }}>
-							<small>
-								{unfilteredInstances.length - filteredInstances.length} hidden
-								results for query "{query}"
-							</small>
-						</div>
-					)}
-				</div>
-
-				{Object.entries(groups).map(([, values]) => {
-					return (
-						<div>
-							<hr />
-							<div>
-								{values.map((value) => {
-									const key = getExomeId(value);
-
-									const storeUrl = `state/${key}`;
-
-									return (
-										<button
-											key={`state-${key}`}
-											type="button"
-											className={[
-												styles.actionButton,
-												url === storeUrl && styles.action,
-											]
-												.filter(Boolean)
-												.join(" ")}
-											onClick={() => {
-												navigate(storeUrl, "state");
-											}}
-										>
-											{/* <small style={{ opacity: 0.4 }}>
-												{key.split("-").pop()}
-												<br />
-											</small> */}
-											<span>{getExomeName(value)}</span>
-										</button>
-									);
-								})}
+						{unfilteredInstances.length !== filteredInstances.length && (
+							<div style={{ opacity: 0.5 }}>
+								<small>
+									{unfilteredInstances.length - filteredInstances.length} hidden
+									results for query "{query}"
+								</small>
 							</div>
-						</div>
-					);
-				})}
+						)}
+					</div>
+
+					{Object.entries(groups).map(([, values]) => {
+						return (
+							<div>
+								<hr />
+								<div>
+									{values.map((value) => {
+										const key = getExomeId(value);
+
+										const storeUrl = `state/${key}`;
+
+										return (
+											<button
+												key={`state-${key}`}
+												type="button"
+												className={[
+													styles.actionButton,
+													url === storeUrl && styles.action,
+												]
+													.filter(Boolean)
+													.join(" ")}
+												onClick={() => {
+													navigate(storeUrl, "state");
+												}}
+											>
+												{/* <small style={{ opacity: 0.4 }}>
+													{key.split("-").pop()}
+													<br />
+												</small> */}
+												<span>{getExomeName(value)}</span>
+											</button>
+										);
+									})}
+								</div>
+							</div>
+						);
+					})}
+				</div>
 			</div>
 
 			<RouterOutlet routes={routes} />
