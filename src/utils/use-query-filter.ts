@@ -8,8 +8,8 @@ export function useQueryFilter<T extends any[] = any[]>(
 	const filteredList = unfilteredList
 		.filter(
 			(value) =>
-				get(value).toLowerCase() !== query &&
-				get(value).toLowerCase().indexOf(query) > -1,
+				(get(value).toLowerCase() !== query && get(value).toLowerCase().indexOf(query) > -1)
+				|| get(value).toLowerCase() === query,
 		)
 		.sort(
 			(a, b) =>

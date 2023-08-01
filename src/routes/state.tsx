@@ -35,6 +35,7 @@ function StoreExplore({ instance, count }: StoreExploreProps) {
 				<input placeholder="Filter" type="text" style={{ float: "right" }} />
 				<h3 style={{ color: "#fb8c00" }}>
 					<HistoryButtonBack /> {">"} {getExomeName(instance)}
+					<small>-{getExomeId(instance).split("-").pop()}</small>
 				</h3>
 			</div>
 

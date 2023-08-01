@@ -32,6 +32,11 @@
 		font-size: 20px;
 		font-weight: bold;
 	}
+
+	& h3 small {
+		font-weight: 400;
+		opacity: 0.6;
+	}
 }
 
 .resizerTop {

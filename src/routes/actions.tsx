@@ -247,6 +247,7 @@ function DevtoolsActionsContent() {
 						}}
 					>
 						{instanceName}
+						<small>-{getExomeId(action.instance).split("-").pop()}</small>
 					</a>
 					.
 				</span>
