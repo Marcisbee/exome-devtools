@@ -1,7 +1,8 @@
-import { Exome, getExomeId } from "exome";
+import { Exome, getExomeId, update } from "exome";
 import { useStore } from "exome/preact";
 import { useContext } from "preact/hooks";
 
+import styles from "../../devtools.module.css";
 import { routerContext } from "../../devtools/router";
 
 function ExplorerValue({ value }: { value: any }) {
@@ -33,7 +34,29 @@ export function StoreValueExplore({ instance, source, name }: any) {
 	const value = source[name];
 
 	if (value == null || typeof value !== "object") {
-		return <ExplorerValue value={value} />;
+		return (
+			<>
+				<ExplorerValue value={value} />
+				<button
+					className={styles.storeValueEditButton}
+					onClick={() => {
+						const newValue = prompt(`Update "${name}"?`, JSON.stringify(value));
+
+						if (newValue == null) {
+							return;
+						}
+
+						source[name] = JSON.parse(newValue);
+						update(instance);
+						update(router);
+					}}
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+					  <path d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z" />
+					</svg>
+				</button>
+			</>
+		);
 	}
 
 	if (value instanceof Exome) {

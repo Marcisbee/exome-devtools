@@ -139,3 +139,28 @@
     color: #fff;
   }
 }
+
+.storeValueEditButton {
+	display: none;
+	font-size: 10px;
+	margin: -2px 0 -2px 6px;
+	background: rgba(0,0,0,0.05);
+	border: 0;
+	padding: 3px 5px;
+	border-radius: 4px;
+	vertical-align: top;
+
+	&:hover {
+		background: rgba(0,0,0,0.2);
+	}
+
+	& svg {
+		width: 11px;
+		height: 11px;
+		display: block;
+	}
+}
+
+div:hover > .storeValueEditButton {
+	display: inline-block;
+}

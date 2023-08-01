@@ -237,7 +237,7 @@ function DevtoolsActionsContent() {
 	return (
 		<div className={styles.actionsRight}>
 			<h3>
-				<HistoryButtonBack /> {">"}
+				<HistoryButtonBack /> {"> "}
 				<span>
 					{/* rome-ignore lint/a11y/useValidAnchor: <explanation> */}
 					<a
