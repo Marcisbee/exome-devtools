@@ -85,14 +85,98 @@
 
 .head {
   display: block;
-  height: 80px;
-  padding: 10px 18px;
+  height: 84px;
+  padding: 10px 16px;
   border-bottom: 1px solid #dee2e6;
+
+	& .headClose {
+		display: block;
+		position: absolute;
+		top: 5px;
+		right: 5px;
+		border: 0;
+		background-color: transparent;
+		padding: 5px;
+		cursor: pointer;
+		color: rgba(0,0,0,0.5);
+
+		&:hover {
+			color: #222;
+		}
+
+		& svg {
+			display: block;
+			width: 24px;
+			height: 24px;
+		}
+	}
+}
+
+.headTitle {
+	display: block;
+	position: relative;
+	padding: 6px 30px 6px 40px;
+	margin-bottom: 8px;
+
+	& svg {
+		display: block;
+		width: 30px;
+		height: 30px;
+		position: absolute;
+		left: 0;
+		top: 0;
+	}
+}
+
+.mainMenuButton {
+	display: inline-block;
+	cursor: pointer;
+	border: 0;
+	border-bottom: 2px solid transparent;
+	background-color: transparent;
+	padding: 0;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 14px;
+	line-height: 1em;
+	margin-right: 6px;
+	color: #444;
+
+	& svg {
+		width: 18px;
+		height: 18px;
+		display: inline-block;
+		vertical-align: top;
+    margin: -1px 6px -1px -4px;
+    color: #606060;
+	}
+
+	& span {
+		display: block;
+		background-color: transparent;
+		padding: 7px 12px;
+		border-radius: 5px;
+		margin-bottom: 4px;
+	}
+
+	&.active {
+		border-color: #f5841b;
+		color: #000;
+
+		& svg {
+			color: #444;
+		}
+	}
+
+	&:hover {
+		& span {
+			background-color: #f0f0f0;
+		}
+	}
 }
 
 .body {
   display: flex;
-  height: calc(100% - 80px);
+  height: calc(100% - 84px);
 }
 
 .actionsLeftWrapper {
