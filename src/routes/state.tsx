@@ -14,6 +14,7 @@ import {
 	StoreValueExplore,
 } from "../components/value-explorer/value-explorer";
 import { useResize } from "../utils/use-resize";
+import { getTimingColor } from "../utils/get-timing-color";
 
 const routes = {
 	$storeId: DevtoolsStateContent,
@@ -90,6 +91,9 @@ function StoreExplore({ instance, count }: StoreExploreProps) {
 						Object.getPrototypeOf(instance),
 						name,
 					)?.value.toString();
+					const averageTime = actionCount
+						? actionCount.reduce((a, b) => a + b, 0) / actionCount.length
+						: 0;
 
 					return (
 						<div
@@ -117,18 +121,17 @@ function StoreExplore({ instance, count }: StoreExploreProps) {
 											display: "inline-block",
 											borderLeft: "2px solid #fff",
 											padding: "0 5px",
-											backgroundColor: "#f5f5f5",
+											color: "#fff",
+											backgroundColor: getTimingColor(averageTime),
 										}}
-									>{`~${(
-										actionCount.reduce((a, b) => a + b, 0) / actionCount.length
-									).toFixed(1)}ms`}</span>
+									>{`~${averageTime.toFixed(1)}ms`}</span>
 								</span>
 							) : (
 								<span
 									style={{
 										display: "inline-block",
 										padding: "0 5px",
-										backgroundColor: "#f0f0f0",
+										color: "#ccc",
 									}}
 								>
 									0x

@@ -343,6 +343,14 @@ div:hover > .storeValueEditButton {
 	font-size: 10px;
 	border-radius: 5px;
 	width: 100%;
+
+	& div {
+		line-height: inherit;
+	}
+
+	& span {
+		line-height: inherit;
+	}
 }
 
 .storeExploreBlock {
@@ -373,5 +381,20 @@ div:hover > .storeValueEditButton {
 
 	&::before {
 		content: attr(data-text);
+	}
+}
+
+.getterButton {
+	vertical-align: top;
+	background: rgba(0, 0, 0, .05);
+	border: 0;
+	border-radius: 4px;
+	margin: -1px 0 -4px 6px;
+	padding: 3px 5px;
+	font-size: 10px;
+	cursor: pointer;
+
+	&:hover {
+		background: rgba(0,0,0,0.2);
 	}
 }

@@ -2,6 +2,7 @@ import { Exome } from "exome";
 import { useState } from "preact/hooks";
 
 import { StoreValueExplore } from "../value-explorer/value-explorer";
+import styles from "../../devtools.module.css";
 
 interface GetterValueProps {
 	source: Exome;
@@ -21,7 +22,7 @@ export function GetterValue({ source, field }: GetterValueProps) {
 			onClick={() => {
 				setIsOpen(true);
 			}}
-			style={{ fontSize: 10, margin: "-5px 0" }}
+			className={styles.getterButton}
 		>
 			show value
 		</button>
