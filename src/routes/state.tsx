@@ -65,9 +65,11 @@ function StoreExplore({ instance, count }: StoreExploreProps) {
 						}}
 					>
 						<ExplorerLabel label={name} />:{" "}
-						<i style={{ fontWeight: "normal", opacity: 0.5, fontSize: 10 }}>
-							(getter)
-						</i>{" "}
+						<i
+							style={{ fontWeight: "normal", fontSize: 10 }}
+							className={styles.tempText}
+							data-text="(getter)"
+						/>{" "}
 						<GetterValue
 							key={`getter::${name}::${Math.random()}`}
 							source={instance}
