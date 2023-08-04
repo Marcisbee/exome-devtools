@@ -4,6 +4,28 @@
   left: 8px;
   bottom: 8px;
   z-index: 100;
+
+	& button {
+		color: #f5841b;
+		background-color: #fff;
+    border: 0;
+    border-radius: 50%;
+    padding: 0;
+    width: 44px;
+    height: 44px;
+		cursor: pointer;
+    box-shadow: 0 0 0 1px rgba(16,22,26,0.1), 0 2px 4px rgba(16,22,26,.2), 0 8px 24px rgba(16,22,26,.2);
+
+		&:hover {
+			color: #fff;
+			background-color: #f5841b;
+		}
+	}
+
+	& svg {
+		width: 20px;
+		height: 20px;
+	}
 }
 
 .devtools {
@@ -25,6 +47,7 @@
 	& * {
 		box-sizing: border-box;
 		user-select: auto;
+		line-height: 1em;
 	}
 
 	& h3 {
@@ -36,6 +59,14 @@
 	& h3 small {
 		font-weight: 400;
 		opacity: 0.6;
+	}
+
+	& svg {
+		color: inherit !important;
+	}
+
+	& pre {
+		line-height: 1.5em;
 	}
 }
 
@@ -88,6 +119,7 @@
   height: 84px;
   padding: 10px 16px;
   border-bottom: 1px solid #dee2e6;
+	line-height: 1em;
 
 	& .headClose {
 		display: block;
@@ -99,6 +131,7 @@
 		padding: 5px;
 		cursor: pointer;
 		color: rgba(0,0,0,0.5);
+		z-index: 2;
 
 		&:hover {
 			color: #222;
@@ -116,7 +149,7 @@
 	display: block;
 	position: relative;
 	padding: 6px 30px 6px 40px;
-	margin-bottom: 8px;
+	margin-bottom: 9px;
 
 	& > svg {
 		display: block;
@@ -130,12 +163,6 @@
 	& > strong {
 		display: inline-block;
 		margin-right: 10px;
-	}
-
-	& .historyButton {
-		vertical-align: top;
-		margin-top: -5px;
-    margin-bottom: -5px;
 	}
 }
 
@@ -157,14 +184,14 @@
 		height: 18px;
 		display: inline-block;
 		vertical-align: top;
-    margin: -1px 6px -1px -4px;
+    margin: -2px 6px -2px -4px;
     color: #606060;
 	}
 
 	& span {
 		display: block;
 		background-color: transparent;
-		padding: 7px 12px;
+		padding: 8px 12px;
 		border-radius: 5px;
 		margin-bottom: 4px;
 	}
@@ -182,35 +209,6 @@
 		& span {
 			background-color: #f0f0f0;
 		}
-	}
-}
-
-.historyButton {
-	display: inline-block;
-	vertical-align: middle;
-	background-color: transparent;
-	border: 0;
-	border-radius: 5px;
-	color: #555;
-	cursor: pointer;
-	padding: 1px 3px;
-	line-height: 1em;
-
-	& svg {
-		width: 24px;
-		height: 24px;
-		line-height: 1em;
-	}
-
-	&:hover {
-		color: #000;
-		background-color: #f0f0f0;
-	}
-
-	&:disabled {
-		background-color: transparent !important;
-		color: #ccc !important;
-		cursor: not-allowed;
 	}
 }
 
@@ -232,6 +230,12 @@
   padding: 10px;
   background-color: #ebeff3;
 	scroll-behavior: auto !important;
+
+	& hr {
+		border: 0;
+		height: 1px;
+		background-color: rgba(0,0,0,0.05);
+	}
 }
 
 .actionsRight {
@@ -267,7 +271,7 @@
 .storeValueEditButton {
 	display: none;
 	font-size: 10px;
-	margin: -2px 0 -2px 6px;
+	margin: -3px 0 -2px 6px;
 	background: rgba(0,0,0,0.05);
 	border: 0;
 	padding: 3px 5px;
@@ -287,4 +291,35 @@
 
 div:hover > .storeValueEditButton {
 	display: inline-block;
+}
+
+.filterInput {
+	position: sticky;
+	top: -10px;
+	z-index: 1;
+	background-color: inherit;
+	margin: -10px -10px 10px -10px;
+
+	& input {
+		background-color: #ffffff;
+    border: 0;
+    padding: 11px 20px;
+    width: 100%;
+    border-radius: 0;
+    border-bottom: 1px solid #dee2e6;
+    border-right: 1px solid #dee2e6;
+		outline: none;
+
+		&:focus {
+			box-shadow: inset 0 0 0 1px #f5841b;
+		}
+	}
+
+	& .hiddenResults {
+		opacity: .5;
+    background-color: #dee2e6;
+    padding: 3px 4px 5px 4px;
+    display: block;
+    font-size: 13px;
+	}
 }

@@ -44,7 +44,7 @@ function StoreExplore({ instance, count }: StoreExploreProps) {
 					backgroundColor: "#fff",
 					fontSize: 12,
 					width: "100%",
-					borderTop: "1px solid #ccc",
+					borderTop: "1px solid rgba(0, 0, 0, 0.05)",
 				}}
 			>
 				<span style={{ display: "block", marginBottom: 10, color: "#ccc" }}>
@@ -91,7 +91,7 @@ function StoreExplore({ instance, count }: StoreExploreProps) {
 					backgroundColor: "#fff",
 					fontSize: 12,
 					width: "100%",
-					borderTop: "1px solid #ccc",
+					borderTop: "1px solid rgba(0, 0, 0, 0.05)",
 				}}
 			>
 				<span style={{ display: "block", marginBottom: 10, color: "#ccc" }}>
@@ -209,31 +209,17 @@ export function RouteDevtoolsState() {
 				<div className={styles.resizerRight} onMouseDown={onMouseDown} />
 
 				<div className={styles.actionsLeft}>
-					<div
-						style={{
-							position: "sticky",
-							top: 0,
-							zIndex: 1,
-							backgroundColor: "inherit",
-						}}
-					>
+					<div className={styles.filterInput}>
 						<input
-							type="text"
+							type="search"
 							placeholder="Filter.."
-							style={{
-								backgroundColor: "#fff",
-								border: "1px solid #ccc",
-								padding: "6px 10px",
-								width: "100%",
-								borderRadius: 5,
-							}}
 							onInput={(e) => {
 								setQuery((e.target as HTMLInputElement)!.value.toLowerCase());
 							}}
 						/>
 
 						{unfilteredInstances.length !== filteredInstances.length && (
-							<div style={{ opacity: 0.5 }}>
+							<div className={styles.hiddenResults}>
 								<small>
 									{unfilteredInstances.length - filteredInstances.length} hidden
 									results for query "{query}"

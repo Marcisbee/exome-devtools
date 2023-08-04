@@ -2,7 +2,8 @@ import { useStore } from "exome/preact";
 import { useContext } from "preact/hooks";
 
 import { routerContext } from "../../devtools/router";
-import styles from "../../devtools.module.css";
+
+import styles from "./history-button.module.css";
 
 export function HistoryButtonBack() {
 	const { router } = useContext(routerContext);

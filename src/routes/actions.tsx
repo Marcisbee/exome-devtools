@@ -23,7 +23,11 @@ export function RouteDevtoolsActions() {
 	const devtoolsStore = useContext(devtoolsContext);
 	const { actions: unfilteredActions } = useStore(devtoolsStore.actions);
 	const maxWidth = useMemo(() => window.innerWidth / 2, []);
-	const [refResizeTarget, onMouseDown, width] = useResize(250, "e", "side-panel");
+	const [refResizeTarget, onMouseDown, width] = useResize(
+		250,
+		"e",
+		"side-panel",
+	);
 
 	const [query, setQuery, filteredActions] = useQueryFilter(
 		unfilteredActions,
@@ -46,38 +50,20 @@ export function RouteDevtoolsActions() {
 					width: Math.min(maxWidth, Math.max(200, width)),
 				}}
 			>
-				<div
-					className={styles.resizerRight}
-					onMouseDown={onMouseDown}
-				/>
+				<div className={styles.resizerRight} onMouseDown={onMouseDown} />
 
 				<div className={styles.actionsLeft}>
-
-					<div
-						style={{
-							position: "sticky",
-							top: 0,
-							zIndex: 1,
-							backgroundColor: "inherit",
-						}}
-					>
+					<div className={styles.filterInput}>
 						<input
-							type="text"
+							type="search"
 							placeholder="Filter.."
-							style={{
-								backgroundColor: "#fff",
-								border: "1px solid #ccc",
-								padding: "6px 10px",
-								width: "100%",
-								borderRadius: 5,
-							}}
 							onInput={(e) => {
 								setQuery((e.target as HTMLInputElement)!.value.toLowerCase());
 							}}
 						/>
 
 						{unfilteredActions.length !== filteredActions.length && (
-							<div style={{ opacity: 0.5 }}>
+							<div className={styles.hiddenResults}>
 								<small>
 									{unfilteredActions.length - filteredActions.length} hidden
 									results for query "{query}"

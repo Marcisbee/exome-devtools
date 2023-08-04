@@ -22,7 +22,10 @@ import { getExomeName } from "./utils/get-exome-name";
 import { RouteDevtoolsState } from "./routes/state";
 import { RouteDevtoolsProfiler } from "./routes/profiler";
 import { useResize } from "./utils/use-resize";
-import { HistoryButtonBack, HistoryButtonNext } from "./components/history-button/history-button";
+import {
+	HistoryButtonBack,
+	HistoryButtonNext,
+} from "./components/history-button/history-button";
 
 interface DevtoolsProps {
 	name: string;
@@ -46,7 +49,28 @@ function Devtools({ name, devtoolsStore }: DevtoolsProps) {
 		return (
 			<div className={styles.devtoolsLauncher}>
 				<button type="button" onClick={() => setIsOpen(true)}>
-					devtools
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="184"
+						height="184"
+						fill="none"
+						viewBox="0 0 184 184"
+					>
+						<g
+							fill="currentColor"
+							fill-rule="evenodd"
+							clip-path="url(#a)"
+							clip-rule="evenodd"
+						>
+							<path d="M23 173Zm38-42-27 19A379 379 0 0 1 151 33l-20 28c5 6 9 14 10 22 32-37 49-70 39-80-11-11-60 19-109 68-49 48-79 98-67 109 9 10 42-7 79-39-8-1-16-5-22-10ZM174 23h-1 1Zm-13-13v1-1ZM11 161s-1 0 0 0Z" />
+							<path d="M11 23h1-1Zm76 75C64 74 45 52 34 34c8 5 17 11 26 19 7-6 14-9 23-11C46 11 13-5 4 4-8 15 22 65 71 113c49 49 98 79 110 68 9-10-8-43-40-80-1 8-5 15-10 22l20 27c-18-11-41-29-64-52Zm74 76v-1 1Zm13-13h-1 1ZM24 11c-1 0-1 0 0 0Z" />
+						</g>
+						<defs>
+							<clipPath id="a">
+								<path fill="#fff" d="M0 0h184v184H0z" />
+							</clipPath>
+						</defs>
+					</svg>
 				</button>
 			</div>
 		);

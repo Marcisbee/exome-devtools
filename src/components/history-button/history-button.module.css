@@ -1,0 +1,31 @@
+.historyButton {
+	display: inline-block;
+	vertical-align: middle;
+	background-color: transparent;
+	border: 0;
+	border-radius: 5px;
+	color: #555;
+	cursor: pointer;
+	padding: 1px 3px;
+	line-height: 1em;
+	vertical-align: top;
+	margin-top: -6px;
+	margin-bottom: -6px;
+
+	& svg {
+		width: 24px;
+		height: 24px;
+		line-height: 1em;
+	}
+
+	&:hover {
+		color: #000;
+		background-color: #f0f0f0;
+	}
+
+	&:disabled {
+		background-color: transparent !important;
+		color: #ccc !important;
+		cursor: not-allowed;
+	}
+}
