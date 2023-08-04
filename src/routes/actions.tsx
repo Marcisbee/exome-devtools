@@ -9,7 +9,6 @@ import { getExomeName } from "../utils/get-exome-name";
 import { getTimingColor } from "../utils/get-timing-color";
 import styles from "../devtools.module.css";
 import { useQueryFilter } from "../utils/use-query-filter";
-import { HistoryButtonBack } from "../components/history-button/history-button";
 import { useResize } from "../utils/use-resize";
 
 const routes = {
@@ -237,7 +236,6 @@ function DevtoolsActionsContent() {
 	return (
 		<div className={styles.actionsRight}>
 			<h3>
-				<HistoryButtonBack /> {"> "}
 				<span>
 					{/* rome-ignore lint/a11y/useValidAnchor: <explanation> */}
 					<a

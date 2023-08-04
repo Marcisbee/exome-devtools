@@ -118,13 +118,24 @@
 	padding: 6px 30px 6px 40px;
 	margin-bottom: 8px;
 
-	& svg {
+	& > svg {
 		display: block;
 		width: 30px;
 		height: 30px;
 		position: absolute;
 		left: 0;
 		top: 0;
+	}
+
+	& > strong {
+		display: inline-block;
+		margin-right: 10px;
+	}
+
+	& .historyButton {
+		vertical-align: top;
+		margin-top: -5px;
+    margin-bottom: -5px;
 	}
 }
 
@@ -171,6 +182,35 @@
 		& span {
 			background-color: #f0f0f0;
 		}
+	}
+}
+
+.historyButton {
+	display: inline-block;
+	vertical-align: middle;
+	background-color: transparent;
+	border: 0;
+	border-radius: 5px;
+	color: #555;
+	cursor: pointer;
+	padding: 1px 3px;
+	line-height: 1em;
+
+	& svg {
+		width: 24px;
+		height: 24px;
+		line-height: 1em;
+	}
+
+	&:hover {
+		color: #000;
+		background-color: #f0f0f0;
+	}
+
+	&:disabled {
+		background-color: transparent !important;
+		color: #ccc !important;
+		cursor: not-allowed;
 	}
 }
 

@@ -22,6 +22,7 @@ import { getExomeName } from "./utils/get-exome-name";
 import { RouteDevtoolsState } from "./routes/state";
 import { RouteDevtoolsProfiler } from "./routes/profiler";
 import { useResize } from "./utils/use-resize";
+import { HistoryButtonBack, HistoryButtonNext } from "./components/history-button/history-button";
 
 interface DevtoolsProps {
 	name: string;
@@ -106,6 +107,8 @@ function Devtools({ name, devtoolsStore }: DevtoolsProps) {
 								</defs>
 							</svg>
 							<strong>{name}</strong>
+							<HistoryButtonBack />
+							<HistoryButtonNext />
 						</div>
 
 						<div>

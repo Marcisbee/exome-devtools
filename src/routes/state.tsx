@@ -13,7 +13,6 @@ import {
 	ExplorerLabel,
 	StoreValueExplore,
 } from "../components/value-explorer/value-explorer";
-import { HistoryButtonBack } from "../components/history-button/history-button";
 import { useResize } from "../utils/use-resize";
 
 const routes = {
@@ -33,8 +32,8 @@ function StoreExplore({ instance, count }: StoreExploreProps) {
 		<div>
 			<div style={{ marginBottom: 10 }}>
 				<input placeholder="Filter" type="text" style={{ float: "right" }} />
-				<h3 style={{ color: "#fb8c00" }}>
-					<HistoryButtonBack /> {">"} {getExomeName(instance)}
+				<h3 style={{ color: "#f5841b" }}>
+					{getExomeName(instance)}
 					<small>-{getExomeId(instance).split("-").pop()}</small>
 				</h3>
 			</div>
@@ -178,7 +177,11 @@ export function RouteDevtoolsState() {
 	const { url, navigate } = useStore(router);
 	const { instances } = useStore(store.actions);
 	const maxWidth = useMemo(() => window.innerWidth / 2, []);
-	const [refResizeTarget, onMouseDown, width] = useResize(250, "e", "side-panel");
+	const [refResizeTarget, onMouseDown, width] = useResize(
+		250,
+		"e",
+		"side-panel",
+	);
 
 	const unfilteredInstances = [...instances.entries()];
 	const [query, setQuery, filteredInstances] = useQueryFilter(
@@ -203,10 +206,7 @@ export function RouteDevtoolsState() {
 					width: Math.min(maxWidth, Math.max(200, width)),
 				}}
 			>
-				<div
-					className={styles.resizerRight}
-					onMouseDown={onMouseDown}
-				/>
+				<div className={styles.resizerRight} onMouseDown={onMouseDown} />
 
 				<div className={styles.actionsLeft}>
 					<div
