@@ -194,14 +194,7 @@ function DiffObject({ before, after }: { before: any; after: any }) {
 	const diff = getDiff(before, after || {});
 
 	return (
-		<pre
-			style={{
-				padding: 10,
-				backgroundColor: "#f0f0f0",
-				fontSize: 10,
-				width: "100%",
-			}}
-		>
+		<pre className={styles.preCode}>
 			<DiffProperty before={before} diff={diff} />
 		</pre>
 	);
@@ -284,14 +277,7 @@ function DevtoolsActionsContent() {
 					</g>
 				</svg>
 				Payload:
-				<pre
-					style={{
-						padding: 10,
-						backgroundColor: "#f0f0f0",
-						fontSize: 10,
-						width: "100%",
-					}}
-				>
+				<pre className={styles.preCode}>
 					{JSON.stringify(
 						action.payload,
 						(_key, value) => {
@@ -361,14 +347,7 @@ function DevtoolsActionsContent() {
 					</g>
 				</svg>
 				Before:
-				<pre
-					style={{
-						padding: 10,
-						backgroundColor: "#f0f0f0",
-						fontSize: 10,
-						width: "100%",
-					}}
-				>
+				<pre className={styles.preCode}>
 					{JSON.stringify(action.before, null, 2)}
 				</pre>
 			</div>
@@ -391,14 +370,7 @@ function DevtoolsActionsContent() {
 					</g>
 				</svg>
 				After:
-				<pre
-					style={{
-						padding: 10,
-						backgroundColor: "#f0f0f0",
-						fontSize: 10,
-						width: "100%",
-					}}
-				>
+				<pre className={styles.preCode}>
 					{JSON.stringify(action.after, null, 2)}
 				</pre>
 			</div>
