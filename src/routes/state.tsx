@@ -38,15 +38,7 @@ function StoreExplore({ instance, count }: StoreExploreProps) {
 				</h3>
 			</div>
 
-			<pre
-				style={{
-					padding: 10,
-					backgroundColor: "#fff",
-					fontSize: 12,
-					width: "100%",
-					borderTop: "1px solid rgba(0, 0, 0, 0.05)",
-				}}
-			>
+			<pre className={styles.storeExploreBlock}>
 				<span style={{ display: "block", marginBottom: 10, color: "#ccc" }}>
 					state
 				</span>
@@ -85,15 +77,7 @@ function StoreExplore({ instance, count }: StoreExploreProps) {
 				))}
 			</pre>
 
-			<pre
-				style={{
-					padding: 10,
-					backgroundColor: "#fff",
-					fontSize: 12,
-					width: "100%",
-					borderTop: "1px solid rgba(0, 0, 0, 0.05)",
-				}}
-			>
+			<pre className={styles.storeExploreBlock}>
 				<span style={{ display: "block", marginBottom: 10, color: "#ccc" }}>
 					actions
 				</span>

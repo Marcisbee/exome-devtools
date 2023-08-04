@@ -65,18 +65,20 @@ export function StoreValueExplore({ instance, source, name }: any) {
 	}
 
 	if (value instanceof Exome) {
-		const id = getExomeId(value);
+		const nameAndId = getExomeId(value);
+		const [name, id] = nameAndId.split("-");
 
 		return (
 			// rome-ignore lint/a11y/useValidAnchor: <explanation>
 			<a
 				href="javascript:void(0);"
 				onClick={() => {
-					navigate(`state/${id}`);
+					navigate(`state/${nameAndId}`);
 				}}
-				style={{ color: "#222", textDecoration: "underline" }}
+				className={styles.instanceLink}
 			>
-				{id}
+				{name}
+				<span>-{id}</span>
 			</a>
 		);
 	}
@@ -86,7 +88,10 @@ export function StoreValueExplore({ instance, source, name }: any) {
 	if (Array.isArray(value)) {
 		return (
 			<>
-				<span style={{ opacity: 0.5 }}>{`Array(${value.length})`}</span>
+				<span
+					className={styles.tempText}
+					data-text={`Array(${value.length})`}
+				/>
 				{" ["}
 				{keys.map((name) => (
 					<div style={{ paddingLeft: 10 }}>

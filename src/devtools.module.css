@@ -69,6 +69,15 @@
 	& pre {
 		line-height: 1.5em;
 	}
+
+	& a {
+		color: #f5841b;
+		text-decoration: underline;
+
+		&:hover {
+			color: #df4d09;
+		}
+	}
 }
 
 .resizerTop {
@@ -236,6 +245,7 @@
 		border: 0;
 		height: 1px;
 		background-color: rgba(0,0,0,0.05);
+		opacity: 1;
 	}
 }
 
@@ -333,4 +343,35 @@ div:hover > .storeValueEditButton {
 	font-size: 10px;
 	border-radius: 5px;
 	width: 100%;
+}
+
+.storeExploreBlock {
+	padding: 10px;
+	background-color: #ffffff;
+	font-size: 12px;
+	width: 100%;
+	border-top: 1px solid rgba(0, 0, 0, 0.05);
+
+	& div {
+		margin-top: 5px;
+		margin-bottom: 5px;
+	}
+}
+
+.instanceLink {
+	& span {
+		opacity: 0.3;
+	}
+
+	&:hover span {
+		opacity: 1;
+	}
+}
+
+.tempText {
+	opacity: 0.5;
+
+	&::before {
+		content: attr(data-text);
+	}
 }
