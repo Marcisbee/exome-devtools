@@ -1,6 +1,5 @@
 // @ts-check
 import * as esbuild from "esbuild";
-import { cssModules } from "esbuild-plugin-lightningcss-modules";
 import { writeFileSync } from "fs";
 
 const result = await esbuild.build({
@@ -19,24 +18,15 @@ const result = await esbuild.build({
 	jsx: "automatic",
 	logLevel: "info",
 	metafile: true,
+	// external: ["exome"],
+	// alias: {
+	// 	"exome/preact": "./node_modules/exome/preact.js",
+	// },
+	loader: {
+		'.module.css': 'local-css',
+	},
 
 	plugins: [
-		cssModules({
-			// add your own or other plugins in the "visitor" section see
-			// https://lightningcss.dev/transforms.html
-			// visitor: myLightningcssPlugin(),
-			visitor: undefined,
-			targets: {
-				chrome: 80, // aligns somewhat to es2020
-			},
-			drafts: {
-				nesting: true,
-			},
-			cssModulesPattern: undefined,
-			includeFilter: /\.module\.css$/,
-			excludeFilter: /normalize\.css/,
-		}),
-
 		{
 			name: "my-plugin",
 			setup(build) {

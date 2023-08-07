@@ -1,6 +1,18 @@
 // @ts-check
 import * as esbuild from "esbuild";
-import { cssModules } from "esbuild-plugin-lightningcss-modules";
+// import { compile } from "sass";
+
+// var sass_module_plugin = {
+//   name: "local-sass",
+//   setup({ onLoad }) {
+//     onLoad({ filter: /\.module\.scss$/ }, (args) => {
+//       const { css } = compile(args.path);
+
+//       return { contents: css, loader: "local-css" };
+//       //                              ^^^^^^^^^^^
+//     });
+//   },
+// };
 
 const ctx = await esbuild.context({
 	entryPoints: ["./src/index.tsx"],
@@ -17,24 +29,9 @@ const ctx = await esbuild.context({
 	target: "es2015",
 	jsx: "automatic",
 	logLevel: "info",
-
-	plugins: [
-		cssModules({
-			// add your own or other plugins in the "visitor" section see
-			// https://lightningcss.dev/transforms.html
-			// visitor: myLightningcssPlugin(),
-			visitor: undefined,
-			targets: {
-				chrome: 80, // aligns somewhat to es2020
-			},
-			drafts: {
-				nesting: true,
-			},
-			cssModulesPattern: undefined,
-			includeFilter: /\.module\.css$/,
-			excludeFilter: /normalize\.css/,
-		}),
-	],
+	loader: {
+		'.module.css': 'local-css',
+	},
 });
 
 await ctx.watch();
