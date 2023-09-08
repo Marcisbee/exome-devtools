@@ -1,5 +1,6 @@
 // @ts-check
 import * as esbuild from "esbuild";
+// import { es5Plugin } from "esbuild-plugin-es5";
 import { writeFileSync } from "fs";
 
 const result = await esbuild.build({
@@ -9,12 +10,13 @@ const result = await esbuild.build({
 	format: "esm",
 	platform: "browser",
 	sourcemap: "external",
-	splitting: true,
+	splitting: false,
 	define: {
 		"process.env.NODE_ENV": JSON.stringify("production"),
 	},
 	minify: true,
 	target: "es2019",
+	// target: "es5",
 	jsx: "automatic",
 	logLevel: "info",
 	metafile: true,
@@ -23,10 +25,11 @@ const result = await esbuild.build({
 	// 	"exome/preact": "./node_modules/exome/preact.js",
 	// },
 	loader: {
-		'.module.css': 'local-css',
+		".module.css": "local-css",
 	},
 
 	plugins: [
+		// es5Plugin(),
 		{
 			name: "my-plugin",
 			setup(build) {

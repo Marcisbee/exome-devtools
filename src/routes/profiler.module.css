@@ -1,0 +1,44 @@
+.row {
+	white-space: nowrap;
+	background-color: #f0f0f0;
+	padding: 10px;
+	overflow: scroll hidden;
+	position: relative;
+	height: 30px;
+}
+
+.action {
+	display: block;
+	position: absolute;
+	height: 10px;
+	font-size: 9px;
+	min-width: 10px;
+	width: 3px;
+	overflow: hidden;
+	border: 2px solid #f0f0f0;
+	background-color: #f5841b;
+	border-radius: 10px;
+	cursor: pointer;
+	color: transparent;
+
+	&:hover {
+		background-color: #df4d09;
+		border-color: #df4d09;
+		z-index: 2;
+		box-shadow: 0 0 0 2px #f0f0f0;
+	}
+}
+
+.increase {
+	animation: increase linear 1s forwards;
+}
+
+@keyframes increase {
+	0% {
+		width: calc(0px * var(--profiler-scale, 1));
+	}
+
+	100% {
+		width: calc(100px * var(--profiler-scale, 1));
+	}
+}

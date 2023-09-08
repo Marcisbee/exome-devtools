@@ -2,16 +2,16 @@
 import * as esbuild from "esbuild";
 // import { compile } from "sass";
 
-// var sass_module_plugin = {
-//   name: "local-sass",
-//   setup({ onLoad }) {
-//     onLoad({ filter: /\.module\.scss$/ }, (args) => {
-//       const { css } = compile(args.path);
+// const sassModulePlugin = {
+// 	name: "local-sass",
+// 	setup({ onLoad }) {
+// 		onLoad({ filter: /\.module\.scss$/ }, (args) => {
+// 			const { css } = compile(args.path);
 
-//       return { contents: css, loader: "local-css" };
-//       //                              ^^^^^^^^^^^
-//     });
-//   },
+// 			return { contents: css, loader: "local-css" };
+// 			//                              ^^^^^^^^^^^
+// 		});
+// 	},
 // };
 
 const ctx = await esbuild.context({
@@ -30,8 +30,9 @@ const ctx = await esbuild.context({
 	jsx: "automatic",
 	logLevel: "info",
 	loader: {
-		'.module.css': 'local-css',
+		".module.css": "local-css",
 	},
+	// plugins: [sassModulePlugin],
 });
 
 await ctx.watch();
