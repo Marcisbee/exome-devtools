@@ -1,4 +1,5 @@
-import { Exome, getExomeId } from "exome";
+import { getExomeId as targetGetExomeId } from "exome-target";
+import { Exome } from "exome";
 import { createContext } from "preact";
 
 export interface Action {
@@ -26,7 +27,7 @@ export class DevtoolsActionsStore extends Exome {
 	public addAction(action: Action) {
 		this.actions.push(action);
 
-		const actionId = `${getExomeId(action.instance)}.${action.name}`;
+		const actionId = `${targetGetExomeId(action.instance)}.${action.name}`;
 		if (!this.count.has(actionId)) {
 			this.count.set(actionId, []);
 		}
@@ -37,7 +38,7 @@ export class DevtoolsActionsStore extends Exome {
 	}
 
 	public addInstance(instance: Exome) {
-		this.instances.set(getExomeId(instance), instance);
+		this.instances.set(targetGetExomeId(instance), instance);
 	}
 }
 

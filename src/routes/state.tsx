@@ -1,10 +1,11 @@
-import { Exome, getExomeId } from "exome";
+import { getExomeId as targetGetExomeId } from "exome-target";
+import { Exome } from "exome";
 import { useStore } from "exome/preact";
 import { useContext, useMemo } from "preact/hooks";
 
 import { DevtoolsActionsStore, devtoolsContext } from "../store";
 import { RouterOutlet, routerContext } from "../devtools/router";
-import { getExomeName } from "../utils/get-exome-name";
+import { targetGetExomeName } from "../utils/get-exome-name";
 import { exploreExomeInstance } from "../utils/explore-exome-instance";
 import { GetterValue } from "../components/getter-value/getter-value";
 import { useQueryFilter } from "../utils/use-query-filter";
@@ -34,8 +35,8 @@ function StoreExplore({ instance, count }: StoreExploreProps) {
 			<div style={{ marginBottom: 10 }}>
 				<input placeholder="Filter" type="text" style={{ float: "right" }} />
 				<h3 style={{ color: "#f5841b" }}>
-					{getExomeName(instance)}
-					<small>-{getExomeId(instance).split("-").pop()}</small>
+					{targetGetExomeName(instance)}
+					<small>-{targetGetExomeId(instance).split("-").pop()}</small>
 				</h3>
 			</div>
 
@@ -86,7 +87,9 @@ function StoreExplore({ instance, count }: StoreExploreProps) {
 				</span>
 
 				{instanceDetails.actions.map((name) => {
-					const actionCount = count.get(`${getExomeId(instance)}.${name}`);
+					const actionCount = count.get(
+						`${targetGetExomeId(instance)}.${name}`,
+					);
 					const fnString = Object.getOwnPropertyDescriptor(
 						Object.getPrototypeOf(instance),
 						name,
@@ -178,7 +181,7 @@ export function RouteDevtoolsState() {
 		([key]) => key,
 	);
 	const groups = filteredInstances.reduce((acc, [, value]) => {
-		const name = getExomeName(value);
+		const name = targetGetExomeName(value);
 
 		acc[name] ??= [];
 		acc[name].push(value);
@@ -223,7 +226,7 @@ export function RouteDevtoolsState() {
 								<hr />
 								<div>
 									{values.map((value) => {
-										const key = getExomeId(value);
+										const key = targetGetExomeId(value);
 
 										const storeUrl = `state/${key}`;
 
@@ -245,7 +248,7 @@ export function RouteDevtoolsState() {
 													{key.split("-").pop()}
 													<br />
 												</small> */}
-												<span>{getExomeName(value)}</span>
+												<span>{targetGetExomeName(value)}</span>
 											</button>
 										);
 									})}

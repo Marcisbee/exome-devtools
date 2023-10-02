@@ -1,24 +1,17 @@
-import { Exome, Middleware, getExomeId, update } from "exome";
+import {
+	Exome as targetExome,
+	getExomeId as targetGetExomeId,
+} from "exome-target";
+import { Middleware, update } from "exome";
 import { useStore } from "exome/preact";
 import { render } from "preact";
 import { useMemo, useState } from "preact/hooks";
 
 import styles from "./devtools.module.css";
-import { exomeToJson } from "./utils/exome-to-json";
-import {
-	HistoryStore,
-	RouterOutlet,
-	RouterStore,
-	routerContext,
-} from "./devtools/router";
-import {
-	Action,
-	DevtoolsActionsStore,
-	DevtoolsStore,
-	devtoolsContext,
-} from "./store";
+import { targetExomeToJson } from "./utils/exome-to-json";
+import { RouterOutlet, RouterStore, routerContext } from "./devtools/router";
+import { Action, DevtoolsStore, devtoolsContext } from "./store";
 import { RouteDevtoolsActions } from "./routes/actions";
-import { getExomeName } from "./utils/get-exome-name";
 import { RouteDevtoolsState } from "./routes/state";
 import { RouteDevtoolsProfiler } from "./routes/profiler";
 import { useResize } from "./utils/use-resize";
@@ -26,6 +19,7 @@ import {
 	HistoryButtonBack,
 	HistoryButtonNext,
 } from "./components/history-button/history-button";
+import { targetGetExomeName } from "./utils/get-exome-name";
 
 interface DevtoolsProps {
 	name: string;
@@ -273,27 +267,11 @@ export function inlineDevtools({
 
 	return (instance, name, payload) => {
 		try {
-			if (!(instance instanceof Exome)) {
+			if (!(instance instanceof targetExome)) {
 				return;
 			}
 
-			if (instance instanceof DevtoolsStore) {
-				return;
-			}
-
-			if (instance instanceof RouterStore) {
-				return;
-			}
-
-			if (instance instanceof HistoryStore) {
-				return;
-			}
-
-			if (instance instanceof DevtoolsActionsStore) {
-				return;
-			}
-
-			const storeName = getExomeName(instance);
+			const storeName = targetGetExomeName(instance);
 
 			if (ignoreListStores.indexOf(storeName) > -1) {
 				return;
@@ -308,13 +286,13 @@ export function inlineDevtools({
 				return;
 			}
 
-			const actionId = `${getExomeId(instance)}.${name}`;
+			const actionId = `${targetGetExomeId(instance)}.${name}`;
 
 			if (ignoreListActions.indexOf(`${storeName}.${name}`) > -1) {
 				return;
 			}
 
-			const before = exomeToJson(instance);
+			const before = targetExomeToJson(instance);
 			const id = String(Math.random());
 			const trace = new Error().stack?.split(/\n/g)[6] || "";
 
@@ -338,7 +316,7 @@ export function inlineDevtools({
 
 			return () => {
 				action.time = performance.now() - start;
-				action.after = exomeToJson(instance);
+				action.after = targetExomeToJson(instance);
 				count.get(actionId)!.push(action.time);
 
 				depth -= 1;

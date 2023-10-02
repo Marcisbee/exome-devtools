@@ -33,7 +33,7 @@ const result = await esbuild.build({
 		{
 			name: "my-plugin",
 			setup(build) {
-				build.onResolve({ filter: /^exome$/ }, (args) => ({
+				build.onResolve({ filter: /^exome-target$/ }, (args) => ({
 					path: args.path,
 					namespace: "my-plugin",
 				}));

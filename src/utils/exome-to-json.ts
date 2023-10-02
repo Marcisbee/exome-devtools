@@ -1,6 +1,6 @@
-import { Exome, getExomeId } from "exome";
+import { Exome, getExomeId } from "exome-target";
 
-export function exomeToJson(instance: Exome) {
+export function targetExomeToJson(instance: Exome) {
 	return JSON.parse(
 		JSON.stringify(
 			instance,

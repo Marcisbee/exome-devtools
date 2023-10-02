@@ -1,11 +1,12 @@
-import { Exome, getExomeId } from "exome";
+import { getExomeId as targetGetExomeId } from "exome-target";
+import { Exome } from "exome";
 import { useStore } from "exome/preact";
 import { useContext, useLayoutEffect, useMemo, useRef } from "preact/hooks";
 
 import { RouterOutlet, routerContext } from "../devtools/router";
 import { getDiff, undefinedDiff } from "../utils/get-diff";
 import { devtoolsContext } from "../store";
-import { getExomeName } from "../utils/get-exome-name";
+import { targetGetExomeName } from "../utils/get-exome-name";
 import { getTimingColor } from "../utils/get-timing-color";
 import styles from "../devtools.module.css";
 import { useQueryFilter } from "../utils/use-query-filter";
@@ -91,7 +92,7 @@ export function RouteDevtoolsActions() {
 									}}
 								>
 									<small style={{ opacity: 0.4 }}>
-										{getExomeName(instance)}
+										{targetGetExomeName(instance)}
 										<br />
 									</small>
 									{new Array(depth - 1).fill(null).map(() => (
@@ -210,7 +211,7 @@ function DevtoolsActionsContent() {
 		return <div className={styles.actionsRight}>No Action Selected</div>;
 	}
 
-	const instanceName = getExomeName(action.instance);
+	const instanceName = targetGetExomeName(action.instance);
 
 	return (
 		<div className={styles.actionsRight}>
@@ -220,11 +221,14 @@ function DevtoolsActionsContent() {
 					<a
 						href="javascript:void(0);"
 						onClick={() => {
-							router.navigate(`state/${getExomeId(action.instance)}`, "state");
+							router.navigate(
+								`state/${targetGetExomeId(action.instance)}`,
+								"state",
+							);
 						}}
 					>
 						{instanceName}
-						<small>-{getExomeId(action.instance).split("-").pop()}</small>
+						<small>-{targetGetExomeId(action.instance).split("-").pop()}</small>
 					</a>
 					.
 				</span>
@@ -287,7 +291,7 @@ function DevtoolsActionsContent() {
 
 							if (value instanceof Exome) {
 								return {
-									$$exome_id: getExomeId(value),
+									$$exome_id: targetGetExomeId(value),
 								};
 							}
 

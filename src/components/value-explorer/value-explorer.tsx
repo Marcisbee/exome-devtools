@@ -1,4 +1,9 @@
-import { Exome, getExomeId, update } from "exome";
+import {
+	Exome as targetExome,
+	getExomeId as targetGetExomeId,
+	update as targetUpdate,
+} from "exome-target";
+import { update } from "exome";
 import { useStore } from "exome/preact";
 import { useContext } from "preact/hooks";
 
@@ -48,7 +53,7 @@ export function StoreValueExplore({ instance, source, name }: any) {
 						}
 
 						source[name] = JSON.parse(newValue);
-						update(instance);
+						targetUpdate(instance);
 						update(router);
 					}}
 				>
@@ -64,8 +69,8 @@ export function StoreValueExplore({ instance, source, name }: any) {
 		);
 	}
 
-	if (value instanceof Exome) {
-		const nameAndId = getExomeId(value);
+	if (value instanceof targetExome) {
+		const nameAndId = targetGetExomeId(value);
 		const [name, id] = nameAndId.split("-");
 
 		return (
