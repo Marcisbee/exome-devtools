@@ -53,6 +53,7 @@ export function StoreValueExplore({ instance, source, name }: any) {
 						}
 
 						source[name] = JSON.parse(newValue);
+						// @TODO
 						targetUpdate(instance);
 						update(router);
 					}}
@@ -74,7 +75,7 @@ export function StoreValueExplore({ instance, source, name }: any) {
 		const [name, id] = nameAndId.split("-");
 
 		return (
-			// rome-ignore lint/a11y/useValidAnchor: <explanation>
+			// biome-ignore lint/a11y/useValidAnchor: <explanation>
 			<a
 				href="javascript:void(0);"
 				onClick={() => {

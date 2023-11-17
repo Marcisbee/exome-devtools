@@ -1,4 +1,3 @@
-import { getExomeId as targetGetExomeId } from "exome-target";
 import { Exome } from "exome";
 import { createContext } from "preact";
 
@@ -6,7 +5,7 @@ export interface Action {
 	id: string;
 	name: string;
 	payload: any[];
-	instance: Exome;
+	instance: string;
 	depth: number;
 	now: number;
 	time?: number;
@@ -17,7 +16,7 @@ export interface Action {
 
 export class DevtoolsActionsStore extends Exome {
 	public actions: Action[] = [];
-	public instances = new Map<string, Exome>();
+	public instances = new Map<string, Record<string, any>>();
 	public count = new Map<string, number[]>();
 
 	constructor(public maxAge: number) {
@@ -27,7 +26,7 @@ export class DevtoolsActionsStore extends Exome {
 	public addAction(action: Action) {
 		this.actions.push(action);
 
-		const actionId = `${targetGetExomeId(action.instance)}.${action.name}`;
+		const actionId = `${action.instance}.${action.name}`;
 		if (!this.count.has(actionId)) {
 			this.count.set(actionId, []);
 		}
@@ -37,15 +36,34 @@ export class DevtoolsActionsStore extends Exome {
 		}
 	}
 
-	public addInstance(instance: Exome) {
-		this.instances.set(targetGetExomeId(instance), instance);
+	public addInstance(name: string, state: Record<string, any>) {
+		this.instances.set(name, state);
+	}
+
+	public updateAction(action: Action) {
+		const existingAction = this.actions.find(({ id }) => action.id === id);
+
+		if (!existingAction) {
+			// Nothing to update
+			return;
+		}
+
+		const actionId = `${action.instance}.${action.name}`;
+		this.count.get(actionId)!.push(action.time!);
+
+		Object.assign(existingAction, action);
+		this.instances.set(action.instance, action.after!);
+	}
+
+	public updateInstance(name: string, state: Record<string, any>) {
+		this.instances.set(name, state);
 	}
 }
 
 export class DevtoolsStore extends Exome {
 	public actions: DevtoolsActionsStore;
 
-	constructor(public maxAge: number) {
+	constructor(public name: string, public maxAge: number) {
 		super();
 
 		this.actions = new DevtoolsActionsStore(maxAge);

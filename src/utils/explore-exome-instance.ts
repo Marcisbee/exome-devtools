@@ -1,8 +1,8 @@
-import type { Exome } from "exome";
+export const PROPERTY_TYPE_GETTER = "$$exome_gt";
+export const PROPERTY_TYPE_ACTION = "$$exome_ac";
+export const PROPERTY_TYPE_SILENT = "$$exome_sl";
 
-const descriptor = Object.getOwnPropertyDescriptor;
-
-export function exploreExomeInstance(instance: Exome) {
+export function exploreExomeInstance(instance: Record<string, any>) {
 	const output: {
 		state: string[];
 		getters: string[];
@@ -21,29 +21,21 @@ export function exploreExomeInstance(instance: Exome) {
 		(key) => methodNames.indexOf(key) === -1,
 	);
 
-	for (const methodName of methodNames) {
-		if (methodName === "constructor") {
-			continue;
-		}
-
-		const isGetter = typeof descriptor(proto, methodName)?.get === "function";
-		// console.log(methodName, descriptor(proto, methodName));
-		// console.dir(proto[methodName]);
-
-		if (isGetter) {
-			output.getters.push(methodName);
-			continue;
-		}
-
-		output.actions.push(methodName);
-	}
-
 	for (const propertyName of propertyNames) {
-		const isMethod =
-			typeof descriptor(instance, propertyName)?.value === "function";
+		const [type, name] = propertyName.split(":");
 
-		if (isMethod) {
-			output.silentActions.push(propertyName);
+		if (type === PROPERTY_TYPE_GETTER) {
+			output.getters.push(name);
+			continue;
+		}
+
+		if (type === PROPERTY_TYPE_ACTION) {
+			output.actions.push(name);
+			continue;
+		}
+
+		if (type === PROPERTY_TYPE_SILENT) {
+			output.silentActions.push(name);
 			continue;
 		}
 

@@ -1,12 +1,12 @@
-import { getExomeId as targetGetExomeId } from "exome-target";
-import { Exome } from "exome";
 import { useStore } from "exome/preact";
 import { useContext, useMemo } from "preact/hooks";
 
 import { DevtoolsActionsStore, devtoolsContext } from "../store";
 import { RouterOutlet, routerContext } from "../devtools/router";
-import { targetGetExomeName } from "../utils/get-exome-name";
-import { exploreExomeInstance } from "../utils/explore-exome-instance";
+import {
+	PROPERTY_TYPE_GETTER,
+	exploreExomeInstance,
+} from "../utils/explore-exome-instance";
 import { GetterValue } from "../components/getter-value/getter-value";
 import { useQueryFilter } from "../utils/use-query-filter";
 import styles from "../devtools.module.css";
@@ -23,20 +23,22 @@ const routes = {
 };
 
 interface StoreExploreProps {
-	instance: Exome;
+	id: string;
+	instance: Record<string, any>;
 	count: DevtoolsActionsStore["count"];
 }
 
-function StoreExplore({ instance, count }: StoreExploreProps) {
+function StoreExplore({ id, instance, count }: StoreExploreProps) {
 	const instanceDetails = exploreExomeInstance(instance);
+	const name = id.replace(/-[a-z0-9]+$/gi, "");
 
 	return (
 		<div>
 			<div style={{ marginBottom: 10 }}>
 				<input placeholder="Filter" type="text" style={{ float: "right" }} />
 				<h3 style={{ color: "#f5841b" }}>
-					{targetGetExomeName(instance)}
-					<small>-{targetGetExomeId(instance).split("-").pop()}</small>
+					{name}
+					<small>-{id.split("-").pop()}</small>
 				</h3>
 			</div>
 
@@ -72,10 +74,10 @@ function StoreExplore({ instance, count }: StoreExploreProps) {
 							className={styles.tempText}
 							data-text="(getter)"
 						/>{" "}
-						<GetterValue
-							key={`getter::${name}::${Math.random()}`}
+						<StoreValueExplore
+							instance={instance}
 							source={instance}
-							field={name}
+							name={`${PROPERTY_TYPE_GETTER}:${name}`}
 						/>
 					</div>
 				))}
@@ -87,9 +89,7 @@ function StoreExplore({ instance, count }: StoreExploreProps) {
 				</span>
 
 				{instanceDetails.actions.map((name) => {
-					const actionCount = count.get(
-						`${targetGetExomeId(instance)}.${name}`,
-					);
+					const actionCount = count.get(`${id}.${name}`);
 					const fnString = Object.getOwnPropertyDescriptor(
 						Object.getPrototypeOf(instance),
 						name,
@@ -180,14 +180,14 @@ export function RouteDevtoolsState() {
 		unfilteredInstances,
 		([key]) => key,
 	);
-	const groups = filteredInstances.reduce((acc, [, value]) => {
-		const name = targetGetExomeName(value);
+	const groups = filteredInstances.reduce((acc, [id, value]) => {
+		const name = id.replace(/-[a-z0-9]+$/gi, "");
 
 		acc[name] ??= [];
-		acc[name].push(value);
+		acc[name].push([id, value]);
 
 		return acc;
-	}, {} as Record<string, any[]>);
+	}, {} as Record<string, [string, any][]>);
 
 	return (
 		<div className={styles.body}>
@@ -220,14 +220,12 @@ export function RouteDevtoolsState() {
 						)}
 					</div>
 
-					{Object.entries(groups).map(([, values]) => {
+					{Object.entries(groups).map(([name, values]) => {
 						return (
 							<div>
 								<hr />
 								<div>
-									{values.map((value) => {
-										const key = targetGetExomeId(value);
-
+									{values.map(([key]) => {
 										const storeUrl = `state/${key}`;
 
 										return (
@@ -244,11 +242,7 @@ export function RouteDevtoolsState() {
 													navigate(storeUrl, "state");
 												}}
 											>
-												{/* <small style={{ opacity: 0.4 }}>
-													{key.split("-").pop()}
-													<br />
-												</small> */}
-												<span>{targetGetExomeName(value)}</span>
+												<span>{name}</span>
 											</button>
 										);
 									})}
@@ -276,7 +270,7 @@ export function DevtoolsStateContent() {
 
 	return (
 		<div className={styles.actionsRight}>
-			<StoreExplore instance={instance} count={count} />
+			<StoreExplore id={params.storeId} instance={instance} count={count} />
 		</div>
 	);
 }

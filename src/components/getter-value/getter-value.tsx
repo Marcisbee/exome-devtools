@@ -1,11 +1,10 @@
-import { Exome } from "exome";
 import { useState } from "preact/hooks";
 
 import { StoreValueExplore } from "../value-explorer/value-explorer";
 import styles from "../../devtools.module.css";
 
 interface GetterValueProps {
-	source: Exome;
+	source: Record<string, any>;
 	field: string;
 }
 

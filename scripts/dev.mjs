@@ -32,6 +32,10 @@ const ctx = await esbuild.context({
 	loader: {
 		".module.css": "local-css",
 	},
+	alias: {
+		preact: './node_modules/preact',
+		'preact/hooks': './node_modules/preact/hooks',
+	},
 	// plugins: [sassModulePlugin],
 });
 

@@ -1,12 +1,9 @@
-import { getExomeId as targetGetExomeId } from "exome-target";
-import { Exome } from "exome";
 import { useStore } from "exome/preact";
 import { useContext, useLayoutEffect, useMemo, useRef } from "preact/hooks";
 
 import { RouterOutlet, routerContext } from "../devtools/router";
 import { getDiff, undefinedDiff } from "../utils/get-diff";
 import { devtoolsContext } from "../store";
-import { targetGetExomeName } from "../utils/get-exome-name";
 import { getTimingColor } from "../utils/get-timing-color";
 import styles from "../devtools.module.css";
 import { useQueryFilter } from "../utils/use-query-filter";
@@ -76,6 +73,7 @@ export function RouteDevtoolsActions() {
 					<div ref={ref}>
 						{filteredActions.map(({ id, depth, instance, name, time }) => {
 							const actionUrl = `actions/${id}`;
+							const instanceName = instance.replace(/-[a-z0-9]+$/gi, "");
 
 							return (
 								<button
@@ -92,7 +90,7 @@ export function RouteDevtoolsActions() {
 									}}
 								>
 									<small style={{ opacity: 0.4 }}>
-										{targetGetExomeName(instance)}
+										{instanceName}
 										<br />
 									</small>
 									{new Array(depth - 1).fill(null).map(() => (
@@ -211,24 +209,21 @@ function DevtoolsActionsContent() {
 		return <div className={styles.actionsRight}>No Action Selected</div>;
 	}
 
-	const instanceName = targetGetExomeName(action.instance);
+	const instanceName = action.instance.replace(/-[a-z0-9]+$/gi, "");
 
 	return (
 		<div className={styles.actionsRight}>
 			<h3>
 				<span>
-					{/* rome-ignore lint/a11y/useValidAnchor: <explanation> */}
+					{/* biome-ignore lint/a11y/useValidAnchor: <explanation> */}
 					<a
 						href="javascript:void(0);"
 						onClick={() => {
-							router.navigate(
-								`state/${targetGetExomeId(action.instance)}`,
-								"state",
-							);
+							router.navigate(`state/${action.instance}`, "state");
 						}}
 					>
 						{instanceName}
-						<small>-{targetGetExomeId(action.instance).split("-").pop()}</small>
+						<small>-{action.instance.split("-").pop()}</small>
 					</a>
 					.
 				</span>
@@ -289,11 +284,11 @@ function DevtoolsActionsContent() {
 								return value;
 							}
 
-							if (value instanceof Exome) {
-								return {
-									$$exome_id: targetGetExomeId(value),
-								};
-							}
+							// if (value instanceof Exome) {
+							// 	return {
+							// 		$$exome_id: targetGetExomeId(value),
+							// 	};
+							// }
 
 							if (
 								value.constructor !== Array &&
