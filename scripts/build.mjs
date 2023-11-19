@@ -30,22 +30,40 @@ const result = await esbuild.build({
 
 	plugins: [
 		// es5Plugin(),
-		{
-			name: "my-plugin",
-			setup(build) {
-				build.onResolve({ filter: /^exome-target$/ }, (args) => ({
-					path: args.path,
-					namespace: "my-plugin",
-				}));
-
-				build.onLoad({ filter: /.*/, namespace: "my-plugin" }, () => {
-					const contents =
-						"module.exports = window.__EXOME_DEVTOOLS__ && window.__EXOME_DEVTOOLS__.meta";
-					return { contents };
-				});
-			},
-		},
+		// {
+		// 	name: "my-plugin",
+		// 	setup(build) {
+		// 		build.onResolve({ filter: /^exome-target$/ }, (args) => ({
+		// 			path: args.path,
+		// 			namespace: "my-plugin",
+		// 		}));
+		// 		build.onLoad({ filter: /.*/, namespace: "my-plugin" }, () => {
+		// 			const contents =
+		// 				"module.exports = window.__EXOME_DEVTOOLS__ && window.__EXOME_DEVTOOLS__.meta";
+		// 			return { contents };
+		// 		});
+		// 	},
+		// },
 	],
+});
+
+await esbuild.build({
+	entryPoints: ["./lib/devtools-exome.ts"],
+	bundle: true,
+	outdir: "dist",
+	format: "esm",
+	platform: "browser",
+	sourcemap: "external",
+	splitting: false,
+	define: {
+		"process.env.NODE_ENV": JSON.stringify("production"),
+	},
+	minify: true,
+	target: "es2019",
+	jsx: "automatic",
+	logLevel: "info",
+	metafile: true,
+	external: ["exome"],
 });
 
 writeFileSync("metafile.json", JSON.stringify(result.metafile));
