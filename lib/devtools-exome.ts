@@ -11,7 +11,11 @@ export interface DevtoolsExtensionConnectionInterface {
 	disconnect(): void;
 
 	send(data: { event: "update"; type: "action"; payload: Action }): void;
-	send(data: { event: "update"; type: "state"; payload: [string, any] }): void;
+	send(data: {
+		event: "update";
+		type: "state";
+		payload: [string, any] | [string, any, string];
+	}): void;
 
 	send(data: { event: "send"; type: "actions"; payload: Action[] }): void;
 	send(data: { event: "send"; type: "action"; payload: Action }): void;
@@ -167,12 +171,12 @@ export const exomeDevtools = ({
 	window.addEventListener("unload", connection.disconnect, { once: true });
 
 	// Return requested data by
-	connection.subscribe(({ type }) => {
-		console.log("request", type);
-		// if (type === "states") {
-		// 	return ["Poo-123"];
-		// }
-	});
+	// connection.subscribe(({ type }) => {
+	// 	console.log("request", type);
+	// 	// if (type === "states") {
+	// 	// 	return ["Poo-123"];
+	// 	// }
+	// });
 
 	return (instance, name, payload) => {
 		const storeId = getExomeId(instance);
@@ -193,19 +197,24 @@ export const exomeDevtools = ({
 				type: "state",
 				payload: [storeId, exomeToJson(instance)],
 			});
-			return;
+			return () => {
+				connection.send({
+					event: "update",
+					type: "state",
+					payload: [storeId, exomeToJson(instance), getExomeId(instance)],
+				});
+			};
 		}
 
 		if (name === "LOAD_STATE") {
-			connection.send({
-				event: "update",
-				type: "state",
-				payload: [storeId, exomeToJson(instance)],
-			});
-			return;
+			return () => {
+				connection.send({
+					event: "update",
+					type: "state",
+					payload: [storeId, exomeToJson(instance), getExomeId(instance)],
+				});
+			};
 		}
-
-		const actionId = `${storeId}.${name}`;
 
 		if (ignoreListActions.indexOf(`${storeName}.${name}`) > -1) {
 			return;
@@ -241,34 +250,14 @@ export const exomeDevtools = ({
 		return () => {
 			action.time = performance.now() - start;
 			action.after = exomeToJson(instance);
-			// count.get(actionId)!.push(action.time);
 
 			depth -= 1;
-
-			// update(devtoolsStore.actions);
 
 			connection.send({
 				event: "update",
 				type: "action",
 				payload: action,
 			});
-
-			// devtoolsStore.addAction({
-			//   id: String(Math.random()),
-			//   name,
-			//   instance,
-			//   payload,
-			//   now: start,
-			//   time: performance.now() - start,
-			// });
-
-			// let parsedPayload: any[] = [];
-
-			// try {
-			// 	parsedPayload = JSON.parse(JSON.stringify(payload));
-			// } catch (e) {}
-
-			// connection.send("", { type, payload: parsedPayload });
 		};
 	};
 
@@ -339,7 +328,7 @@ function exomeToJsonDepth(instance: any) {
 					return value;
 				}
 
-				if (value instanceof Exome && key !== "") {
+				if (value instanceof Exome) {
 					return {
 						$$exome_id: getExomeId(value),
 					};
@@ -348,8 +337,7 @@ function exomeToJsonDepth(instance: any) {
 				if (
 					value.constructor.name !== "Array" &&
 					value.constructor.name !== "Object" &&
-					value.constructor.name !== "Date" &&
-					key !== ""
+					value.constructor.name !== "Date"
 				) {
 					return {
 						$$exome_class: value.constructor.name,

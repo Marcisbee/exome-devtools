@@ -13,7 +13,7 @@
 	},
 	"devDependencies": {
 		"esbuild": "^0.18.19",
-		"exome": "^2.0.2",
+		"exome": "^2.3.0",
 		"preact": "^10.14.1"
 	},
 	"repository": {

@@ -339,7 +339,11 @@ export function renderUI(target: HTMLElement) {
 
 				if (data.event === "update") {
 					if (data.type === "state") {
-						store.actions.updateInstance(data.payload[0], data.payload[1]);
+						store.actions.updateInstance(
+							data.payload[0],
+							data.payload[1],
+							data.payload[2],
+						);
 						return;
 					}
 

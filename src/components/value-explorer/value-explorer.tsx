@@ -70,8 +70,8 @@ export function StoreValueExplore({ instance, source, name }: any) {
 		);
 	}
 
-	if (value instanceof targetExome) {
-		const nameAndId = targetGetExomeId(value);
+	if (value.$$exome_id) {
+		const nameAndId = value.$$exome_id;
 		const [name, id] = nameAndId.split("-");
 
 		return (
@@ -86,6 +86,17 @@ export function StoreValueExplore({ instance, source, name }: any) {
 				{name}
 				<span>-{id}</span>
 			</a>
+		);
+	}
+
+	if (value.$$exome_class) {
+		const name = value.$$exome_class;
+
+		return (
+			<span style={{ opacity: 0.5 }}>
+				{name}
+				{" {...}"}
+			</span>
 		);
 	}
 

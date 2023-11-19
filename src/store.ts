@@ -55,7 +55,17 @@ export class DevtoolsActionsStore extends Exome {
 		this.instances.set(action.instance, action.after!);
 	}
 
-	public updateInstance(name: string, state: Record<string, any>) {
+	public updateInstance(
+		name: string,
+		state: Record<string, any>,
+		newName?: string,
+	) {
+		if (newName) {
+			this.instances.delete(name);
+			this.instances.set(newName, state);
+			return;
+		}
+
 		this.instances.set(name, state);
 	}
 }
