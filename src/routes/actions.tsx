@@ -2,7 +2,7 @@ import { useStore } from "exome/preact";
 import { useContext, useLayoutEffect, useMemo, useRef } from "preact/hooks";
 
 import { RouterOutlet, routerContext } from "../devtools/router";
-import { getDiff, undefinedDiff } from "../utils/get-diff";
+import { getDiff, getShallowExomeJson, undefinedDiff } from "../utils/get-diff";
 import { devtoolsContext } from "../store";
 import { getTimingColor } from "../utils/get-timing-color";
 import styles from "../devtools.module.css";
@@ -211,6 +211,9 @@ function DevtoolsActionsContent() {
 
 	const instanceName = action.instance.replace(/-[a-z0-9]+$/gi, "");
 
+	const stateBefore = getShallowExomeJson(action.before);
+	const stateAfter = getShallowExomeJson(action.after!);
+
 	return (
 		<div className={styles.actionsRight}>
 			<h3>
@@ -325,7 +328,7 @@ function DevtoolsActionsContent() {
 					</g>
 				</svg>
 				Diff:
-				<DiffObject before={action.before} after={action.after} />
+				<DiffObject before={stateBefore} after={stateAfter} />
 			</div>
 
 			<br />
@@ -347,7 +350,7 @@ function DevtoolsActionsContent() {
 				</svg>
 				Before:
 				<pre className={styles.preCode}>
-					{JSON.stringify(action.before, null, 2)}
+					{JSON.stringify(stateBefore, null, 2)}
 				</pre>
 			</div>
 
@@ -370,7 +373,7 @@ function DevtoolsActionsContent() {
 				</svg>
 				After:
 				<pre className={styles.preCode}>
-					{JSON.stringify(action.after, null, 2)}
+					{JSON.stringify(stateAfter, null, 2)}
 				</pre>
 			</div>
 
