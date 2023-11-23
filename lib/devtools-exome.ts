@@ -231,7 +231,7 @@ export const exomeDevtools = ({
 			id,
 			name,
 			instance: storeId,
-			payload,
+			payload: payload.map(exomeToJsonDepth),
 			now: start,
 			depth,
 			// time: performance.now() - start,
@@ -287,13 +287,8 @@ function exomeToJson(instance: Exome) {
 		const isGetter = typeof descriptor(proto, methodName)?.get === "function";
 
 		if (isGetter) {
-			data[`$$exome_gt:${methodName}`] = (() => {
-				try {
-					return (instance as any)[methodName];
-				} catch (e) {
-					return String(e);
-				}
-			})();
+			// @TODO lazy request getter value via subscription
+			data[`$$exome_gt:${methodName}`] = null;
 			continue;
 		}
 
@@ -320,35 +315,39 @@ function exomeToJsonDepth(instance: any) {
 		return instance;
 	}
 
-	return JSON.parse(
-		JSON.stringify(
-			instance,
-			(key, value) => {
-				if (value == null || typeof value !== "object") {
+	try {
+		return JSON.parse(
+			JSON.stringify(
+				instance,
+				(key, value) => {
+					if (value == null || typeof value !== "object") {
+						return value;
+					}
+
+					if (value instanceof Exome) {
+						return {
+							$$exome_id: getExomeId(value),
+						};
+					}
+
+					if (
+						value.constructor.name !== "Array" &&
+						value.constructor.name !== "Object" &&
+						value.constructor.name !== "Date"
+					) {
+						return {
+							$$exome_class: value.constructor.name,
+						};
+					}
+
 					return value;
-				}
-
-				if (value instanceof Exome) {
-					return {
-						$$exome_id: getExomeId(value),
-					};
-				}
-
-				if (
-					value.constructor.name !== "Array" &&
-					value.constructor.name !== "Object" &&
-					value.constructor.name !== "Date"
-				) {
-					return {
-						$$exome_class: value.constructor.name,
-					};
-				}
-
-				return value;
-			},
-			2,
-		),
-	);
+				},
+				2,
+			),
+		);
+	} catch (_e) {
+		return undefined;
+	}
 }
 
 interface Action {
