@@ -133,4 +133,5 @@ dist
 /www/index.js
 /www/index.css
 /dist/
+/extension/dist/
 /metafile.json

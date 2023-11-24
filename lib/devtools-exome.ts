@@ -31,12 +31,6 @@ export interface DevtoolsExtensionConnectionInterface {
 	send(data: { event: "send"; type: "state"; payload: [string, any] }): void;
 
 	subscribe(cb: (data: { type: "sync" }) => void): () => void;
-	// subscribe(cb: (data: { type: "actions" }) => Action[]): () => void;
-	// subscribe(cb: (data: { type: "action" }) => Action): () => void;
-	// subscribe(cb: (data: { type: "states" }) => [string, any][]): () => void;
-	// subscribe(
-	// 	cb: (data: { type: "state" }) => [string, Record<string, any>],
-	// ): () => void;
 }
 
 export interface ExomeDevtoolsConfig {
