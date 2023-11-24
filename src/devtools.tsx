@@ -20,9 +20,11 @@ import {
 import {
 	Action,
 	DevtoolsActionsStore,
+	DevtoolsEventStore,
 	DevtoolsStore,
 	devtoolsContext,
 } from "./store";
+import { RouteDevtoolsDetails } from "./routes/details";
 import { RouteDevtoolsActions } from "./routes/actions";
 import { RouteDevtoolsState } from "./routes/state";
 import { RouteDevtoolsProfiler } from "./routes/profiler";
@@ -34,63 +36,64 @@ import {
 import { targetGetExomeName } from "./utils/get-exome-name";
 
 const routes = {
+	details: RouteDevtoolsDetails,
 	actions: RouteDevtoolsActions,
 	state: RouteDevtoolsState,
 	profiler: RouteDevtoolsProfiler,
 };
 
 function Devtools() {
-	const [isOpen, setIsOpen] = useState(false);
+	// const [isOpen, setIsOpen] = useState(false);
 	const { name } = useStore(useContext(devtoolsContext));
 	const router = useMemo(() => new RouterStore("actions"), []);
 	const { urlChunks, navigateMemoFirst } = useStore(router);
-	const maxHeight = useMemo(() => window.innerHeight / 1.5, []);
-	const [refResizeTarget, onMouseDown, height] = useResize(500, "n");
+	// const maxHeight = useMemo(() => window.innerHeight / 1.5, []);
+	// const [refResizeTarget, onMouseDown, height] = useResize(500, "n");
 
-	if (!isOpen) {
-		return (
-			<div className={styles.devtoolsLauncher}>
-				<button type="button" onClick={() => setIsOpen(true)}>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						width="184"
-						height="184"
-						fill="none"
-						viewBox="0 0 184 184"
-					>
-						<g
-							fill="currentColor"
-							fill-rule="evenodd"
-							clip-path="url(#a)"
-							clip-rule="evenodd"
-						>
-							<path d="M23 173Zm38-42-27 19A379 379 0 0 1 151 33l-20 28c5 6 9 14 10 22 32-37 49-70 39-80-11-11-60 19-109 68-49 48-79 98-67 109 9 10 42-7 79-39-8-1-16-5-22-10ZM174 23h-1 1Zm-13-13v1-1ZM11 161s-1 0 0 0Z" />
-							<path d="M11 23h1-1Zm76 75C64 74 45 52 34 34c8 5 17 11 26 19 7-6 14-9 23-11C46 11 13-5 4 4-8 15 22 65 71 113c49 49 98 79 110 68 9-10-8-43-40-80-1 8-5 15-10 22l20 27c-18-11-41-29-64-52Zm74 76v-1 1Zm13-13h-1 1ZM24 11c-1 0-1 0 0 0Z" />
-						</g>
-						<defs>
-							<clipPath id="a">
-								<path fill="#fff" d="M0 0h184v184H0z" />
-							</clipPath>
-						</defs>
-					</svg>
-				</button>
-			</div>
-		);
-	}
+	// if (!isOpen) {
+	// 	return (
+	// 		<div className={styles.devtoolsLauncher}>
+	// 			<button type="button" onClick={() => setIsOpen(true)}>
+	// 				<svg
+	// 					xmlns="http://www.w3.org/2000/svg"
+	// 					width="184"
+	// 					height="184"
+	// 					fill="none"
+	// 					viewBox="0 0 184 184"
+	// 				>
+	// 					<g
+	// 						fill="currentColor"
+	// 						fill-rule="evenodd"
+	// 						clip-path="url(#a)"
+	// 						clip-rule="evenodd"
+	// 					>
+	// 						<path d="M23 173Zm38-42-27 19A379 379 0 0 1 151 33l-20 28c5 6 9 14 10 22 32-37 49-70 39-80-11-11-60 19-109 68-49 48-79 98-67 109 9 10 42-7 79-39-8-1-16-5-22-10ZM174 23h-1 1Zm-13-13v1-1ZM11 161s-1 0 0 0Z" />
+	// 						<path d="M11 23h1-1Zm76 75C64 74 45 52 34 34c8 5 17 11 26 19 7-6 14-9 23-11C46 11 13-5 4 4-8 15 22 65 71 113c49 49 98 79 110 68 9-10-8-43-40-80-1 8-5 15-10 22l20 27c-18-11-41-29-64-52Zm74 76v-1 1Zm13-13h-1 1ZM24 11c-1 0-1 0 0 0Z" />
+	// 					</g>
+	// 					<defs>
+	// 						<clipPath id="a">
+	// 							<path fill="#fff" d="M0 0h184v184H0z" />
+	// 						</clipPath>
+	// 					</defs>
+	// 				</svg>
+	// 			</button>
+	// 		</div>
+	// 	);
+	// }
 
 	return (
 		<routerContext.Provider value={{ router, depth: 0 }}>
 			<div
-				ref={refResizeTarget}
+				// ref={refResizeTarget}
 				className={styles.devtools}
-				style={{
-					height: Math.min(maxHeight, Math.max(300, height)),
-				}}
+				// style={{
+				// 	height: Math.min(maxHeight, Math.max(300, height)),
+				// }}
 			>
-				<div className={styles.resizerTop} onMouseDown={onMouseDown} />
+				{/* <div className={styles.resizerTop} onMouseDown={onMouseDown} /> */}
 
 				<div className={styles.head}>
-					<button
+					{/* <button
 						type="button"
 						onClick={() => setIsOpen(false)}
 						className={styles.headClose}
@@ -106,7 +109,7 @@ function Devtools() {
 								clip-rule="evenodd"
 							/>
 						</svg>
-					</button>
+					</button> */}
 
 					<div className={styles.headTitle}>
 						<svg
@@ -137,6 +140,36 @@ function Devtools() {
 					</div>
 
 					<div>
+						<button
+							type="button"
+							className={[
+								styles.mainMenuButton,
+								urlChunks[0] === "details" && styles.active,
+							]
+								.filter(Boolean)
+								.join(" ")}
+							onClick={() => {
+								navigateMemoFirst("details", "details");
+							}}
+						>
+							<span>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+									strokeWidth={1.5}
+									stroke="currentColor"
+									className="w-6 h-6"
+								>
+									<path
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+									/>
+								</svg>
+								Details
+							</span>
+						</button>
 						<button
 							type="button"
 							className={[
@@ -199,6 +232,37 @@ function Devtools() {
 							type="button"
 							className={[
 								styles.mainMenuButton,
+								urlChunks[0] === "subscribers" && styles.active,
+							]
+								.filter(Boolean)
+								.join(" ")}
+							onClick={() => {
+								navigateMemoFirst("subscribers", "subscribers");
+							}}
+							disabled
+						>
+							<span>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+									strokeWidth={1.5}
+									stroke="currentColor"
+									className="w-6 h-6"
+								>
+									<path
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										d="M9.348 14.651a3.75 3.75 0 010-5.303m5.304 0a3.75 3.75 0 010 5.303m-7.425 2.122a6.75 6.75 0 010-9.546m9.546 0a6.75 6.75 0 010 9.546M5.106 18.894c-3.808-3.808-3.808-9.98 0-13.789m13.788 0c3.808 3.808 3.808 9.981 0 13.79M12 12h.008v.007H12V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
+									/>
+								</svg>
+								Subscribers (WIP)
+							</span>
+						</button>
+						<button
+							type="button"
+							className={[
+								styles.mainMenuButton,
 								urlChunks[0] === "profiler" && styles.active,
 							]
 								.filter(Boolean)
@@ -206,6 +270,7 @@ function Devtools() {
 							onClick={() => {
 								navigateMemoFirst("profiler", "profiler");
 							}}
+							disabled
 						>
 							<span>
 								<svg
@@ -226,7 +291,7 @@ function Devtools() {
 										d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z"
 									/>
 								</svg>
-								Profiler
+								Profiler (WIP)
 							</span>
 						</button>
 					</div>
@@ -300,9 +365,15 @@ export function renderUI(target: HTMLElement) {
 
 (window as any).__EXOME_DEVTOOLS_EXTENSION__ = {
 	connect(config) {
-		const store = new DevtoolsStore(config.name, config.maxAge!);
+		const store = new DevtoolsStore(
+			config.name,
+			config.maxAge!,
+			config.details,
+		);
 
 		connectionsStore.connect(store);
+
+		Promise.resolve().then(store.events.sync);
 
 		return {
 			disconnect() {
@@ -352,12 +423,35 @@ export function renderUI(target: HTMLElement) {
 						return;
 					}
 
+					if (data.type === "all") {
+						for (const state of data.payload.states) {
+							store.actions.addInstance(state[0], state[1]);
+						}
+
+						for (const action of data.payload.actions) {
+							store.actions.addAction(action);
+						}
+						return;
+					}
+
 					return;
 				}
 			},
 			subscribe(cb) {
-				console.log("subscribe");
-				return () => {};
+				return onAction(
+					DevtoolsEventStore,
+					null,
+					(instance, action, payload) => {
+						if (instance !== store.events) {
+							return;
+						}
+
+						if (action === "sync") {
+							cb({ type: "sync" });
+							return;
+						}
+					},
+				);
 			},
 		};
 	},

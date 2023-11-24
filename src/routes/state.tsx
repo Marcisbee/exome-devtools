@@ -168,14 +168,16 @@ export function RouteDevtoolsState() {
 	const { router } = useContext(routerContext);
 	const { url, navigate } = useStore(router);
 	const { instances } = useStore(store.actions);
-	const maxWidth = useMemo(() => window.innerWidth / 2, []);
-	const [refResizeTarget, onMouseDown, width] = useResize(
-		250,
-		"e",
-		"side-panel",
-	);
+	// const maxWidth = useMemo(() => window.innerWidth / 2, []);
+	// const [refResizeTarget, onMouseDown, width] = useResize(
+	// 	250,
+	// 	"e",
+	// 	"side-panel",
+	// );
 
-	const unfilteredInstances = [...instances.entries()];
+	const unfilteredInstances = [...instances.entries()].sort(([a], [b]) =>
+		a > b ? 1 : -1,
+	);
 	const [query, setQuery, filteredInstances] = useQueryFilter(
 		unfilteredInstances,
 		([key]) => key,
@@ -193,12 +195,13 @@ export function RouteDevtoolsState() {
 		<div className={styles.body}>
 			<div
 				className={styles.actionsLeftWrapper}
-				ref={refResizeTarget}
+				// ref={refResizeTarget}
 				style={{
-					width: Math.min(maxWidth, Math.max(200, width)),
+					width: 250,
+					// width: Math.min(maxWidth, Math.max(200, width)),
 				}}
 			>
-				<div className={styles.resizerRight} onMouseDown={onMouseDown} />
+				{/* <div className={styles.resizerRight} onMouseDown={onMouseDown} /> */}
 
 				<div className={styles.actionsLeft}>
 					<div className={styles.filterInput}>

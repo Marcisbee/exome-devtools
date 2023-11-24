@@ -70,10 +70,19 @@ export class DevtoolsActionsStore extends Exome {
 	}
 }
 
+export class DevtoolsEventStore extends Exome {
+	public sync() {}
+}
+
 export class DevtoolsStore extends Exome {
+	public events = new DevtoolsEventStore();
 	public actions: DevtoolsActionsStore;
 
-	constructor(public name: string, public maxAge: number) {
+	constructor(
+		public name: string,
+		public maxAge: number,
+		public details: { version: string },
+	) {
 		super();
 
 		this.actions = new DevtoolsActionsStore(maxAge);

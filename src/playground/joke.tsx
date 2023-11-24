@@ -1,6 +1,6 @@
 import { Exome } from "exome";
 import { useStore } from "exome/preact";
-import { useState } from "preact/hooks";
+import { useMemo, useState } from "preact/hooks";
 
 function useAsyncAction<T extends (...args: any[]) => Promise<any>>(action: T) {
 	const [isLoading, setIsLoading] = useState(false);
@@ -40,10 +40,13 @@ export class JokeStore extends Exome {
 	}
 }
 
-export const jokeStore = new JokeStore();
-
 export function JokeComponent() {
-	const { joke, jokeText, getJoke: getJokeAsync, clear } = useStore(jokeStore);
+	const {
+		joke,
+		jokeText,
+		getJoke: getJokeAsync,
+		clear,
+	} = useStore(useMemo(() => new JokeStore(), []));
 	const [getJoke, isGettingJoke] = useAsyncAction(getJokeAsync);
 
 	return (

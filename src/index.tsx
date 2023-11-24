@@ -20,6 +20,7 @@ addMiddleware(
 			"ConnectionsStore",
 			"DevtoolsActionsStore",
 			"DevtoolsStore",
+			"DevtoolsEventStore",
 			"RouterStore",
 			"HistoryStore",
 		],

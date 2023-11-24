@@ -1,6 +1,6 @@
 import { Exome } from "exome";
 import { useStore } from "exome/preact";
-import { useEffect } from "preact/hooks";
+import { useEffect, useMemo } from "preact/hooks";
 
 export class CounterStore extends Exome {
 	public count = 0;
@@ -25,11 +25,9 @@ export class CounterStore extends Exome {
 	};
 }
 
-export const counterStore = new CounterStore();
-
 export function CounterComponent() {
 	const { count, double, increment, decrement, silentIncrement, reset } =
-		useStore(counterStore);
+		useStore(useMemo(() => new CounterStore(), []));
 
 	useEffect(() => {
 		// Let's start with initial actions

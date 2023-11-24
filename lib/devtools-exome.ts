@@ -1,15 +1,23 @@
-import { Exome, Middleware, getExomeId } from "exome";
+import { Exome, Middleware, getExomeId, subscribe } from "exome";
 
 export interface DevtoolsExtensionInterface {
 	connect(config: {
 		name: string;
 		maxAge?: number;
+		details: {
+			version: string;
+		};
 	}): DevtoolsExtensionConnectionInterface;
 }
 
 export interface DevtoolsExtensionConnectionInterface {
 	disconnect(): void;
 
+	send(data: {
+		event: "update";
+		type: "all";
+		payload: { actions: Action[]; states: [string, any][] };
+	}): void;
 	send(data: { event: "update"; type: "action"; payload: Action }): void;
 	send(data: {
 		event: "update";
@@ -22,12 +30,13 @@ export interface DevtoolsExtensionConnectionInterface {
 	send(data: { event: "send"; type: "states"; payload: [string, any][] }): void;
 	send(data: { event: "send"; type: "state"; payload: [string, any] }): void;
 
-	subscribe(cb: (data: { type: "actions" }) => Action[]): () => void;
-	subscribe(cb: (data: { type: "action" }) => Action): () => void;
-	subscribe(cb: (data: { type: "states" }) => [string, any][]): () => void;
-	subscribe(
-		cb: (data: { type: "state" }) => [string, Record<string, any>],
-	): () => void;
+	subscribe(cb: (data: { type: "sync" }) => void): () => void;
+	// subscribe(cb: (data: { type: "actions" }) => Action[]): () => void;
+	// subscribe(cb: (data: { type: "action" }) => Action): () => void;
+	// subscribe(cb: (data: { type: "states" }) => [string, any][]): () => void;
+	// subscribe(
+	// 	cb: (data: { type: "state" }) => [string, Record<string, any>],
+	// ): () => void;
 }
 
 export interface ExomeDevtoolsConfig {
@@ -127,7 +136,7 @@ export const exomeDevtools = ({
 	try {
 		extension =
 			(window as any)[devtoolName] || (window.top as any)[devtoolName];
-	} catch (e) {}
+	} catch (_e) {}
 
 	if (!extension) {
 		if (process.env.NODE_ENV !== "production") {
@@ -140,8 +149,11 @@ export const exomeDevtools = ({
 	}
 
 	let depth = 0;
+	const details = {
+		version: "6.6.6",
+	};
 
-	const connection = extension.connect({ name, maxAge });
+	const connection = extension.connect({ name, maxAge, details });
 
 	// connection.subscribe((message) => {
 	// 	if (message.type === "DISPATCH" && message.state) {
@@ -168,15 +180,27 @@ export const exomeDevtools = ({
 	// 	}
 	// });
 
-	window.addEventListener("unload", connection.disconnect, { once: true });
+	window.addEventListener("beforeunload", connection.disconnect, {
+		once: true,
+	});
 
 	// Return requested data by
-	// connection.subscribe(({ type }) => {
-	// 	console.log("request", type);
-	// 	// if (type === "states") {
-	// 	// 	return ["Poo-123"];
-	// 	// }
-	// });
+	connection.subscribe(({ type }) => {
+		if (type === "sync") {
+			connection.send({
+				event: "update",
+				type: "all",
+				payload: {
+					actions: fullActions,
+					states: [...fullStore]
+						.map(([_name, map]) =>
+							[...map].map(([id, instance]) => [id, exomeToJson(instance)]),
+						)
+						.flat(1) as any,
+				},
+			});
+		}
+	});
 
 	return (instance, name, payload) => {
 		const storeId = getExomeId(instance);
@@ -202,6 +226,14 @@ export const exomeDevtools = ({
 					event: "update",
 					type: "state",
 					payload: [storeId, exomeToJson(instance), getExomeId(instance)],
+				});
+
+				subscribe(instance, (instance) => {
+					connection.send({
+						event: "update",
+						type: "state",
+						payload: [storeId, exomeToJson(instance), getExomeId(instance)],
+					});
 				});
 			};
 		}
@@ -265,7 +297,7 @@ export const exomeDevtools = ({
 		fullActions.push(action);
 
 		if (fullActions.length > maxAge) {
-			fullActions.splice(maxAge, fullActions.length - maxAge);
+			fullActions.splice(0, maxAge);
 		}
 	}
 };
@@ -292,7 +324,8 @@ function exomeToJson(instance: Exome) {
 			continue;
 		}
 
-		data[`$$exome_ac:${methodName}`] = String(proto[methodName]);
+		data[`$$exome_ac:${methodName}`] = String();
+		// data[`$$exome_ac:${methodName}`] = String(proto[methodName]);
 	}
 
 	for (const propertyName of propertyNames) {

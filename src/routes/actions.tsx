@@ -20,12 +20,12 @@ export function RouteDevtoolsActions() {
 	const { url, navigate } = useStore(router);
 	const devtoolsStore = useContext(devtoolsContext);
 	const { actions: unfilteredActions } = useStore(devtoolsStore.actions);
-	const maxWidth = useMemo(() => window.innerWidth / 2, []);
-	const [refResizeTarget, onMouseDown, width] = useResize(
-		250,
-		"e",
-		"side-panel",
-	);
+	// const maxWidth = useMemo(() => window.innerWidth / 2, []);
+	// const [refResizeTarget, onMouseDown, width] = useResize(
+	// 	250,
+	// 	"e",
+	// 	"side-panel",
+	// );
 
 	const [query, setQuery, filteredActions] = useQueryFilter(
 		unfilteredActions,
@@ -43,12 +43,13 @@ export function RouteDevtoolsActions() {
 		<div className={styles.body}>
 			<div
 				className={styles.actionsLeftWrapper}
-				ref={refResizeTarget}
+				// ref={refResizeTarget}
 				style={{
-					width: Math.min(maxWidth, Math.max(200, width)),
+					// width: Math.min(maxWidth, Math.max(200, width)),
+					width: 250,
 				}}
 			>
-				<div className={styles.resizerRight} onMouseDown={onMouseDown} />
+				{/* <div className={styles.resizerRight} onMouseDown={onMouseDown} /> */}
 
 				<div className={styles.actionsLeft}>
 					<div className={styles.filterInput}>
