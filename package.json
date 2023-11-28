@@ -1,20 +1,21 @@
 {
 	"private": true,
 	"name": "exome-devtools",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "",
 	"main": "./dist/devtools.js",
 	"module": "./dist/devtools.js",
 	"scripts": {
 		"dev": "node scripts/dev.mjs",
 		"build": "node scripts/build.mjs",
-		"postbuild": "cat package.json | sed '/\\\"devDependencies\\\"/,/}/ d; /^$/d' | sed 's/\\.\\/dist\\//\\.\\//g' | sed '/\"private\": true,/d' > ./dist/package.json && cp README.md dist && cp LICENSE dist",
+		"prebuild": "cat package.json | sed '/\\\"devDependencies\\\"/,/}/ d; /^$/d' | sed 's/\\.\\/dist\\//\\.\\//g' | sed '/\"private\": true,/d' > ./dist/package.json && cp README.md dist && cp LICENSE dist",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"devDependencies": {
+		"@biomejs/biome": "^1.4.0",
 		"@types/chrome": "^0.0.253",
 		"esbuild": "^0.19.7",
-		"exome": "^2.3.0",
+		"exome": "^2.3.2",
 		"preact": "^10.14.1",
 		"webext-bridge": "^6.0.1"
 	},

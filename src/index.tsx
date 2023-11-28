@@ -1,7 +1,7 @@
 import { render } from "preact";
 import { addMiddleware } from "exome";
 
-import { exomeDevtools } from "../lib/devtools-exome";
+import { unstableExomeDevtools } from "exome/devtools";
 
 // import { inlineDevtools } from "./devtools";
 import { Playground } from "./playground/playground";
@@ -13,7 +13,7 @@ import { renderUI } from "./devtools";
 renderUI(document.getElementById("devtools")!);
 
 addMiddleware(
-	exomeDevtools({
+	unstableExomeDevtools({
 		name: "Exome Devtools Playground",
 		maxAge: 60,
 		ignoreListStores: [

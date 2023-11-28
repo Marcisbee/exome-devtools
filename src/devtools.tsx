@@ -428,6 +428,7 @@ export function renderUI(target: HTMLElement) {
 							store.actions.addInstance(state[0], state[1]);
 						}
 
+						store.actions.actions = [];
 						for (const action of data.payload.actions) {
 							store.actions.addAction(action);
 						}

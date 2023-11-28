@@ -2,7 +2,7 @@
   "name": "Exome Developer Tools",
   "description": "Adds Exome debugging tools to the Chrome Developer Tools",
   "manifest_version": 3,
-  "version": "1.0",
+  "version": "0.0.0-dev",
   "icons": {
     "16": "/assets/logo16.png",
     "32": "/assets/logo32.png",
@@ -25,8 +25,12 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["devtools.css"],
-      "matches": ["<all_urls>"]
+      "resources": [
+        "devtools.css"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
     }
   ],
   "content_scripts": [

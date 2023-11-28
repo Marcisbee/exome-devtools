@@ -24,10 +24,6 @@ onMessage<{ type: string; data: any }>(
 
 			connection = window.__EXOME_DEVTOOLS_EXTENSION__.connect(event.data.data);
 
-			chrome.devtools.inspectedWindow.eval(
-				`console.log("Exome Devtools Connected!");`,
-			);
-
 			connection.subscribe((event) => {
 				sendMessage("exome-backward-payload", event, "content-script");
 			});

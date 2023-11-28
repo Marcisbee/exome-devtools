@@ -1,6 +1,10 @@
 // @ts-check
 import * as esbuild from "esbuild";
-import { writeFileSync } from "fs";
+import { readFileSync, writeFileSync } from "fs";
+
+import packageJson from "../package.json" assert { type: "json" };
+
+import { packagePlugin } from "./common.mjs";
 
 const result = await esbuild.build({
 	entryPoints: ["./src/devtools.tsx"],
@@ -18,25 +22,7 @@ const result = await esbuild.build({
 	jsx: "automatic",
 	logLevel: "info",
 	metafile: true,
-});
-
-await esbuild.build({
-	entryPoints: ["./lib/devtools-exome.ts"],
-	bundle: true,
-	outdir: "./dist",
-	format: "esm",
-	platform: "browser",
-	sourcemap: "external",
-	splitting: false,
-	define: {
-		"process.env.NODE_ENV": JSON.stringify("production"),
-	},
-	minify: true,
-	target: "es2019",
-	jsx: "automatic",
-	logLevel: "info",
-	metafile: true,
-	external: ["exome"],
+	plugins: [packagePlugin],
 });
 
 writeFileSync("metafile.json", JSON.stringify(result.metafile));
@@ -61,9 +47,10 @@ await esbuild.build({
 	alias: {
 		"exome-devtools": "./dist",
 	},
+	plugins: [packagePlugin],
 });
 
-await esbuild.build({
+const { metafile } = await esbuild.build({
 	entryPoints: ["./extension/public/**/*"],
 	loader: {
 		".html": "copy",
@@ -73,4 +60,20 @@ await esbuild.build({
 	write: true,
 	outdir: "./extension/dist",
 	logLevel: "info",
+	metafile: true,
 });
+
+const [outputManifestPath] =
+	Object.entries(metafile.outputs).find(
+		([_, data]) => data.inputs["extension/public/manifest.json"],
+	) || [];
+
+if (!outputManifestPath) {
+	throw new Error("Output manifest.json not found");
+}
+
+const manifestJson = JSON.parse(readFileSync(outputManifestPath, "utf-8"));
+
+manifestJson.version = packageJson.version;
+
+writeFileSync(outputManifestPath, JSON.stringify(manifestJson, null, 2));

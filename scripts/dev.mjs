@@ -1,18 +1,7 @@
 // @ts-check
 import * as esbuild from "esbuild";
-// import { compile } from "sass";
 
-// const sassModulePlugin = {
-// 	name: "local-sass",
-// 	setup({ onLoad }) {
-// 		onLoad({ filter: /\.module\.scss$/ }, (args) => {
-// 			const { css } = compile(args.path);
-
-// 			return { contents: css, loader: "local-css" };
-// 			//                              ^^^^^^^^^^^
-// 		});
-// 	},
-// };
+import { packagePlugin } from "./common.mjs";
 
 const ctx = await esbuild.context({
 	entryPoints: ["./src/index.tsx"],
@@ -32,11 +21,7 @@ const ctx = await esbuild.context({
 	loader: {
 		".module.css": "local-css",
 	},
-	alias: {
-		preact: './node_modules/preact',
-		'preact/hooks': './node_modules/preact/hooks',
-	},
-	// plugins: [sassModulePlugin],
+	plugins: [packagePlugin],
 });
 
 await ctx.watch();

@@ -3,6 +3,8 @@ import { useStore } from "exome/preact";
 
 import { devtoolsContext } from "../store";
 import styles from "../devtools.module.css";
+// @ts-ignore
+import { version } from "../../package.json";
 
 export function RouteDevtoolsDetails() {
 	const store = useContext(devtoolsContext);
@@ -20,8 +22,8 @@ export function RouteDevtoolsDetails() {
 				}}
 			>
 				<div style={{ textAlign: "center" }}>
-					<p>Devtools version: 0.1.0</p>
-					<p>Exome version: {store.details.version}</p>
+					<p>Devtools version: v{version}</p>
+					<p>Exome version: v{store.details.version}</p>
 					<hr />
 					<p>Instances: {instances.size}</p>
 					<p>

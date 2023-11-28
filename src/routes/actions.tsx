@@ -378,7 +378,7 @@ function DevtoolsActionsContent() {
 				</pre>
 			</div>
 
-			<br />
+			{/* <br />
 
 			<div>
 				<svg
@@ -399,7 +399,7 @@ function DevtoolsActionsContent() {
 				<button type="button" onClick={() => console.log(action.trace)}>
 					push to console
 				</button>
-			</div>
+			</div> */}
 		</div>
 	);
 }

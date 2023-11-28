@@ -35,7 +35,7 @@ function StoreExplore({ id, instance, count }: StoreExploreProps) {
 	return (
 		<div>
 			<div style={{ marginBottom: 10 }}>
-				<input placeholder="Filter" type="text" style={{ float: "right" }} />
+				{/* <input placeholder="Filter" type="text" style={{ float: "right" }} /> */}
 				<h3 style={{ color: "#f5841b" }}>
 					{name}
 					<small>-{id.split("-").pop()}</small>
@@ -182,14 +182,17 @@ export function RouteDevtoolsState() {
 		unfilteredInstances,
 		([key]) => key,
 	);
-	const groups = filteredInstances.reduce((acc, [id, value]) => {
-		const name = id.replace(/-[a-z0-9]+$/gi, "");
+	const groups = filteredInstances.reduce(
+		(acc, [id, value]) => {
+			const name = id.replace(/-[a-z0-9]+$/gi, "");
 
-		acc[name] ??= [];
-		acc[name].push([id, value]);
+			acc[name] ??= [];
+			acc[name].push([id, value]);
 
-		return acc;
-	}, {} as Record<string, [string, any][]>);
+			return acc;
+		},
+		{} as Record<string, [string, any][]>,
+	);
 
 	return (
 		<div className={styles.body}>
