@@ -1,0 +1,28 @@
+[class^="icon-"] {
+	-webkit-mask-size: 100% 100%;
+	mask-size: 100% 100%;
+	background-color: currentColor;
+	color: inherit;
+	display: inline-block;
+	height: 1.2em;
+	width: 1.2em;
+	vertical-align: text-bottom;
+}
+
+.icon-arrow-down {
+	--icn: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24'%3E%3Cpath fill='currentColor' d='m12 16l-6-6h12l-6 6Z'/%3E%3C/svg%3E");
+	-webkit-mask: var(--icn) no-repeat;
+	mask: var(--icn) no-repeat;
+	-webkit-mask-size: 100% 100%;
+	mask-size: 100% 100%;
+}
+
+.icon-arrow-right {
+	--icn: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24'%3E%3Cpath fill='currentColor' d='m16 12l-6 6V6l6 6Z'/%3E%3C/svg%3E");
+	-webkit-mask: var(--icn) no-repeat;
+	mask: var(--icn) no-repeat;
+	-webkit-mask-size: 100% 100%;
+	mask-size: 100% 100%;
+}
+
+

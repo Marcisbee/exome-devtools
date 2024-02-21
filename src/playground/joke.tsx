@@ -17,7 +17,21 @@ function useAsyncAction<T extends (...args: any[]) => Promise<any>>(action: T) {
 	] as const;
 }
 
+export class PoopStore extends Exome {
+	public test = {
+		foo: [1,2,null, undefined, NaN, 0.5, true, false, "asd", {}]
+	}
+
+	public dom = window.document
+
+	public test2() {}
+	public get test3() {}
+	public test4 = () => {}
+}
+
 export class JokeStore extends Exome {
+	public poop = new PoopStore()
+
 	public joke?: {
 		icon_url: string;
 		id: string;

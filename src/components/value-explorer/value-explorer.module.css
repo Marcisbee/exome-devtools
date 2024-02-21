@@ -1,0 +1,139 @@
+:root {
+	--data-type-label: #881391;
+	--data-type-unknown: #737373;
+	--data-type-null: #737373;
+	--data-type-string: #0a3069;
+	--data-type-number: #0550ae;
+	--data-type-boolean: #0550ae;
+	--data-type-class: #953800;
+	--data-type-keyword: #cf222e;
+}
+
+.wrap {
+	display: block;
+	position: relative;
+	padding-left: 1em;
+	color: var(--gray-color-200);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+.expanded {
+	display: block;
+	padding-left: 1em;
+}
+
+.expandHandle {
+	display: inline;
+	cursor: pointer;
+	color: var(--gray-color-200);
+	white-space: nowrap;
+
+	> i:first-child {
+		position: absolute;
+		top: 0;
+		left: -0.3em;
+		font-size: 1em;
+  	line-height: 1em;
+    vertical-align: top;
+		opacity: 0.4;
+		margin: 0 0 0.15em 0;
+	}
+
+	&:hover {
+		color: var(--gray-color-050);
+
+		> i:first-child {
+			opacity: 1;
+		}
+	}
+
+	&.expanded {
+		padding-left: 0;
+	}
+}
+
+div.expandHandle {
+	display: block;
+}
+
+.expandHandle::after,
+.expanded .expandHandle::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 0;
+	height: 1.5em;
+	width: 100%;
+	z-index: 1;
+}
+
+.root {
+	padding-left: 2em;
+	margin-left: -2em;
+	position: relative;
+}
+
+.root > .wrap {
+	padding-left: 1em;
+	margin-left: -1em;
+}
+
+:global(.inspector) > .wrap {
+	margin-left: -1em;
+}
+
+.notExpendable.expandHandle {
+	cursor: text;
+	color: var(--gray-color-200);
+
+	&:hover {
+		color: var(--gray-color-200);
+	}
+
+	&::after {
+		display: none;
+	}
+
+	> i:first-child {
+		display: none;
+	}
+}
+
+.inspectLabel {
+	color: var(--data-type-label);
+}
+
+.inspectUnknown {
+	color: var(--data-type-unknown);
+}
+
+.inspectNull {
+	color: var(--data-type-null);
+}
+
+.inspectString {
+	color: var(--data-type-string);
+}
+
+.inspectNumber {
+	color: var(--data-type-number);
+}
+
+.inspectBoolean {
+	color: var(--data-type-boolean);
+}
+
+.inspectColor {
+}
+
+.inspectColorExtra {
+	display: inline-block;
+	width: 1.05em;
+	height: 1.05em;
+	vertical-align: top;
+	border: 1px solid var(--gray-color-200);
+	margin: 0.2em 6px 0 0;
+	border-radius: 3px;
+}

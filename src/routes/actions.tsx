@@ -1,11 +1,15 @@
 import { useStore } from "exome/preact";
 import { useContext, useLayoutEffect, useMemo, useRef } from "preact/hooks";
 
-import { RouterOutlet, routerContext } from "../devtools/router";
-import { getDiff, getShallowExomeJson, undefinedDiff } from "../utils/get-diff";
-import { devtoolsContext } from "../store";
-import { getTimingColor } from "../utils/get-timing-color";
+import {
+	ExploreExomeObject,
+	ExploreObject,
+} from "../components/value-explorer/value-explorer2";
 import styles from "../devtools.module.css";
+import { RouterOutlet, routerContext } from "../devtools/router";
+import { devtoolsContext } from "../store";
+import { getDiff, getShallowExomeJson, undefinedDiff } from "../utils/get-diff";
+import { getTimingColor } from "../utils/get-timing-color";
 import { useQueryFilter } from "../utils/use-query-filter";
 import { useResize } from "../utils/use-resize";
 
@@ -281,33 +285,7 @@ function DevtoolsActionsContent() {
 				</svg>
 				Payload:
 				<pre className={styles.preCode}>
-					{JSON.stringify(
-						action.payload,
-						(_key, value) => {
-							if (value == null || typeof value !== "object") {
-								return value;
-							}
-
-							// if (value instanceof Exome) {
-							// 	return {
-							// 		$$exome_id: targetGetExomeId(value),
-							// 	};
-							// }
-
-							if (
-								value.constructor !== Array &&
-								value.constructor !== Object &&
-								value.constructor !== Date
-							) {
-								return {
-									$$exome_class: value.constructor.name,
-								};
-							}
-
-							return value;
-						},
-						2,
-					)}
+					<ExploreObject value={action.payload} forceOpen={true} />
 				</pre>
 			</div>
 
@@ -351,7 +329,11 @@ function DevtoolsActionsContent() {
 				</svg>
 				Before:
 				<pre className={styles.preCode}>
-					{JSON.stringify(stateBefore, null, 2)}
+					<ExploreExomeObject
+						id={action.instance}
+						value={action.before}
+						forceOpen={true}
+					/>
 				</pre>
 			</div>
 
@@ -374,7 +356,15 @@ function DevtoolsActionsContent() {
 				</svg>
 				After:
 				<pre className={styles.preCode}>
-					{JSON.stringify(stateAfter, null, 2)}
+					{!action.after ? (
+						<i>Action is still pending...</i>
+					) : (
+						<ExploreExomeObject
+							id={action.instance}
+							value={action.after!}
+							forceOpen={true}
+						/>
+					)}
 				</pre>
 			</div>
 

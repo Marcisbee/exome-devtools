@@ -8,6 +8,7 @@
 	"scripts": {
 		"dev": "node scripts/dev.mjs",
 		"build": "node scripts/build.mjs",
+		"icons": "node scripts/build.icons.mjs",
 		"prebuild": "cat package.json | sed '/\\\"devDependencies\\\"/,/}/ d; /^$/d' | sed 's/\\.\\/dist\\//\\.\\//g' | sed '/\"private\": true,/d' > ./dist/package.json && cp README.md dist && cp LICENSE dist",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},

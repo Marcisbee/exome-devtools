@@ -1,21 +1,22 @@
 import { useStore } from "exome/preact";
 import { useContext, useMemo } from "preact/hooks";
 
-import { DevtoolsActionsStore, devtoolsContext } from "../store";
-import { RouterOutlet, routerContext } from "../devtools/router";
-import {
-	PROPERTY_TYPE_GETTER,
-	exploreExomeInstance,
-} from "../utils/explore-exome-instance";
 import { GetterValue } from "../components/getter-value/getter-value";
-import { useQueryFilter } from "../utils/use-query-filter";
-import styles from "../devtools.module.css";
 import {
 	ExplorerLabel,
 	StoreValueExplore,
 } from "../components/value-explorer/value-explorer";
-import { useResize } from "../utils/use-resize";
+import { ExploreLabelAndValue, ExploreValue, OutputExplorer } from "../components/value-explorer/value-explorer2";
+import styles from "../devtools.module.css";
+import { RouterOutlet, routerContext } from "../devtools/router";
+import { DevtoolsActionsStore, devtoolsContext } from "../store";
+import {
+	PROPERTY_TYPE_GETTER,
+	exploreExomeInstance,
+} from "../utils/explore-exome-instance";
 import { getTimingColor } from "../utils/get-timing-color";
+import { useQueryFilter } from "../utils/use-query-filter";
+import { useResize } from "../utils/use-resize";
 
 const routes = {
 	$storeId: DevtoolsStateContent,
@@ -48,18 +49,21 @@ function StoreExplore({ id, instance, count }: StoreExploreProps) {
 				</span>
 
 				{instanceDetails.state.map((name) => (
-					<div
-						style={{
-							paddingLeft: 10,
-						}}
-					>
-						<ExplorerLabel label={name} />:{" "}
-						<StoreValueExplore
-							instance={instance}
-							source={instance}
-							name={name}
-						/>
-					</div>
+					<ExploreLabelAndValue label={name} value={instance[name]} />
+					// <div
+					// 	style={{
+					// 		paddingLeft: 10,
+					// 	}}
+					// >
+					// 	<ExplorerLabel label={name} />:{" "}
+
+					// 	<span style={{ position: "relative", paddingLeft: 10 }}>
+
+					// 	<ExploreValue
+					// 		value={instance[name]}
+					// 	/>
+					// 	</span>
+					// </div>
 				))}
 
 				{instanceDetails.getters.map((name) => (
