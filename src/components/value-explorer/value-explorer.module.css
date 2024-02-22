@@ -32,7 +32,7 @@
 
 	> i:first-child {
 		position: absolute;
-		top: 0;
+		top: -0.15em;
 		left: -0.3em;
 		font-size: 1em;
   	line-height: 1em;
