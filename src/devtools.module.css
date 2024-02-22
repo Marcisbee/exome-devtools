@@ -32,6 +32,51 @@
 	}
 }
 
+.waitingForConnection {
+	display: block;
+	background-color: #fff;
+	margin: 0;
+	font-family: Arial, Helvetica, sans-serif;
+	user-select: text;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	min-height: 100vh;
+	text-align: center;
+
+	> svg {
+		display: block;
+		width: 3em;
+		height: 3em;
+		margin: 0 auto 1.5em auto;
+	}
+
+	> strong {
+		display: block;
+		font-size: 1em;
+		font-weight: normal;
+		margin-bottom: 0.5em;
+	}
+
+	& a {
+		font-size: 0.8em;
+		color: #f5841b;
+		text-decoration: underline;
+
+		&:hover {
+			color: #df4d09;
+		}
+	}
+}
+
+.actionListErrorMark {
+	color: rgb(244, 67, 54);
+	font-weight: bold;
+	font-style: normal;
+	display: inline-block;
+	padding-right: 4px;
+}
+
 .devtools {
 	position: absolute;
 	top: 0;

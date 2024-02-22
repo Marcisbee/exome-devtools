@@ -8,10 +8,14 @@ function useAsyncAction<T extends (...args: any[]) => Promise<any>>(action: T) {
 	return [
 		(async (...args: Parameters<T>) => {
 			setIsLoading(true);
-			const output = await action(...args);
-			setIsLoading(false);
+			try {
+				const output = await action(...args);
+				setIsLoading(false);
 
-			return output;
+				return output;
+			} finally {
+				setIsLoading(false);
+			}
 		}) as T,
 		isLoading,
 	] as const;
@@ -19,18 +23,18 @@ function useAsyncAction<T extends (...args: any[]) => Promise<any>>(action: T) {
 
 export class PoopStore extends Exome {
 	public test = {
-		foo: [1,2,null, undefined, NaN, 0.5, true, false, "asd", {}]
-	}
+		foo: [1, 2, null, undefined, NaN, 0.5, true, false, "asd", {}],
+	};
 
-	public dom = window.document
+	public dom = window.document;
 
 	public test2() {}
 	public get test3() {}
-	public test4 = () => {}
+	public test4 = () => {};
 }
 
 export class JokeStore extends Exome {
-	public poop = new PoopStore()
+	public poop = new PoopStore();
 
 	public joke?: {
 		icon_url: string;
@@ -49,6 +53,10 @@ export class JokeStore extends Exome {
 		);
 	}
 
+	public async getError() {
+		throw new Error("Async error");
+	}
+
 	public clear() {
 		this.joke = undefined;
 	}
@@ -59,6 +67,7 @@ export function JokeComponent() {
 		joke,
 		jokeText,
 		getJoke: getJokeAsync,
+		getError,
 		clear,
 	} = useStore(useMemo(() => new JokeStore(), []));
 	const [getJoke, isGettingJoke] = useAsyncAction(getJokeAsync);
@@ -72,6 +81,9 @@ export function JokeComponent() {
 			</button>
 			<button type="button" onClick={clear}>
 				clear
+			</button>
+			<button type="button" onClick={getError}>
+				get error
 			</button>
 		</div>
 	);

@@ -1,13 +1,14 @@
 import { useStore } from "exome/preact";
 import { useContext, useLayoutEffect, useMemo, useRef } from "preact/hooks";
 
+import { onAction } from "exome";
 import {
 	ExploreExomeObject,
 	ExploreObject,
 } from "../components/value-explorer/value-explorer2";
 import styles from "../devtools.module.css";
 import { RouterOutlet, routerContext } from "../devtools/router";
-import { devtoolsContext } from "../store";
+import { DevtoolsActionsStore, devtoolsContext } from "../store";
 import { getDiff, getShallowExomeJson, undefinedDiff } from "../utils/get-diff";
 import { getTimingColor } from "../utils/get-timing-color";
 import { useQueryFilter } from "../utils/use-query-filter";
@@ -76,65 +77,68 @@ export function RouteDevtoolsActions() {
 					</div>
 
 					<div ref={ref}>
-						{filteredActions.map(({ id, depth, instance, name, time }) => {
-							const actionUrl = `actions/${id}`;
-							const instanceName = instance.replace(/-[a-z0-9]+$/gi, "");
+						{filteredActions.map(
+							({ id, depth, instance, name, time, error }) => {
+								const actionUrl = `actions/${id}`;
+								const instanceName = instance.replace(/-[a-z0-9]+$/gi, "");
 
-							return (
-								<button
-									key={id}
-									type="button"
-									className={[
-										styles.actionButton,
-										url === actionUrl && styles.action,
-									]
-										.filter(Boolean)
-										.join(" ")}
-									onClick={() => {
-										navigate(actionUrl, "actions");
-									}}
-								>
-									<small style={{ opacity: 0.4 }}>
-										{instanceName}
-										<br />
-									</small>
-									{new Array(depth - 1).fill(null).map(() => (
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											width="1em"
-											height="1em"
-											viewBox="0 0 256 256"
-											style={{
-												width: 16,
-												height: 16,
-												marginTop: -2,
-												marginLeft: -5,
-												color: "inherit",
-											}}
-										>
-											<path
-												fill="currentColor"
-												d="M136 128a8 8 0 1 1-8-8a8 8 0 0 1 8 8Z"
-											/>
-										</svg>
-									))}
-									<span>
-										{name}{" "}
-										{time === undefined ? (
-											<small style={{ opacity: 0.4 }}>waiting...</small>
-										) : (
-											<small
+								return (
+									<button
+										key={id}
+										type="button"
+										className={[
+											styles.actionButton,
+											url === actionUrl && styles.action,
+										]
+											.filter(Boolean)
+											.join(" ")}
+										onClick={() => {
+											navigate(actionUrl, "actions");
+										}}
+									>
+										<small style={{ opacity: 0.4 }}>
+											{instanceName}
+											<br />
+										</small>
+										{!!error && <i className={styles.actionListErrorMark}>!</i>}
+										{new Array(depth - 1).fill(null).map(() => (
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												width="1em"
+												height="1em"
+												viewBox="0 0 256 256"
 												style={{
-													color: getTimingColor(time),
+													width: 16,
+													height: 16,
+													marginTop: -2,
+													marginLeft: -5,
+													color: "inherit",
 												}}
 											>
-												({time.toFixed(1)}ms)
-											</small>
-										)}
-									</span>
-								</button>
-							);
-						})}
+												<path
+													fill="currentColor"
+													d="M136 128a8 8 0 1 1-8-8a8 8 0 0 1 8 8Z"
+												/>
+											</svg>
+										))}
+										<span>
+											{name}{" "}
+											{time === undefined ? (
+												<small style={{ opacity: 0.4 }}>waiting...</small>
+											) : (
+												<small
+													style={{
+														color: getTimingColor(time),
+													}}
+												>
+													({time.toFixed(1)}ms)
+												</small>
+											)}
+										</span>
+									</button>
+								);
+							},
+						)}
 					</div>
 				</div>
 			</div>
@@ -210,6 +214,39 @@ function DevtoolsActionsContent() {
 	const { actions } = useStore(store.actions);
 	const action = actions.find(({ id }) => params?.actionId === id);
 
+	useLayoutEffect(() => {
+		if (!params?.actionId) {
+			return;
+		}
+
+		return onAction(
+			DevtoolsActionsStore,
+			"addAction",
+			(instance, _, [newAction]) => {
+				if (!params?.actionId) {
+					return;
+				}
+
+				if (instance !== store.actions) {
+					return;
+				}
+
+				if (!newAction) {
+					return;
+				}
+
+				const lastAction = instance.actions[instance.actions.length - 1];
+
+				if (lastAction.id !== params.actionId) {
+					return;
+				}
+
+				router.navigate(`actions/${newAction.id}`, "actions");
+			},
+			"before",
+		);
+	}, [params?.actionId]);
+
 	if (!action) {
 		return <div className={styles.actionsRight}>No Action Selected</div>;
 	}
@@ -261,8 +298,14 @@ function DevtoolsActionsContent() {
 						color: getTimingColor(action.time),
 					}}
 				>
-					{action.time === undefined ? "Waiting..." : action.time.toFixed(1)}
-					<small>ms</small>
+					{action.time === undefined ? (
+						"Waiting..."
+					) : (
+						<>
+							{action.time.toFixed(1)}
+							<small>ms</small>
+						</>
+					)}
 				</span>
 			</div>
 
@@ -307,7 +350,13 @@ function DevtoolsActionsContent() {
 					</g>
 				</svg>
 				Diff:
-				<DiffObject before={stateBefore} after={stateAfter} />
+				{!action.after ? (
+					<pre className={styles.preCode}>
+						<i>Action is still pending...</i>
+					</pre>
+				) : (
+					<DiffObject before={stateBefore} after={stateAfter} />
+				)}
 			</div>
 
 			<br />
@@ -366,6 +415,42 @@ function DevtoolsActionsContent() {
 						/>
 					)}
 				</pre>
+			</div>
+
+			<br />
+
+			<div>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="1em"
+					height="1em"
+					viewBox="0 0 256 256"
+				>
+					<g fill="currentColor">
+						<path
+							d="m240 112l-36 40H40a8 8 0 0 1-8-8V80a8 8 0 0 1 8-8h164Z"
+							opacity=".2"
+						/>
+						<path d="m246 106.65l-36-40a8 8 0 0 0-6-2.65h-68V32a8 8 0 0 0-16 0v32H40a16 16 0 0 0-16 16v64a16 16 0 0 0 16 16h80v64a8 8 0 0 0 16 0v-64h68a8 8 0 0 0 5.95-2.65l36-40a8 8 0 0 0 .05-10.7ZM200.44 144H40V80h160.44l28.8 32Z" />
+					</g>
+				</svg>
+				Error:
+				{action.error ? (
+					<pre
+						className={styles.preCode}
+						style={{
+							backgroundColor: "#FFEBEE",
+							borderColor: "#FFCDD2",
+							color: "#B71C1C",
+						}}
+					>
+						{String(action.error)}
+					</pre>
+				) : (
+					<pre className={styles.preCode}>
+						<i>Nothing was thrown</i>
+					</pre>
+				)}
 			</div>
 
 			{/* <br />

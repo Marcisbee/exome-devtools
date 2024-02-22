@@ -9,6 +9,7 @@ export interface Action {
 	depth: number;
 	now: number;
 	time?: number;
+	error?: string;
 	trace: string;
 	before: Record<string, any>;
 	after?: Record<string, any>;
