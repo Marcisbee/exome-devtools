@@ -4,8 +4,6 @@ import {
 	PROPERTY_TYPE_SILENT,
 } from "./explore-exome-instance";
 
-export const undefinedDiff = new (class {})();
-
 const NORMAL_KEY_REGEXP = new RegExp(
 	`^${PROPERTY_TYPE_GETTER}:`.replace(/(\$)/g, "\\$"),
 );
@@ -17,49 +15,69 @@ function normalKey(key: string) {
 	return key.replace(NORMAL_KEY_REGEXP, "");
 }
 
-export function getDiff(a: any, b: any) {
-	if (a === b) {
-		return undefined;
-	}
+export interface Diff {
+	added: [string[], any][];
+	removed: [string[], any][];
+	edited: [string[], any, any][];
+}
 
-	if (b === undefined && a !== undefined) {
-		return undefinedDiff;
-	}
+export function getDiff(before: any, after: any): Diff {
+	const output: Diff = {
+		added: [],
+		removed: [],
+		edited: [],
+	};
 
-	if (
-		a !== null &&
-		typeof a === "object" &&
-		b !== null &&
-		typeof b === "object"
-	) {
-		const aKeys = Object.keys(a);
-		const bKeys = Object.keys(b);
+	innerDiff(before, after);
 
-		if (aKeys.length === 0 && bKeys.length === 0) {
-			return undefined;
+	return output;
+
+	function innerDiff(a: any, b: any, path: string[] = []) {
+		if (a === b) {
+			return;
 		}
 
-		const allKeys = aKeys.concat(bKeys);
-		const output: Record<string, any> = {};
+		if (a !== undefined && b === undefined) {
+			output.removed.push([path, a]);
+			return;
+		}
 
-		for (const key of allKeys) {
-			const diff = getDiff(a[key], b[key]);
+		if (a === undefined && b !== undefined) {
+			output.added.push([path, b]);
+			return;
+		}
 
-			if (diff === undefined) {
-				continue;
+		if (
+			a !== null &&
+			typeof a === "object" &&
+			b !== null &&
+			typeof b === "object"
+		) {
+			const aKeys = Object.keys(a);
+			const bKeys = Object.keys(b);
+
+			if (aKeys.length === 0 && bKeys.length === 0) {
+				return;
 			}
 
-			output[key] = diff;
+			const allKeys = aKeys.concat(bKeys);
+			const length = allKeys.length;
+
+			for (let i = 0; i < length; i += 1) {
+				const key = allKeys[i];
+
+				if (i !== allKeys.indexOf(key)) {
+					continue;
+				}
+
+				innerDiff(a[key], b[key], path.concat(key));
+			}
+
+			return;
 		}
 
-		if (!Object.keys(output).length) {
-			return undefined;
-		}
-
-		return output;
+		output.edited.push([path, a, b]);
 	}
-
-	return b;
 }
 
 export function getShallowExomeJson(state: Record<string, any>) {

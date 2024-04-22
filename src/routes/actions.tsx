@@ -5,11 +5,12 @@ import { onAction } from "exome";
 import {
 	ExploreExomeObject,
 	ExploreObject,
+	safeStringify,
 } from "../components/value-explorer/value-explorer2";
 import styles from "../devtools.module.css";
 import { RouterOutlet, routerContext } from "../devtools/router";
 import { DevtoolsActionsStore, devtoolsContext } from "../store";
-import { getDiff, getShallowExomeJson, undefinedDiff } from "../utils/get-diff";
+import { getDiff, getShallowExomeJson } from "../utils/get-diff";
 import { getTimingColor } from "../utils/get-timing-color";
 import { useQueryFilter } from "../utils/use-query-filter";
 import { useResize } from "../utils/use-resize";
@@ -148,62 +149,28 @@ export function RouteDevtoolsActions() {
 	);
 }
 
-function DiffProperty({ before, diff }: { before: any; diff: any }) {
-	if (diff === undefined) {
-		return null;
-	}
-
-	if (
-		!diff ||
-		!before ||
-		typeof diff !== "object" ||
-		typeof before !== typeof diff ||
-		(diff === undefined && before !== undefined) ||
-		(diff !== undefined && before === undefined)
-	) {
-		const diffValues = [
-			before !== undefined && before !== undefinedDiff && (
-				<span style={{ backgroundColor: "rgb(239, 154, 154)" }}>
-					{JSON.stringify(before, null, 1)}
-				</span>
-			),
-			diff !== undefined && diff !== undefinedDiff && (
-				<span style={{ backgroundColor: "rgb(156, 204, 101)" }}>
-					{JSON.stringify(diff, null, 1)}
-				</span>
-			),
-		];
-
-		return (
-			<span>
-				{diffValues[0]}
-				{diffValues[0] && diffValues[1] && " => "}
-				{diffValues[1]}
-			</span>
-		);
-	}
-
-	return (
-		<>
-			{"{"}
-			{Object.entries(diff).map(([key, b]) => {
-				return (
-					<div style={{ paddingLeft: 10 }}>
-						<span>{key}</span>: <DiffProperty before={before?.[key]} diff={b} />
-					</div>
-				);
-			})}
-			{"}"}
-		</>
-	);
-}
-
 function DiffObject({ before, after }: { before: any; after: any }) {
 	const diff = getDiff(before, after || {});
 
 	return (
 		<pre className={styles.preCode}>
-			<DiffProperty before={before} diff={diff} />
+		{"{\n"}
+			{!!diff.added?.length && (
+				<>
+					{diff.added.map(([path, a]) => <span style={{ backgroundColor: "rgb(156, 204, 101)" }}>+ {path.join('.')}: {safeStringify(a)},{"\n"}</span>)}
+				</>
+			)}
+			{!!diff.removed?.length && (
+				<>
+					{diff.removed.map(([path, a]) => <span style={{ backgroundColor: "rgb(239, 154, 154)" }}>- {path.join('.')}: {safeStringify(a)},{"\n"}</span>)}
+				</>
+			)}
+			{!!diff.edited?.length && (
+				<>
+					{diff.edited.map(([path, a, b]) => <>  {path.join('.')}: <span style={{ backgroundColor: "rgb(239, 154, 154)" }}>{safeStringify(a)}</span> {"=>"} <span style={{ backgroundColor: "rgb(156, 204, 101)" }}>{safeStringify(b)}</span>,{"\n"}</>)}
+				</>
+			)}
+		{"}"}
 		</pre>
 	);
 }

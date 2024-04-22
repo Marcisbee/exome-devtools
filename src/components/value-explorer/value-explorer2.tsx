@@ -291,7 +291,7 @@ function safeLabel(value: string) {
 	return value;
 }
 
-function safeStringify(value: any, depth = 0): string {
+export function safeStringify(value: any, depth = 0): string {
 	if (Array.isArray(value)) {
 		if (depth > 0) {
 			return "[...]";
