@@ -158,10 +158,12 @@ function DiffObject({ before, after }: { before: any; after: any }) {
 			{!!diff.added?.length && (
 				<>
 					{diff.added.map(([path, a]) => (
-						<span style={{
-							backgroundColor: "rgba(139,195,74,0.25)",
-							color: "#1b420b",
-						}}>
+						<span
+							style={{
+								backgroundColor: "rgba(139,195,74,0.25)",
+								color: "#1b420b",
+							}}
+						>
 							+ {path.join(".")}: {safeStringify(a)},{"\n"}
 						</span>
 					))}
@@ -170,10 +172,12 @@ function DiffObject({ before, after }: { before: any; after: any }) {
 			{!!diff.removed?.length && (
 				<>
 					{diff.removed.map(([path, a]) => (
-						<span style={{
-							color: "#940707",
-							backgroundColor: "rgba(244,67,54,0.1)",
-						}}>
+						<span
+							style={{
+								color: "#940707",
+								backgroundColor: "rgba(244,67,54,0.1)",
+							}}
+						>
 							- {path.join(".")}: {safeStringify(a)},{"\n"}
 						</span>
 					))}
@@ -185,17 +189,21 @@ function DiffObject({ before, after }: { before: any; after: any }) {
 						<>
 							{" "}
 							{path.join(".")}:{" "}
-							<span style={{
-								color: "#940707",
-								backgroundColor: "rgba(244,67,54,0.1)",
-							}}>
+							<span
+								style={{
+									color: "#940707",
+									backgroundColor: "rgba(244,67,54,0.1)",
+								}}
+							>
 								{safeStringify(a)}
 							</span>{" "}
 							{"=>"}{" "}
-							<span style={{
-								backgroundColor: "rgba(139,195,74,0.25)",
-								color: "#1b420b",
-							}}>
+							<span
+								style={{
+									backgroundColor: "rgba(139,195,74,0.25)",
+									color: "#1b420b",
+								}}
+							>
 								{safeStringify(b)}
 							</span>
 							,{"\n"}
