@@ -2,7 +2,7 @@
 import * as esbuild from "esbuild";
 import { readFileSync, writeFileSync } from "fs";
 
-import packageJson from "../package.json" assert { type: "json" };
+import packageJson from "../package.json" with { type: "json" };
 
 import { packagePlugin } from "./common.mjs";
 
