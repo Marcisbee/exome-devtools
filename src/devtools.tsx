@@ -228,7 +228,7 @@ function Devtools() {
 								State
 							</span>
 						</button>
-						<button
+						{/* <button
 							type="button"
 							className={[
 								styles.mainMenuButton,
@@ -258,7 +258,7 @@ function Devtools() {
 								</svg>
 								Subscribers (WIP)
 							</span>
-						</button>
+						</button> */}
 						<button
 							type="button"
 							className={[
