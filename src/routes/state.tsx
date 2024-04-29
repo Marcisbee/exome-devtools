@@ -6,7 +6,11 @@ import {
 	ExplorerLabel,
 	StoreValueExplore,
 } from "../components/value-explorer/value-explorer";
-import { ExploreLabelAndValue, ExploreValue, OutputExplorer } from "../components/value-explorer/value-explorer2";
+import {
+	ExploreLabelAndValue,
+	ExploreValue,
+	OutputExplorer,
+} from "../components/value-explorer/value-explorer2";
 import styles from "../devtools.module.css";
 import { RouterOutlet, routerContext } from "../devtools/router";
 import { DevtoolsActionsStore, devtoolsContext } from "../store";

@@ -53,7 +53,10 @@ export class RouterStore extends Exome {
 
 	private memoRoutes: Record<string, string | undefined> = {};
 
-	constructor(public url: string, public urlChunks: string[] = url.split("/")) {
+	constructor(
+		public url: string,
+		public urlChunks: string[] = url.split("/"),
+	) {
 		super();
 	}
 

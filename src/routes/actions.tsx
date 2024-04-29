@@ -154,23 +154,44 @@ function DiffObject({ before, after }: { before: any; after: any }) {
 
 	return (
 		<pre className={styles.preCode}>
-		{"{\n"}
+			{"{\n"}
 			{!!diff.added?.length && (
 				<>
-					{diff.added.map(([path, a]) => <span style={{ backgroundColor: "rgb(156, 204, 101)" }}>+ {path.join('.')}: {safeStringify(a)},{"\n"}</span>)}
+					{diff.added.map(([path, a]) => (
+						<span style={{ backgroundColor: "rgb(156, 204, 101)" }}>
+							+ {path.join(".")}: {safeStringify(a)},{"\n"}
+						</span>
+					))}
 				</>
 			)}
 			{!!diff.removed?.length && (
 				<>
-					{diff.removed.map(([path, a]) => <span style={{ backgroundColor: "rgb(239, 154, 154)" }}>- {path.join('.')}: {safeStringify(a)},{"\n"}</span>)}
+					{diff.removed.map(([path, a]) => (
+						<span style={{ backgroundColor: "rgb(239, 154, 154)" }}>
+							- {path.join(".")}: {safeStringify(a)},{"\n"}
+						</span>
+					))}
 				</>
 			)}
 			{!!diff.edited?.length && (
 				<>
-					{diff.edited.map(([path, a, b]) => <>  {path.join('.')}: <span style={{ backgroundColor: "rgb(239, 154, 154)" }}>{safeStringify(a)}</span> {"=>"} <span style={{ backgroundColor: "rgb(156, 204, 101)" }}>{safeStringify(b)}</span>,{"\n"}</>)}
+					{diff.edited.map(([path, a, b]) => (
+						<>
+							{" "}
+							{path.join(".")}:{" "}
+							<span style={{ backgroundColor: "rgb(239, 154, 154)" }}>
+								{safeStringify(a)}
+							</span>{" "}
+							{"=>"}{" "}
+							<span style={{ backgroundColor: "rgb(156, 204, 101)" }}>
+								{safeStringify(b)}
+							</span>
+							,{"\n"}
+						</>
+					))}
 				</>
 			)}
-		{"}"}
+			{"}"}
 		</pre>
 	);
 }
