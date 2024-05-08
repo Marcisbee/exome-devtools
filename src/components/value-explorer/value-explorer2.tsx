@@ -7,6 +7,7 @@ import { cc } from "../../utils/cc";
 import { Icon } from "../icon/icon";
 
 import styles from "./value-explorer.module.css";
+import { Diff } from "../../utils/get-diff";
 
 const IS_HEX_COLOR = /^#(?:[0-9A-Fa-f]{3}){1,2}\b$/;
 const IS_HSL_COLOR =
@@ -16,7 +17,7 @@ const IS_RGB_COLOR =
 const IS_RGBA_COLOR =
 	/^rgba\(\s*(-?\d+|-?\d*\.\d+(?=%))(%?)\s*,\s*(-?\d+|-?\d*\.\d+(?=%))(\2)\s*,\s*(-?\d+|-?\d*\.\d+(?=%))(\2)\s*,\s*(-?\d+|-?\d*.\d+)\s*\)$/;
 
-export function ExploreValue({ value }: { value: any }) {
+export function ExploreValue({ value, diff, path = [] }: { value: any, diff?: Diff, path?: string[] }) {
 	if (value === undefined) {
 		return <i className={styles.inspectNull}>undefined</i>;
 	}
@@ -26,7 +27,7 @@ export function ExploreValue({ value }: { value: any }) {
 	}
 
 	if (typeof value === "object") {
-		return <ExploreObject value={value} />;
+		return <ExploreObject value={value} diff={diff} path={path} />;
 	}
 
 	const output = JSON.stringify(value);
@@ -74,20 +75,37 @@ function ExploreLabel({ label }: { label: string }) {
 export function ExploreLabelAndValue({
 	label,
 	value,
-}: { label: string; value: any }) {
+	path = [],
+}: { label: string; value: any; path?: string[] }) {
 	return (
 		<div className={styles.wrap}>
-			<ExploreLabel label={label} />: <ExploreValue value={value} />
+			<ExploreLabel label={label} />: <ExploreValue value={value} path={path} />
 		</div>
 	);
 }
 
+function areArraysEqual(a: string[], b: string[], len: boolean = true) {
+  if (len && a.length !== b.length) return false;
+
+  for (var i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
 export function ExploreObject({
 	value,
+	diff,
 	forceOpen = false,
+	path = [],
 }: {
 	value: Record<string, any> | any[];
+	diff?: Diff;
 	forceOpen?: boolean;
+	path?: string[];
 }) {
 	const [isExpanded, setIsExpanded] = useState(forceOpen);
 	const {
@@ -95,6 +113,89 @@ export function ExploreObject({
 	} = useContext(devtoolsContext);
 
 	const keys = Object.keys(value);
+
+	function labelPlusValue(name: string) {
+		const newPath = path.concat(name);
+		if (diff) {
+			const edited = diff.edited.find(([a]) => areArraysEqual(newPath, a));
+
+			if (edited) {
+				return (
+					<>
+						<div className={cc([
+							styles.wrap,
+							styles.wrapDiffRemoved,
+						])}>
+							<ExploreLabel label={name} />:{" "}
+							<ExploreValue value={edited[1]} path={newPath} />
+						</div>
+						<div className={cc([
+							styles.wrap,
+							styles.wrapDiffAdded,
+						])}>
+							<ExploreLabel label={name} />:{" "}
+							<ExploreValue value={edited[2]} path={newPath} />
+						</div>
+					</>
+				);
+			}
+
+			const removed = diff.removed.find(([a]) => areArraysEqual(newPath, a));
+
+			if (removed) {
+				return (
+					<div className={cc([
+						styles.wrap,
+						styles.wrapDiffRemoved,
+					])}>
+						<ExploreLabel label={name} />:{" "}
+						<ExploreValue value={removed[1]} path={newPath} />
+					</div>
+				);
+			}
+
+			const added = diff.added.find(([a]) => areArraysEqual(newPath, a));
+
+			if (added) {
+				return (
+					<div className={cc([
+						styles.wrap,
+						styles.wrapDiffAdded,
+					])}>
+						<ExploreLabel label={name} />:{" "}
+						<ExploreValue value={value[name]} path={newPath} />
+					</div>
+				);
+			}
+
+			const shallowEdited = diff.edited.find(([a]) => areArraysEqual(newPath, a, false));
+			const shallowAdded = diff.added.find(([a]) => areArraysEqual(newPath, a, false));
+			const shallowRemoved = diff.removed.find(([a]) => areArraysEqual(newPath, a, false));
+
+			if (shallowEdited || shallowAdded || shallowRemoved) {
+				return (
+					<div className={cc([
+						styles.wrap,
+						(!!shallowEdited || (!!added && !!removed)) && styles.wrapDiffEdited,
+						!shallowEdited && !!added && styles.wrapDiffAdded,
+						!shallowEdited && !!removed && styles.wrapDiffRemoved,
+					])}>
+						<ExploreLabel label={name} />:{" "}
+						<ExploreValue value={value[name]} diff={diff} path={newPath} />
+					</div>
+				);
+			}
+
+			return null;
+		}
+
+		return (
+			<div className={styles.wrap}>
+				<ExploreLabel label={name} />:{" "}
+				<ExploreValue value={value[name]} diff={diff} path={newPath} />
+			</div>
+		);
+	}
 
 	if (Array.isArray(value)) {
 		return (
@@ -126,12 +227,7 @@ export function ExploreObject({
 
 				{isExpanded && (
 					<>
-						{keys.map((name) => (
-							<div className={styles.wrap}>
-								<ExploreLabel label={name} />:{" "}
-								<ExploreValue value={value[name]} />
-							</div>
-						))}
+						{keys.map(labelPlusValue)}
 						{"]"}
 					</>
 				)}
@@ -148,6 +244,7 @@ export function ExploreObject({
 					id={value.$$exome_id}
 					value={instance}
 					forceOpen={forceOpen}
+					path={path}
 				/>
 			);
 		}
@@ -189,12 +286,7 @@ export function ExploreObject({
 
 			{isExpanded && (
 				<>
-					{keys.map((name) => (
-						<div className={styles.wrap}>
-							<ExploreLabel label={name} />:{" "}
-							<ExploreValue value={value[name]} />
-						</div>
-					))}
+					{keys.map(labelPlusValue)}
 					{"}"}
 				</>
 			)}
@@ -206,10 +298,12 @@ export function ExploreExomeObject({
 	id,
 	value,
 	forceOpen = false,
+	path = [],
 }: {
 	id: string;
 	value: Record<string, any>;
 	forceOpen?: boolean;
+	path?: string[];
 }) {
 	const [isExpanded, setIsExpanded] = useState(forceOpen);
 	const { router } = useContext(routerContext);
@@ -265,7 +359,7 @@ export function ExploreExomeObject({
 					{keys.map((name) => (
 						<div className={styles.wrap}>
 							<ExploreLabel label={name} />:{" "}
-							<ExploreValue value={value[name]} />
+							<ExploreValue value={value[name]} path={path.concat(name)} />
 						</div>
 					))}
 					{"}"}

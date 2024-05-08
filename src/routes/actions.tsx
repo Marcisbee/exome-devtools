@@ -154,6 +154,9 @@ function DiffObject({ before, after }: { before: any; after: any }) {
 
 	return (
 		<pre className={styles.preCode}>
+			<ExploreObject value={after} diff={diff} forceOpen />
+			<br />
+			<br />
 			{"{\n"}
 			{!!diff.added?.length && (
 				<>
