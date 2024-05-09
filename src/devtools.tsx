@@ -366,7 +366,7 @@ export function renderUI(target: HTMLElement) {
 					<strong>No Exome connection found</strong>
 					<div>
 						<a
-							href="https://exome.dev/guides#devtools"
+							href="https://exome.js.org/guides#devtools"
 							target="_blank"
 							rel="noreferrer"
 						>
