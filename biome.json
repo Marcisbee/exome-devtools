@@ -1,5 +1,13 @@
 {
-  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+	"css": {
+		"formatter": {
+			"enabled": true
+		},
+		"parser": {
+			"cssModules": true
+		}
+	},
 	"formatter": {
 		"enabled": true,
 		"indentStyle": "tab"
