@@ -57,6 +57,10 @@ export class JokeStore extends Exome {
 		throw new Error("Async error");
 	}
 
+	public readCurrentJoke() {
+		return this.joke;
+	}
+
 	public clear() {
 		this.joke = undefined;
 	}
@@ -67,6 +71,7 @@ export function JokeComponent() {
 		joke,
 		jokeText,
 		getJoke: getJokeAsync,
+		readCurrentJoke,
 		getError,
 		clear,
 	} = useStore(useMemo(() => new JokeStore(), []));
@@ -78,6 +83,9 @@ export function JokeComponent() {
 			<br />
 			<button type="button" onClick={getJoke} disabled={isGettingJoke}>
 				get joke
+			</button>
+			<button type="button" onClick={readCurrentJoke} disabled={isGettingJoke}>
+				read joke
 			</button>
 			<button type="button" onClick={clear}>
 				clear
