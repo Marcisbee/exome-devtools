@@ -1,5 +1,11 @@
 import { useStore } from "exome/preact";
-import { useContext, useLayoutEffect, useMemo, useRef } from "preact/hooks";
+import {
+	useContext,
+	useLayoutEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "preact/hooks";
 
 import { onAction } from "exome";
 import {
@@ -10,7 +16,8 @@ import {
 import styles from "../devtools.module.css";
 import { RouterOutlet, routerContext } from "../devtools/router";
 import { DevtoolsActionsStore, devtoolsContext } from "../store";
-import { getDiff, getShallowExomeJson } from "../utils/get-diff";
+import { cc } from "../utils/cc";
+import { type Diff, getDiff, getShallowExomeJson } from "../utils/get-diff";
 import { getTimingColor } from "../utils/get-timing-color";
 import { useQueryFilter } from "../utils/use-query-filter";
 import { useResize } from "../utils/use-resize";
@@ -149,9 +156,7 @@ export function RouteDevtoolsActions() {
 	);
 }
 
-function DiffObject({ before, after }: { before: any; after: any }) {
-	const diff = getDiff(before, after || {});
-
+function DiffObject({ diff }: { diff: Diff }) {
 	return (
 		<pre className={styles.preCode}>
 			{"{\n"}
@@ -217,6 +222,7 @@ function DiffObject({ before, after }: { before: any; after: any }) {
 }
 
 function DevtoolsActionsContent() {
+	const [stateTab, setStateTab] = useState<"diff" | "before" | "after">("diff");
 	const store = useContext(devtoolsContext);
 	const { router, params } = useContext(routerContext);
 	const { actions } = useStore(store.actions);
@@ -263,6 +269,7 @@ function DevtoolsActionsContent() {
 
 	const stateBefore = getShallowExomeJson(action.before);
 	const stateAfter = getShallowExomeJson(action.after!);
+	const sateDiff = getDiff(stateBefore, stateAfter || {});
 
 	return (
 		<div className={styles.actionsRight}>
@@ -286,21 +293,27 @@ function DevtoolsActionsContent() {
 			<br />
 
 			<div>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					width="1em"
-					height="1em"
-					viewBox="0 0 256 256"
-				>
-					<g fill="currentColor">
-						<path
-							d="M216 136a88 88 0 1 1-88-88a88 88 0 0 1 88 88Z"
-							opacity=".2"
-						/>
-						<path d="M128 40a96 96 0 1 0 96 96a96.11 96.11 0 0 0-96-96Zm0 176a80 80 0 1 1 80-80a80.09 80.09 0 0 1-80 80Zm45.66-125.66a8 8 0 0 1 0 11.32l-40 40a8 8 0 0 1-11.32-11.32l40-40a8 8 0 0 1 11.32 0ZM96 16a8 8 0 0 1 8-8h48a8 8 0 0 1 0 16h-48a8 8 0 0 1-8-8Z" />
-					</g>
-				</svg>
-				Timing:{" "}
+				<span className={styles.textWithIcon}>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="1em"
+						height="1em"
+						viewBox="0 0 24 24"
+					>
+						<g
+							fill="none"
+							stroke="currentColor"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+						>
+							<path d="M10 2h4m-2 12l3-3" />
+							<circle cx="12" cy="14" r="8" />
+						</g>
+					</svg>
+					Timing:{" "}
+				</span>
+
 				<span
 					style={{
 						color: getTimingColor(action.time),
@@ -320,21 +333,27 @@ function DevtoolsActionsContent() {
 			<br />
 
 			<div>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					width="1em"
-					height="1em"
-					viewBox="0 0 256 256"
-				>
-					<g fill="currentColor">
-						<path
-							d="M240 120v64a8 8 0 0 1-8 8h-24a24 24 0 0 0-32-22.63A24 24 0 0 0 160 192H96a24 24 0 0 0-48 0H24a8 8 0 0 1-8-8v-40h160v-24Z"
-							opacity=".2"
-						/>
-						<path d="m247.42 117l-14-35a15.93 15.93 0 0 0-14.84-10H184v-8a8 8 0 0 0-8-8H24A16 16 0 0 0 8 72v112a16 16 0 0 0 16 16h17a32 32 0 0 0 62 0h50a32 32 0 0 0 62 0h17a16 16 0 0 0 16-16v-64a7.94 7.94 0 0 0-.58-3ZM184 88h34.58l9.6 24H184ZM24 72h144v64H24Zm48 136a16 16 0 1 1 16-16a16 16 0 0 1-16 16Zm81-24h-50a32 32 0 0 0-62 0H24v-32h144v12.31A32.11 32.11 0 0 0 153 184Zm31 24a16 16 0 1 1 16-16a16 16 0 0 1-16 16Zm48-24h-17a32.06 32.06 0 0 0-31-24v-32h48Z" />
-					</g>
-				</svg>
-				Payload:
+				<span className={styles.textWithIcon}>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="1em"
+						height="1em"
+						viewBox="0 0 24 24"
+					>
+						<g
+							fill="none"
+							stroke="currentColor"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+						>
+							<path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2m10 0H9m10 0h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14" />
+							<circle cx="17" cy="18" r="2" />
+							<circle cx="7" cy="18" r="2" />
+						</g>
+					</svg>
+					Payload
+				</span>
 				<pre className={styles.preCode}>
 					<ExploreObject value={action.payload} forceOpen={true} />
 				</pre>
@@ -343,48 +362,176 @@ function DevtoolsActionsContent() {
 			<br />
 
 			<div>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					width="1em"
-					height="1em"
-					viewBox="0 0 256 256"
+				<div>
+					<button
+						type="button"
+						className={cc([
+							styles.textWithIcon,
+							stateTab === "diff" && styles.active,
+						])}
+						onClick={() => setStateTab("diff")}
+					>
+						<span>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="1em"
+								height="1em"
+								viewBox="0 0 24 24"
+							>
+								<path
+									fill="none"
+									stroke="currentColor"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Zm-6 8h6m-3 3V7M9 17h6"
+								/>
+							</svg>
+							Diff
+							{action.after
+								? ` (${
+										sateDiff.added.length +
+										sateDiff.removed.length +
+										sateDiff.edited.length
+									})`
+								: ""}
+						</span>
+					</button>
+
+					<button
+						type="button"
+						className={cc([
+							styles.textWithIcon,
+							stateTab === "before" && styles.active,
+						])}
+						onClick={() => setStateTab("before")}
+					>
+						<span>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="1em"
+								height="1em"
+								viewBox="0 0 24 24"
+							>
+								<g
+									fill="none"
+									stroke="currentColor"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+								>
+									<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+									<path d="M14 2v4a2 2 0 0 0 2 2h4" />
+								</g>
+							</svg>
+							Before
+						</span>
+					</button>
+
+					<button
+						type="button"
+						className={cc([
+							styles.textWithIcon,
+							stateTab === "after" && styles.active,
+						])}
+						onClick={() => setStateTab("after")}
+					>
+						<span>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="1em"
+								height="1em"
+								viewBox="0 0 24 24"
+							>
+								<g
+									fill="none"
+									stroke="currentColor"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+								>
+									<path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4" />
+									<path d="M14 2v4a2 2 0 0 0 2 2h4M3 15l2 2l4-4" />
+								</g>
+							</svg>
+							After
+						</span>
+					</button>
+				</div>
+
+				<div
+					className={cc([
+						styles.stateTabContent,
+						stateTab === "diff" && styles.show,
+					])}
 				>
-					<g fill="currentColor">
-						<path
-							d="M96 96v64H40V40h120v56Zm64 0v64H96v56h120V96Z"
-							opacity=".2"
-						/>
-						<path d="M216 88h-48V40a8 8 0 0 0-8-8H40a8 8 0 0 0-8 8v120a8 8 0 0 0 8 8h48v48a8 8 0 0 0 8 8h120a8 8 0 0 0 8-8V96a8 8 0 0 0-8-8ZM48 152V48h104v40H96a8 8 0 0 0-8 8v56Zm104-48v48h-48v-48Zm56 104H104v-40h56a8 8 0 0 0 8-8v-56h40Z" />
-					</g>
-				</svg>
-				Diff:
-				{!action.after ? (
+					{!action.after ? (
+						<pre className={styles.preCode}>
+							<i>Action is still pending...</i>
+						</pre>
+					) : (
+						<DiffObject diff={sateDiff} />
+					)}
+				</div>
+
+				<div
+					className={cc([
+						styles.stateTabContent,
+						stateTab === "before" && styles.show,
+					])}
+				>
 					<pre className={styles.preCode}>
-						<i>Action is still pending...</i>
+						<ExploreExomeObject
+							id={action.instance}
+							value={action.before}
+							forceOpen={true}
+						/>
 					</pre>
-				) : (
-					<DiffObject before={stateBefore} after={stateAfter} />
-				)}
+				</div>
+
+				<div
+					className={cc([
+						styles.stateTabContent,
+						stateTab === "after" && styles.show,
+					])}
+				>
+					<pre className={styles.preCode}>
+						{!action.after ? (
+							<i>Action is still pending...</i>
+						) : (
+							<ExploreExomeObject
+								id={action.instance}
+								value={action.after!}
+								forceOpen={true}
+							/>
+						)}
+					</pre>
+				</div>
 			</div>
 
-			<br />
+			{/* <br />
 
 			<div>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					width="1em"
-					height="1em"
-					viewBox="0 0 256 256"
-				>
-					<g fill="currentColor">
-						<path
-							d="M216 80c0 26.51-39.4 48-88 48s-88-21.49-88-48s39.4-48 88-48s88 21.49 88 48Z"
-							opacity=".2"
-						/>
-						<path d="M128 24c-53.83 0-96 24.6-96 56v96c0 31.4 42.17 56 96 56s96-24.6 96-56V80c0-31.4-42.17-56-96-56Zm80 104c0 9.62-7.88 19.43-21.61 26.92C170.93 163.35 150.19 168 128 168s-42.93-4.65-58.39-13.08C55.88 147.43 48 137.62 48 128v-16.64c17.06 15 46.23 24.64 80 24.64s62.94-9.68 80-24.64ZM69.61 53.08C85.07 44.65 105.81 40 128 40s42.93 4.65 58.39 13.08C200.12 60.57 208 70.38 208 80s-7.88 19.43-21.61 26.92C170.93 115.35 150.19 120 128 120s-42.93-4.65-58.39-13.08C55.88 99.43 48 89.62 48 80s7.88-19.43 21.61-26.92Zm116.78 149.84C170.93 211.35 150.19 216 128 216s-42.93-4.65-58.39-13.08C55.88 195.43 48 185.62 48 176v-16.64c17.06 15 46.23 24.64 80 24.64s62.94-9.68 80-24.64V176c0 9.62-7.88 19.43-21.61 26.92Z" />
-					</g>
-				</svg>
-				Before:
+				<span className={styles.textWithIcon}>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="1em"
+						height="1em"
+						viewBox="0 0 24 24"
+					>
+						<g
+							fill="none"
+							stroke="currentColor"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+						>
+							<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+							<path d="M14 2v4a2 2 0 0 0 2 2h4" />
+						</g>
+					</svg>
+					Before
+				</span>
 				<pre className={styles.preCode}>
 					<ExploreExomeObject
 						id={action.instance}
@@ -397,21 +544,26 @@ function DevtoolsActionsContent() {
 			<br />
 
 			<div>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					width="1em"
-					height="1em"
-					viewBox="0 0 256 256"
-				>
-					<g fill="currentColor">
-						<path
-							d="M216 80c0 26.51-39.4 48-88 48s-88-21.49-88-48s39.4-48 88-48s88 21.49 88 48Z"
-							opacity=".2"
-						/>
-						<path d="M128 24c-53.83 0-96 24.6-96 56v96c0 31.4 42.17 56 96 56s96-24.6 96-56V80c0-31.4-42.17-56-96-56Zm80 104c0 9.62-7.88 19.43-21.61 26.92C170.93 163.35 150.19 168 128 168s-42.93-4.65-58.39-13.08C55.88 147.43 48 137.62 48 128v-16.64c17.06 15 46.23 24.64 80 24.64s62.94-9.68 80-24.64ZM69.61 53.08C85.07 44.65 105.81 40 128 40s42.93 4.65 58.39 13.08C200.12 60.57 208 70.38 208 80s-7.88 19.43-21.61 26.92C170.93 115.35 150.19 120 128 120s-42.93-4.65-58.39-13.08C55.88 99.43 48 89.62 48 80s7.88-19.43 21.61-26.92Zm116.78 149.84C170.93 211.35 150.19 216 128 216s-42.93-4.65-58.39-13.08C55.88 195.43 48 185.62 48 176v-16.64c17.06 15 46.23 24.64 80 24.64s62.94-9.68 80-24.64V176c0 9.62-7.88 19.43-21.61 26.92Z" />
-					</g>
-				</svg>
-				After:
+				<span className={styles.textWithIcon}>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="1em"
+						height="1em"
+						viewBox="0 0 24 24"
+					>
+						<g
+							fill="none"
+							stroke="currentColor"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+						>
+							<path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4" />
+							<path d="M14 2v4a2 2 0 0 0 2 2h4M3 15l2 2l4-4" />
+						</g>
+					</svg>
+					After
+				</span>
 				<pre className={styles.preCode}>
 					{!action.after ? (
 						<i>Action is still pending...</i>
@@ -423,26 +575,73 @@ function DevtoolsActionsContent() {
 						/>
 					)}
 				</pre>
+			</div> */}
+
+			<br />
+
+			<div>
+				<span className={styles.textWithIcon}>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="1em"
+						height="1em"
+						viewBox="0 0 24 24"
+					>
+						<g
+							fill="none"
+							stroke="currentColor"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+						>
+							<circle cx="5" cy="6" r="3" />
+							<path d="M5 9v12" />
+							<circle cx="19" cy="18" r="3" />
+							<path d="m15 9l-3-3l3-3" />
+							<path d="M12 6h5a2 2 0 0 1 2 2v7" />
+						</g>
+					</svg>
+					Return
+				</span>
+				{action.response !== undefined ? (
+					<pre className={styles.preCode}>
+						<ExploreExomeObject
+							id={action.instance}
+							value={action.response!}
+							forceOpen={true}
+						/>
+					</pre>
+				) : (
+					<pre className={styles.preCode}>
+						<i>Action did not return</i>
+					</pre>
+				)}
 			</div>
 
 			<br />
 
 			<div>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					width="1em"
-					height="1em"
-					viewBox="0 0 256 256"
-				>
-					<g fill="currentColor">
-						<path
-							d="m240 112l-36 40H40a8 8 0 0 1-8-8V80a8 8 0 0 1 8-8h164Z"
-							opacity=".2"
-						/>
-						<path d="m246 106.65l-36-40a8 8 0 0 0-6-2.65h-68V32a8 8 0 0 0-16 0v32H40a16 16 0 0 0-16 16v64a16 16 0 0 0 16 16h80v64a8 8 0 0 0 16 0v-64h68a8 8 0 0 0 5.95-2.65l36-40a8 8 0 0 0 .05-10.7ZM200.44 144H40V80h160.44l28.8 32Z" />
-					</g>
-				</svg>
-				Error:
+				<span className={styles.textWithIcon}>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="1em"
+						height="1em"
+						viewBox="0 0 24 24"
+					>
+						<g
+							fill="none"
+							stroke="currentColor"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+						>
+							<circle cx="6" cy="6" r="3" />
+							<path d="M6 9v12M21 3l-6 6m6 0l-6-6m3 8.5V15" />
+							<circle cx="18" cy="18" r="3" />
+						</g>
+					</svg>
+					Throw
+				</span>
 				{action.error ? (
 					<pre
 						className={styles.preCode}
@@ -456,7 +655,7 @@ function DevtoolsActionsContent() {
 					</pre>
 				) : (
 					<pre className={styles.preCode}>
-						<i>Nothing was thrown</i>
+						<i>Action did not throw</i>
 					</pre>
 				)}
 			</div>

@@ -10,6 +10,7 @@ export interface Action {
 	now: number;
 	time?: number;
 	error?: string;
+	response?: any;
 	trace: string;
 	before: Record<string, any>;
 	after?: Record<string, any>;

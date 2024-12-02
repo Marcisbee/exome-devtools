@@ -155,17 +155,20 @@ function Devtools() {
 							<span>
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
-									fill="none"
+									width="1em"
+									height="1em"
 									viewBox="0 0 24 24"
-									strokeWidth={1.5}
-									stroke="currentColor"
-									className="w-6 h-6"
 								>
-									<path
-										strokeLinecap="round"
-										strokeLinejoin="round"
-										d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
-									/>
+									<g
+										fill="none"
+										stroke="currentColor"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+									>
+										<circle cx="12" cy="12" r="10"></circle>
+										<path d="M12 16v-4m0-4h.01"></path>
+									</g>
 								</svg>
 								Details
 							</span>
@@ -185,16 +188,27 @@ function Devtools() {
 							<span>
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
-									fill="none"
+									width="1em"
+									height="1em"
 									viewBox="0 0 24 24"
-									strokeWidth={1.5}
-									stroke="currentColor"
 								>
-									<path
-										strokeLinecap="round"
-										strokeLinejoin="round"
-										d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"
-									/>
+									<g
+										fill="none"
+										stroke="currentColor"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+									>
+										<rect
+											width="18"
+											height="18"
+											x="3"
+											y="3"
+											rx="2"
+											ry="2"
+										></rect>
+										<path d="M9 17c2 0 2.8-1 2.8-2.8V10c0-2 1-3.3 3.2-3m-6 4.2h5.7"></path>
+									</g>
 								</svg>
 								Actions
 							</span>
@@ -214,16 +228,21 @@ function Devtools() {
 							<span>
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
-									fill="none"
+									width="1em"
+									height="1em"
 									viewBox="0 0 24 24"
-									strokeWidth={1.5}
-									stroke="currentColor"
 								>
-									<path
-										strokeLinecap="round"
-										strokeLinejoin="round"
-										d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125"
-									/>
+									<g
+										fill="none"
+										stroke="currentColor"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+									>
+										<ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+										<path d="M3 5v14a9 3 0 0 0 18 0V5"></path>
+										<path d="M3 12a9 3 0 0 0 18 0"></path>
+									</g>
 								</svg>
 								State
 							</span>
@@ -275,21 +294,20 @@ function Devtools() {
 							<span>
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
-									fill="none"
+									width="1em"
+									height="1em"
 									viewBox="0 0 24 24"
-									strokeWidth={1.5}
-									stroke="currentColor"
 								>
-									<path
-										strokeLinecap="round"
-										strokeLinejoin="round"
-										d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z"
-									/>
-									<path
-										strokeLinecap="round"
-										strokeLinejoin="round"
-										d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z"
-									/>
+									<g
+										fill="none"
+										stroke="currentColor"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+									>
+										<path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+										<path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+									</g>
 								</svg>
 								Profiler (WIP)
 							</span>
@@ -363,7 +381,7 @@ export function renderUI(target: HTMLElement) {
 							</clipPath>
 						</defs>
 					</svg>
-					<strong>No Exome connection found</strong>
+					<strong>Waiting for Exome connections</strong>
 					<div>
 						<a
 							href="https://exome.js.org/guides#devtools"
