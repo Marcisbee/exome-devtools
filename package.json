@@ -15,7 +15,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
 		"@types/chrome": "^0.0.253",
-		"esbuild": "^0.24.0",
+		"esbuild": "^0.28.1",
 		"exome": "^2.6.0",
 		"preact": "^10.25.1",
 		"webext-bridge": "^6.0.1"
