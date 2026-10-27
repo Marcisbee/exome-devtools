@@ -27,7 +27,7 @@ export function RouteDevtoolsDetails() {
 					<hr />
 					<p>Instances: {instances.size}</p>
 					<p>
-						Actions: {count.size} (
+						Retained completed actions: {count.size} (
 						{[...count.values()].reduce(
 							(acc, timings) => acc + timings.length,
 							0,

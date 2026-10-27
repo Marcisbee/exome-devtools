@@ -33,46 +33,29 @@ export function getDiff(before: any, after: any): Diff {
 	return output;
 
 	function innerDiff(a: any, b: any, path: string[] = []) {
-		if (a === b) {
-			return;
-		}
-
-		if (a !== undefined && b === undefined) {
-			output.removed.push([path, a]);
-			return;
-		}
-
-		if (a === undefined && b !== undefined) {
-			output.added.push([path, b]);
-			return;
-		}
-
+		if (Object.is(a, b)) return;
 		if (
 			a !== null &&
-			typeof a === "object" &&
 			b !== null &&
-			typeof b === "object"
+			typeof a === "object" &&
+			typeof b === "object" &&
+			Array.isArray(a) === Array.isArray(b)
 		) {
-			const aKeys = Object.keys(a);
-			const bKeys = Object.keys(b);
-
-			if (aKeys.length === 0 && bKeys.length === 0) {
-				return;
+			for (const key of new Set([...Object.keys(a), ...Object.keys(b)])) {
+				const childPath = path.concat(key);
+				if (!Object.prototype.hasOwnProperty.call(a, key))
+					output.added.push([childPath, b[key]]);
+				else if (!Object.prototype.hasOwnProperty.call(b, key))
+					output.removed.push([childPath, a[key]]);
+				else innerDiff(a[key], b[key], childPath);
 			}
-
-			const allKeys = aKeys.concat(bKeys);
-			const length = allKeys.length;
-
-			for (let i = 0; i < length; i += 1) {
-				const key = allKeys[i];
-
-				if (i !== allKeys.indexOf(key)) {
-					continue;
-				}
-
-				innerDiff(a[key], b[key], path.concat(key));
-			}
-
+			if (
+				Array.isArray(a) &&
+				a.length !== b.length &&
+				Object.keys(a).length === 0 &&
+				Object.keys(b).length === 0
+			)
+				output.edited.push([path, a, b]);
 			return;
 		}
 

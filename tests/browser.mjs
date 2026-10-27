@@ -1,0 +1,141 @@
+import { chromium } from "playwright";
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import { createServer } from "node:http";
+const js = await readFile("dist/devtools.js");
+const css = await readFile("dist/devtools.css");
+const server = createServer((req, res) => {
+	if (req.url === "/devtools.js") {
+		res.setHeader("Content-Type", "text/javascript");
+		res.end(js);
+		return;
+	}
+	if (req.url === "/devtools.css") {
+		res.setHeader("Content-Type", "text/css");
+		res.end(css);
+		return;
+	}
+	res.setHeader("Content-Type", "text/html");
+	res.end(
+		'<link rel="stylesheet" href="/devtools.css"><div id="root" style="height:100vh"></div>',
+	);
+});
+await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+const browser = await chromium.launch({
+	executablePath: process.env.CHROME_PATH || undefined,
+	headless: true,
+});
+try {
+	const page = await browser.newPage({
+		viewport: { width: 1000, height: 700 },
+	});
+	const errors = [];
+	page.on("pageerror", (error) => errors.push(error.message));
+	await page.goto(`http://127.0.0.1:${server.address().port}`);
+	await page.evaluate(async () => {
+		const { renderUI } = await import("/devtools.js");
+		renderUI(document.getElementById("root"));
+		const connection = window.__EXOME_DEVTOOLS_EXTENSION__.connect({
+			name: "Test app",
+			maxAge: 3,
+			details: { version: "2.6.0" },
+		});
+		window.connection = connection;
+		const action = {
+			id: "1",
+			name: "increment",
+			instance: "Counter-1",
+			depth: 1,
+			now: 0,
+			time: 5,
+			trace: "",
+			payload: [],
+			before: { value: [], child: { $$exome_id: "Counter-2" } },
+			after: { value: {}, count: 1, child: { $$exome_id: "Counter-2" } },
+		};
+		connection.send({
+			event: "update",
+			type: "all",
+			payload: {
+				states: [
+					["Counter-1", { count: 1, "$$exome_gt:double": null, list: [1, 2] }],
+					["Counter-2", { count: 999 }],
+				],
+				actions: [action],
+			},
+		});
+	});
+	await page
+		.getByRole("searchbox", { name: "Filter actions" })
+		.fill("increment,count=1");
+	await page.getByRole("button", { name: /Counter.*increment/s }).click();
+	await page.getByRole("button", { name: "Before", exact: true }).click();
+	await page
+		.getByText("Counter-2 (reference; historical value not captured)")
+		.first()
+		.waitFor({ state: "visible" });
+	assert.match(await page.locator("#root").innerText(), /Diff \(2\)/);
+	assert.equal(
+		(await page.locator("#root").innerText()).includes("999"),
+		false,
+	);
+	await page.getByRole("button", { name: "State", exact: true }).click();
+	await page.getByRole("button", { name: "Counter-1", exact: true }).click();
+	await page.getByText("not evaluated", { exact: true }).waitFor();
+	const array = page.getByRole("button", {
+		name: "Array(2) [1, 2]",
+		exact: true,
+	});
+	await array.focus();
+	await page.keyboard.press("Enter");
+	assert.equal(
+		await page
+			.getByRole("button", { name: "Array(2) [", exact: true })
+			.getAttribute("aria-expanded"),
+		"true",
+	);
+	await page.keyboard.press("Space");
+	assert.equal(await array.getAttribute("aria-expanded"), "false");
+	await page.setViewportSize({ width: 380, height: 700 });
+	const listBox = await page
+		.getByRole("button", { name: "Counter-1", exact: true })
+		.boundingBox();
+	const stateBox = await page
+		.getByText("not evaluated", { exact: true })
+		.boundingBox();
+	assert.ok(stateBox.y > listBox.y, "narrow panel stacks list above inspector");
+	await page.getByRole("button", { name: "Details", exact: true }).click();
+	assert.match(
+		await page.locator("#root").innerText(),
+		/Retained completed actions: 1 \(1x\)/,
+	);
+	await page.evaluate(() =>
+		window.connection.send({
+			event: "update",
+			type: "all",
+			payload: { states: [], actions: [] },
+		}),
+	);
+	await page.getByRole("button", { name: "State", exact: true }).click();
+	assert.equal(
+		await page.getByRole("button", { name: "Counter-1", exact: true }).count(),
+		0,
+	);
+	await page.evaluate(() => {
+		const second = window.__EXOME_DEVTOOLS_EXTENSION__.connect({
+			name: "Second",
+			maxAge: 3,
+			details: { version: "2.6.0" },
+		});
+		window.connection.disconnect();
+		window.connection.disconnect();
+	});
+	await page.getByText("Second", { exact: true }).waitFor();
+	assert.deepEqual(errors, []);
+	console.log(
+		"Production UI: filtering, diffs, snapshots, getters, keyboard, narrow panel, sync and connection disposal passed",
+	);
+} finally {
+	await browser.close();
+	await new Promise((resolve) => server.close(resolve));
+}

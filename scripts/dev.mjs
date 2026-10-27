@@ -27,4 +27,6 @@ const ctx = await esbuild.context({
 await ctx.watch();
 await ctx.serve({
 	servedir: "www",
+	host: "127.0.0.1",
+	port: Number(process.env.PORT || 8000),
 });

@@ -7,7 +7,7 @@ import { useContext, useMemo, useState } from "preact/hooks";
 import type {
 	DevtoolsExtensionInterface,
 	ExomeDevtoolsConfig,
-} from "../lib/devtools-exome";
+} from "./protocol";
 
 import {
 	HistoryButtonBack,
@@ -334,7 +334,9 @@ class ConnectionsStore extends Exome {
 	}
 
 	public disconnect(connection: DevtoolsStore) {
-		this.connections.splice(this.connections.indexOf(connection), 1);
+		const index = this.connections.indexOf(connection);
+		if (index < 0) return;
+		this.connections.splice(index, 1);
 
 		if (this.active === connection) {
 			this.active = this.connections[0];
@@ -354,7 +356,7 @@ export function renderUI(target: HTMLElement) {
 	}
 
 	function ConnectionApp() {
-		const { active } = useStore(connectionsStore);
+		const { active, connections, setActive } = useStore(connectionsStore);
 
 		if (!active) {
 			return (
@@ -397,38 +399,60 @@ export function renderUI(target: HTMLElement) {
 
 		return (
 			<devtoolsContext.Provider value={active}>
-				<Devtools />
+				{connections.length > 1 && (
+					<label>
+						Connection{" "}
+						<select
+							aria-label="Connection"
+							value={connections.indexOf(active)}
+							onChange={(event) =>
+								setActive(connections[Number(event.currentTarget.value)])
+							}
+						>
+							{connections.map((connection, index) => (
+								<option value={index}>
+									{connection.name} ({index + 1})
+								</option>
+							))}
+						</select>
+					</label>
+				)}
+				<Devtools key={getExomeId(active)} />
 			</devtoolsContext.Provider>
 		);
 	}
 
 	render(<ConnectionApp />, target);
 
-	// @TODO: Handle unmounting
-	// function unmount() {
-	// 	if ((target as any)._prevVNode != null) {
-	// 		render(null, target);
-	// 	}
-	// }
+	return () => render(null, target);
 }
 
 (window as any).__EXOME_DEVTOOLS_EXTENSION__ = {
 	connect(config) {
 		const store = new DevtoolsStore(
 			config.name,
-			config.maxAge!,
+			config.maxAge ?? 20,
 			config.details,
 		);
 
 		connectionsStore.connect(store);
 
-		Promise.resolve().then(store.events.sync);
+		let connected = true;
+		const subscriptions = new Set<() => void>();
+		Promise.resolve().then(() => {
+			if (connected) store.events.sync();
+		});
 
 		return {
 			disconnect() {
+				if (!connected) return;
+				connected = false;
+				for (const unsubscribe of subscriptions) unsubscribe();
+				subscriptions.clear();
 				connectionsStore.disconnect(store);
 			},
 			send(data) {
+				if (!connected) return;
 				if (data.event === "send") {
 					if (data.type === "states") {
 						for (const [name, state] of data.payload) {
@@ -473,14 +497,10 @@ export function renderUI(target: HTMLElement) {
 					}
 
 					if (data.type === "all") {
-						for (const state of data.payload.states) {
-							store.actions.addInstance(state[0], state[1]);
-						}
-
-						store.actions.actions = [];
-						for (const action of data.payload.actions) {
-							store.actions.addAction(action);
-						}
+						store.actions.replaceSnapshot(
+							data.payload.states,
+							data.payload.actions,
+						);
 						return;
 					}
 
@@ -488,7 +508,8 @@ export function renderUI(target: HTMLElement) {
 				}
 			},
 			subscribe(cb) {
-				return onAction(
+				if (!connected) return () => {};
+				const unsubscribe = onAction(
 					DevtoolsEventStore,
 					null,
 					(instance, action, payload) => {
@@ -502,6 +523,10 @@ export function renderUI(target: HTMLElement) {
 						}
 					},
 				);
+				subscriptions.add(unsubscribe);
+				return () => {
+					if (subscriptions.delete(unsubscribe)) unsubscribe();
+				};
 			},
 		};
 	},

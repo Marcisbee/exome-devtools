@@ -82,18 +82,14 @@ function StoreExplore({ id, instance, count }: StoreExploreProps) {
 							className={styles.tempText}
 							data-text="(getter)"
 						/>{" "}
-						<StoreValueExplore
-							instance={instance}
-							source={instance}
-							name={`${PROPERTY_TYPE_GETTER}:${name}`}
-						/>
+						<i>not evaluated</i>
 					</div>
 				))}
 			</pre>
 
 			<pre className={styles.storeExploreBlock}>
 				<span style={{ display: "block", marginBottom: 10, color: "#ccc" }}>
-					actions
+					actions (retained history)
 				</span>
 
 				{instanceDetails.actions.map((name) => {
@@ -189,6 +185,7 @@ export function RouteDevtoolsState() {
 	const [query, setQuery, filteredInstances] = useQueryFilter(
 		unfilteredInstances,
 		([key]) => key,
+		([, state]) => state,
 	);
 	const groups = filteredInstances.reduce(
 		(acc, [id, value]) => {
@@ -218,7 +215,8 @@ export function RouteDevtoolsState() {
 					<div className={styles.filterInput}>
 						<input
 							type="search"
-							placeholder="Filter.."
+							placeholder="Filter stores or store,field=value"
+							aria-label="Filter stores"
 							onInput={(e) => {
 								setQuery((e.target as HTMLInputElement)!.value.toLowerCase());
 							}}
@@ -256,7 +254,10 @@ export function RouteDevtoolsState() {
 													navigate(storeUrl, "state");
 												}}
 											>
-												<span>{name}</span>
+												<span>
+													{name}
+													<small>-{key.split("-").pop()}</small>
+												</span>
 											</button>
 										);
 									})}

@@ -9,14 +9,16 @@
 		"dev": "node scripts/dev.mjs",
 		"build": "node scripts/build.mjs",
 		"icons": "node scripts/build.icons.mjs",
-		"prebuild": "cat package.json | sed '/\\\"devDependencies\\\"/,/}/ d; /^$/d' | sed 's/\\.\\/dist\\//\\.\\//g' | sed '/\"private\": true,/d' > ./dist/package.json && cp README.md dist && cp LICENSE dist",
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"test": "node --test tests/*.test.mjs",
+		"test:browser": "node tests/browser.mjs",
+		"test:extension": "node tests/extension.mjs"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
 		"@types/chrome": "^0.0.253",
 		"esbuild": "^0.28.1",
 		"exome": "^2.6.0",
+		"playwright": "^1.64.1",
 		"preact": "^10.25.1",
 		"webext-bridge": "^6.0.1"
 	},
@@ -29,5 +31,8 @@
 	"bugs": {
 		"url": "https://github.com/Marcisbee/exome-devtools/issues"
 	},
-	"homepage": "https://github.com/Marcisbee/exome-devtools#readme"
+	"homepage": "https://github.com/Marcisbee/exome-devtools#readme",
+	"engines": {
+		"node": ">=22.12"
+	}
 }

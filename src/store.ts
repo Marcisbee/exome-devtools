@@ -25,36 +25,48 @@ export class DevtoolsActionsStore extends Exome {
 		super();
 	}
 
+	// Statistics describe completed actions in the retained history window.
+	private rebuildCounts() {
+		this.count = new Map();
+		for (const action of this.actions) {
+			if (action.time === undefined) continue;
+			const key = `${action.instance}.${action.name}`;
+			if (!this.count.has(key)) this.count.set(key, []);
+			this.count.get(key)!.push(action.time);
+		}
+	}
+
 	public addAction(action: Action) {
-		this.actions.push(action);
-
-		const actionId = `${action.instance}.${action.name}`;
-		if (!this.count.has(actionId)) {
-			this.count.set(actionId, []);
-		}
-
-		if (this.actions.length > this.maxAge) {
-			this.actions.shift();
-		}
+		const existing = this.actions.findIndex((item) => item.id === action.id);
+		if (existing >= 0) this.actions[existing] = structuredClone(action);
+		else this.actions.push(structuredClone(action));
+		const limit = Number.isFinite(this.maxAge)
+			? Math.max(0, Math.floor(this.maxAge))
+			: 20;
+		this.actions.splice(0, Math.max(0, this.actions.length - limit));
+		this.rebuildCounts();
 	}
 
 	public addInstance(name: string, state: Record<string, any>) {
-		this.instances.set(name, state);
+		this.instances.set(name, structuredClone(state));
+	}
+
+	public replaceSnapshot(
+		states: [string, Record<string, any>][],
+		actions: Action[],
+	) {
+		this.instances = new Map(structuredClone(states));
+		this.actions = [];
+		for (const action of actions) this.addAction(action);
+		this.rebuildCounts();
 	}
 
 	public updateAction(action: Action) {
-		const existingAction = this.actions.find(({ id }) => action.id === id);
-
-		if (!existingAction) {
-			// Nothing to update
-			return;
-		}
-
-		const actionId = `${action.instance}.${action.name}`;
-		this.count.get(actionId)!.push(action.time!);
-
-		Object.assign(existingAction, action);
-		this.instances.set(action.instance, action.after!);
+		const existing = this.actions.find((item) => item.id === action.id);
+		if (existing) Object.assign(existing, structuredClone(action));
+		// Live state arrives through state messages; an old async completion must
+		// not overwrite a newer state snapshot.
+		this.rebuildCounts();
 	}
 
 	public updateInstance(
@@ -64,11 +76,11 @@ export class DevtoolsActionsStore extends Exome {
 	) {
 		if (newName) {
 			this.instances.delete(name);
-			this.instances.set(newName, state);
+			this.instances.set(newName, structuredClone(state));
 			return;
 		}
 
-		this.instances.set(name, state);
+		this.instances.set(name, structuredClone(state));
 	}
 }
 

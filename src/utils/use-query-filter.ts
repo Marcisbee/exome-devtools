@@ -1,34 +1,44 @@
 import { useState } from "preact/hooks";
 
-export function useQueryFilter<T extends any[] = any[]>(
-	unfilteredList: T,
-	get: (value: T[number]) => any = (a) => a,
+export function filterQuery<T>(
+	items: T[],
+	query: string,
+	label: (item: T) => string,
+	fields: (item: T) => Record<string, unknown>,
 ) {
-	const [query, setQuery] = useState("");
-	const [queryInstance, queryParams = ""] = query.toLowerCase().split(",");
-	const [queryKey, queryValue] = queryParams.split("=");
-
-	const filteredList = unfilteredList
+	const [name = "", ...rest] = query.toLowerCase().split(",");
+	const parameter = rest.join(",").trim();
+	const separator = parameter.indexOf("=");
+	const key = (
+		separator < 0 ? parameter : parameter.slice(0, separator)
+	).trim();
+	const value = separator < 0 ? "" : parameter.slice(separator + 1).trim();
+	return items
 		.filter(
-			(value) =>
-				((get(value).toLowerCase() !== queryInstance &&
-					get(value).toLowerCase().indexOf(queryInstance) > -1) ||
-					get(value).toLowerCase() === queryInstance) &&
-				(!queryKey ||
-					Object.entries(value[1]).find(
+			(item) =>
+				label(item).toLowerCase().includes(name.trim()) &&
+				(!key ||
+					Object.entries(fields(item)).some(
 						([k, v]) =>
-							k.toLowerCase().indexOf(queryKey) > -1 &&
-							(!queryValue ||
-								(typeof v !== "function" &&
-									typeof v !== "object" &&
-									String(v).toLowerCase().indexOf(queryValue) > -1)),
+							k.toLowerCase().includes(key) &&
+							(!value ||
+								(typeof v !== "object" &&
+									typeof v !== "function" &&
+									String(v).toLowerCase().includes(value))),
 					)),
 		)
 		.sort(
 			(a, b) =>
-				get(a).toLowerCase().indexOf(queryInstance) -
-				get(b).toLowerCase().indexOf(queryInstance),
+				label(a).toLowerCase().indexOf(name.trim()) -
+				label(b).toLowerCase().indexOf(name.trim()),
 		);
+}
 
-	return [queryInstance, setQuery, filteredList as T] as const;
+export function useQueryFilter<T>(
+	items: T[],
+	label: (item: T) => string,
+	fields: (item: T) => Record<string, unknown>,
+) {
+	const [query, setQuery] = useState("");
+	return [query, setQuery, filterQuery(items, query, label, fields)] as const;
 }

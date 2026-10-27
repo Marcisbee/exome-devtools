@@ -1,3 +1,4 @@
+import { createContext } from "preact";
 import { useStore } from "exome/preact";
 import { useContext, useState } from "preact/hooks";
 
@@ -7,6 +8,8 @@ import { cc } from "../../utils/cc";
 import { Icon } from "../icon/icon";
 
 import styles from "./value-explorer.module.css";
+
+export const historicalContext = createContext(false);
 
 const IS_HEX_COLOR = /^#(?:[0-9A-Fa-f]{3}){1,2}\b$/;
 const IS_HSL_COLOR =
@@ -94,6 +97,7 @@ export function ExploreObject({
 		actions: { instances },
 	} = useContext(devtoolsContext);
 
+	const historical = useContext(historicalContext);
 	const keys = Object.keys(value);
 
 	if (Array.isArray(value)) {
@@ -101,6 +105,19 @@ export function ExploreObject({
 			<>
 				{!forceOpen ? (
 					<span
+						role={keys.length ? "button" : undefined}
+						tabIndex={keys.length ? 0 : undefined}
+						aria-expanded={keys.length ? isExpanded : undefined}
+						onKeyDown={(event) => {
+							if (
+								event.target === event.currentTarget &&
+								keys.length &&
+								(event.key === "Enter" || event.key === " ")
+							) {
+								event.preventDefault();
+								setIsExpanded((value) => !value);
+							}
+						}}
 						className={cc([
 							styles.expandHandle,
 							isExpanded && styles.expanded,
@@ -139,6 +156,12 @@ export function ExploreObject({
 		);
 	}
 
+	if (value.$$exome_id && historical) {
+		return (
+			<span>{value.$$exome_id} (reference; historical value not captured)</span>
+		);
+	}
+
 	if (value.$$exome_id) {
 		const instance = instances.get(value.$$exome_id);
 
@@ -153,7 +176,7 @@ export function ExploreObject({
 		}
 	}
 
-	let name = `${value.constructor.name} `;
+	let name = `${value.constructor?.name ?? "Object"} `;
 
 	if (name === "Object ") {
 		name = "";
@@ -168,6 +191,19 @@ export function ExploreObject({
 		<>
 			{!forceOpen ? (
 				<span
+					role={keys.length ? "button" : undefined}
+					tabIndex={keys.length ? 0 : undefined}
+					aria-expanded={keys.length ? isExpanded : undefined}
+					onKeyDown={(event) => {
+						if (
+							event.target === event.currentTarget &&
+							keys.length &&
+							(event.key === "Enter" || event.key === " ")
+						) {
+							event.preventDefault();
+							setIsExpanded((value) => !value);
+						}
+					}}
 					className={cc([
 						styles.expandHandle,
 						isExpanded && styles.expanded,
@@ -223,6 +259,19 @@ export function ExploreExomeObject({
 		<>
 			{!forceOpen ? (
 				<span
+					role={keys.length ? "button" : undefined}
+					tabIndex={keys.length ? 0 : undefined}
+					aria-expanded={keys.length ? isExpanded : undefined}
+					onKeyDown={(event) => {
+						if (
+							event.target === event.currentTarget &&
+							keys.length &&
+							(event.key === "Enter" || event.key === " ")
+						) {
+							event.preventDefault();
+							setIsExpanded((value) => !value);
+						}
+					}}
 					className={cc([
 						styles.expandHandle,
 						isExpanded && styles.expanded,
@@ -319,7 +368,7 @@ export function safeStringify(value: any, depth = 0): string {
 			return `${value.$$exome_id.split("-")[0]} {...}`;
 		}
 
-		let name = `${value.constructor.name} `;
+		let name = `${value.constructor?.name ?? "Object"} `;
 
 		if (name === "Object ") {
 			name = "";

@@ -19,7 +19,9 @@ window.addEventListener(
 			return;
 		}
 
-		await sendMessage("exome-forward-payload", message.data, "devtools");
+		await sendMessage("exome-forward-payload", message.data, "devtools").catch(
+			() => {},
+		);
 	},
 	{ passive: true },
 );

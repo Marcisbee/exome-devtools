@@ -35,8 +35,8 @@
 		top: -0.15em;
 		left: -0.3em;
 		font-size: 1em;
-  	line-height: 1em;
-    vertical-align: top;
+		line-height: 1em;
+		vertical-align: top;
 		opacity: 0.4;
 		margin: 0 0 0.15em 0;
 	}
@@ -136,4 +136,9 @@ div.expandHandle {
 	border: 1px solid var(--gray-color-200);
 	margin: 0.2em 6px 0 0;
 	border-radius: 3px;
+}
+
+.expandHandle:focus-visible {
+	outline: 2px solid #f5841b;
+	outline-offset: 2px;
 }
