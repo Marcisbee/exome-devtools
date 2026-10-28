@@ -1,5 +1,10 @@
 .historyButton {
-	display: inline-block;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: 28px;
+	height: 28px;
 	vertical-align: middle;
 	background-color: transparent;
 	border: 0;
@@ -9,8 +14,8 @@
 	padding: 1px 3px;
 	line-height: 1em;
 	vertical-align: top;
-	margin-top: -6px;
-	margin-bottom: -6px;
+	margin-top: 0;
+	margin-bottom: 0;
 
 	& svg {
 		width: 24px;

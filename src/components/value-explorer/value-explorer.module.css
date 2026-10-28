@@ -13,7 +13,7 @@
 	display: block;
 	position: relative;
 	padding-left: 1em;
-	color: var(--gray-color-200);
+	color: var(--gray-color-200, #344054);
 	text-overflow: ellipsis;
 	white-space: nowrap;
 	overflow: hidden;
@@ -27,7 +27,7 @@
 .expandHandle {
 	display: inline;
 	cursor: pointer;
-	color: var(--gray-color-200);
+	color: var(--gray-color-200, #344054);
 	white-space: nowrap;
 
 	> i:first-child {
@@ -35,14 +35,14 @@
 		top: -0.15em;
 		left: -0.3em;
 		font-size: 1em;
-  	line-height: 1em;
-    vertical-align: top;
+		line-height: 1em;
+		vertical-align: top;
 		opacity: 0.4;
 		margin: 0 0 0.15em 0;
 	}
 
 	&:hover {
-		color: var(--gray-color-050);
+		color: var(--gray-color-050, #101828);
 
 		> i:first-child {
 			opacity: 1;
@@ -86,10 +86,10 @@ div.expandHandle {
 
 .notExpendable.expandHandle {
 	cursor: text;
-	color: var(--gray-color-200);
+	color: var(--gray-color-200, #344054);
 
 	&:hover {
-		color: var(--gray-color-200);
+		color: var(--gray-color-200, #344054);
 	}
 
 	&::after {
@@ -133,7 +133,12 @@ div.expandHandle {
 	width: 1.05em;
 	height: 1.05em;
 	vertical-align: top;
-	border: 1px solid var(--gray-color-200);
+	border: 1px solid var(--gray-color-200, #344054);
 	margin: 0.2em 6px 0 0;
 	border-radius: 3px;
+}
+
+.expandHandle:focus-visible {
+	outline: 2px solid #f5841b;
+	outline-offset: 2px;
 }

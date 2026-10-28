@@ -70,6 +70,13 @@ export function StoreValueExplore({ instance, source, name }: any) {
 		);
 	}
 
+	if (typeof value.$$exome_bigint === "string") {
+		return <span>{value.$$exome_bigint}n</span>;
+	}
+	if (value.$$exome_circular === true) {
+		return <span>[Circular]</span>;
+	}
+
 	if (value.$$exome_id) {
 		const nameAndId = value.$$exome_id;
 		const [name, id] = nameAndId.split("-");

@@ -82,7 +82,10 @@
 	left: 0;
 	bottom: 0;
 	right: 0;
-	height: 100vh;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
 	z-index: 100;
 	background-color: #fff;
 	box-sizing: border-box;
@@ -94,7 +97,6 @@
 	& * {
 		box-sizing: border-box;
 		user-select: auto;
-		line-height: 1em;
 	}
 
 	& h3 {
@@ -171,9 +173,8 @@
 }
 
 .head {
-	display: block;
-	height: 84px;
-	padding: 10px 16px;
+	flex: none;
+	padding: 10px 16px 0;
 	border-bottom: 1px solid #dee2e6;
 	line-height: 1em;
 
@@ -202,24 +203,29 @@
 }
 
 .headTitle {
-	display: block;
-	position: relative;
-	padding: 6px 30px 6px 40px;
-	margin-bottom: 9px;
-
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
+	margin-bottom: 8px;
+	min-height: 32px;
 	& > svg {
-		display: block;
 		width: 30px;
 		height: 30px;
-		position: absolute;
-		left: 0;
-		top: 0;
+		flex: none;
 	}
-
 	& > strong {
-		display: inline-block;
-		margin-right: 10px;
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
+}
+
+.mainMenu {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 2px;
 }
 
 .mainMenuButton {
@@ -283,7 +289,8 @@
 
 .body {
 	display: flex;
-	height: calc(100% - 84px);
+	flex: 1;
+	min-height: 0;
 }
 
 .actionsLeftWrapper {
@@ -516,5 +523,63 @@ button.textWithIcon {
 
 	&.show {
 		display: block;
+	}
+}
+
+/* Keep both the list and inspector usable in a narrow docked panel. */
+.devtools {
+	container-type: inline-size;
+	min-width: 0;
+}
+.actionsLeftWrapper {
+	flex-shrink: 0;
+}
+.actionsRight {
+	min-width: 0;
+	overflow: auto;
+}
+@container (max-width: 520px) {
+	.head {
+		padding: 8px 8px 0;
+	}
+	.body {
+		flex-direction: column;
+	}
+	.actionsLeftWrapper {
+		width: 100% !important;
+		max-height: 30%;
+		min-height: 90px;
+		border-bottom: 1px solid #dee2e6;
+	}
+	.actionsLeft {
+		max-height: 100%;
+	}
+}
+
+.connectionSelector {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
+	flex: 0 1 auto;
+	color: #475467;
+	font-size: 12px;
+	select {
+		flex: 1;
+		min-width: 0;
+		max-width: 260px;
+		height: 32px;
+		border: 1px solid #cbd2da;
+		border-radius: 6px;
+		background: #fff;
+		color: #222;
+		font: inherit;
+		font-size: 13px;
+		padding: 4px 8px;
+		cursor: pointer;
+	}
+	select:focus-visible {
+		outline: 2px solid #f5841b;
+		outline-offset: 2px;
 	}
 }

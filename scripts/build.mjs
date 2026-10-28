@@ -1,10 +1,27 @@
 // @ts-check
 import * as esbuild from "esbuild";
-import { readFileSync, writeFileSync } from "fs";
+import { readFileSync, writeFileSync, mkdirSync, copyFileSync } from "fs";
 
 import packageJson from "../package.json" with { type: "json" };
 
 import { packagePlugin } from "./common.mjs";
+
+mkdirSync("dist", { recursive: true });
+const {
+	devDependencies,
+	private: unpublished,
+	scripts,
+	...metadata
+} = packageJson;
+writeFileSync(
+	"dist/package.json",
+	JSON.stringify(
+		{ ...metadata, main: "./devtools.js", module: "./devtools.js" },
+		null,
+		2,
+	),
+);
+for (const file of ["README.md", "LICENSE"]) copyFileSync(file, `dist/${file}`);
 
 const result = await esbuild.build({
 	entryPoints: ["./src/devtools.tsx"],

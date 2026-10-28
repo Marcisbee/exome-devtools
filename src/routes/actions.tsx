@@ -12,6 +12,7 @@ import {
 	ExploreExomeObject,
 	ExploreObject,
 	safeStringify,
+	historicalContext,
 } from "../components/value-explorer/value-explorer2";
 import styles from "../devtools.module.css";
 import { RouterOutlet, routerContext } from "../devtools/router";
@@ -23,9 +24,17 @@ import { useQueryFilter } from "../utils/use-query-filter";
 import { useResize } from "../utils/use-resize";
 
 const routes = {
-	$actionId: DevtoolsActionsContent,
-	"*": DevtoolsActionsContent,
+	$actionId: HistoricalActionContent,
+	"*": HistoricalActionContent,
 };
+
+function HistoricalActionContent() {
+	return (
+		<historicalContext.Provider value={true}>
+			<DevtoolsActionsContent />
+		</historicalContext.Provider>
+	);
+}
 
 export function RouteDevtoolsActions() {
 	const ref = useRef<HTMLDivElement>(null);
@@ -43,6 +52,7 @@ export function RouteDevtoolsActions() {
 	const [query, setQuery, filteredActions] = useQueryFilter(
 		unfilteredActions,
 		(action) => action.name,
+		(action) => action.after ?? action.before,
 	);
 
 	useLayoutEffect(() => {
@@ -68,7 +78,8 @@ export function RouteDevtoolsActions() {
 					<div className={styles.filterInput}>
 						<input
 							type="search"
-							placeholder="Filter.."
+							placeholder="Filter actions or action,field=value"
+							aria-label="Filter actions"
 							onInput={(e) => {
 								setQuery((e.target as HTMLInputElement)!.value.toLowerCase());
 							}}
@@ -251,7 +262,7 @@ function DevtoolsActionsContent() {
 
 				const lastAction = instance.actions[instance.actions.length - 1];
 
-				if (lastAction.id !== params.actionId) {
+				if (lastAction?.id !== params.actionId) {
 					return;
 				}
 

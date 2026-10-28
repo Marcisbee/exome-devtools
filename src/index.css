@@ -1,10 +1,16 @@
-#devtools {
-	display: block;
-	position: absolute;
-	width: 1000px;
-	max-width: 50%;
-	top: 0;
-	right: 0;
-	bottom: 0;
-	border-left: 2px solid silver;
+html, body { margin: 0; height: 100%; }
+body { display: flex; flex-direction: column; font-family: Arial, sans-serif; }
+.preview-bar {
+	display: flex; align-items: center; justify-content: space-between;
+	gap: 12px; padding: 10px 16px; font-size: 12px; line-height: 1.4;
+	background: #f8fafc; color: #475467; border-bottom: 1px solid #d0d5dd;
+}
+.preview-bar a { color: #344054; text-underline-offset: 3px; }
+#devtools { position: relative; flex: 1; min-height: 0; }
+#playground { display: none; }
+.live-playground #playground { display: block; padding: 16px; width: 40%; box-sizing: border-box; overflow: auto; }
+.live-playground #devtools { position: absolute; left: 40%; right: 0; top: 48px; bottom: 0; border-left: 1px solid #d0d5dd; }
+@media (max-width: 600px) {
+	.live-playground #playground { width: 100%; max-height: 25vh; }
+	.live-playground #devtools { position: relative; left: auto; top: auto; border-left: 0; }
 }
