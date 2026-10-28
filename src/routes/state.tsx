@@ -48,7 +48,7 @@ function StoreExplore({ id, instance, count }: StoreExploreProps) {
 			</div>
 
 			<pre className={styles.storeExploreBlock}>
-				<span style={{ display: "block", marginBottom: 10, color: "#ccc" }}>
+				<span style={{ display: "block", marginBottom: 10, color: "#667085" }}>
 					state
 				</span>
 
@@ -88,7 +88,7 @@ function StoreExplore({ id, instance, count }: StoreExploreProps) {
 			</pre>
 
 			<pre className={styles.storeExploreBlock}>
-				<span style={{ display: "block", marginBottom: 10, color: "#ccc" }}>
+				<span style={{ display: "block", marginBottom: 10, color: "#667085" }}>
 					actions (retained history)
 				</span>
 
@@ -138,7 +138,7 @@ function StoreExplore({ id, instance, count }: StoreExploreProps) {
 									style={{
 										display: "inline-block",
 										padding: "0 5px",
-										color: "#ccc",
+										color: "#667085",
 									}}
 								>
 									0x

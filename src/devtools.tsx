@@ -159,7 +159,7 @@ function Devtools() {
 						<HistoryButtonNext />
 					</div>
 
-					<div>
+					<div className={styles.mainMenu}>
 						<button
 							type="button"
 							className={[

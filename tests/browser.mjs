@@ -17,7 +17,7 @@ const server = createServer((req, res) => {
 	}
 	res.setHeader("Content-Type", "text/html");
 	res.end(
-		'<link rel="stylesheet" href="/devtools.css"><div id="root" style="height:100vh"></div>',
+		'<!doctype html><link rel="stylesheet" href="/devtools.css"><div id="root" style="height:480px;position:relative"></div>',
 	);
 });
 await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
@@ -139,6 +139,45 @@ try {
 		});
 	});
 	const selector = page.getByRole("combobox", { name: "Connection" });
+	await page.getByRole("button", { name: "Actions", exact: true }).click();
+	for (const width of [1100, 380]) {
+		await page.setViewportSize({ width, height: 700 });
+		const bounds = await page.evaluate(() => {
+			const root = document.getElementById("root").getBoundingClientRect();
+			const select = document.querySelector("select").getBoundingClientRect();
+			const nav = [...document.querySelectorAll("button")]
+				.find((el) => el.textContent.trim() === "State")
+				.getBoundingClientRect();
+			const filter = document
+				.querySelector("input[type=search]")
+				.getBoundingClientRect();
+			return {
+				rootBottom: root.bottom,
+				panelBottom: document
+					.querySelector("select")
+					.closest("label")
+					.closest("div")
+					.parentElement.parentElement.getBoundingClientRect().bottom,
+				selectBottom: select.bottom,
+				navTop: nav.top,
+				navBottom: nav.bottom,
+				filterTop: filter.top,
+			};
+		});
+		assert.ok(
+			bounds.selectBottom <= bounds.navTop,
+			"connection selector must not overlap navigation",
+		);
+		assert.ok(
+			bounds.navBottom <= bounds.filterTop,
+			"navigation must not overlap content",
+		);
+		assert.ok(
+			bounds.panelBottom <= bounds.rootBottom + 1,
+			"panel must fit its embedding container",
+		);
+	}
+
 	await selector.click({ timeout: 1500 });
 	await page.keyboard.press("Escape");
 	await selector.selectOption({ label: "Second (2)" });
