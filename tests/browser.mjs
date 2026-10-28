@@ -24,14 +24,22 @@ await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
 const browser = await chromium.launch({
 	executablePath: process.env.CHROME_PATH || undefined,
 	headless: true,
+	slowMo: process.env.EVIDENCE_DIR ? 150 : 0,
 });
 try {
 	const page = await browser.newPage({
-		viewport: { width: 1000, height: 700 },
+		viewport: { width: 1000, height: process.env.EVIDENCE_DIR ? 1000 : 700 },
+		recordVideo: process.env.EVIDENCE_DIR
+			? { dir: process.env.EVIDENCE_DIR, size: { width: 1000, height: 1000 } }
+			: undefined,
 	});
 	const errors = [];
 	page.on("pageerror", (error) => errors.push(error.message));
 	await page.goto(`http://127.0.0.1:${server.address().port}`);
+	if (process.env.EVIDENCE_DIR)
+		await page.locator("#root").evaluate((el) => {
+			el.style.height = "950px";
+		});
 	await page.evaluate(async () => {
 		const { renderUI } = await import("/devtools.js");
 		renderUI(document.getElementById("root"));
@@ -50,8 +58,24 @@ try {
 			time: 5,
 			trace: "",
 			payload: [],
-			before: { value: [], child: { $$exome_id: "Counter-2" } },
-			after: { value: {}, count: 1, child: { $$exome_id: "Counter-2" } },
+			before: {
+				value: [],
+				child: { $$exome_id: "Counter-2" },
+				profile: { name: "Old", deleted: "gone" },
+				addedOnly: {},
+				removed: { nested: "removed object value" },
+				items: ["keep", "removed item"],
+				changedRef: { $$exome_id: "Counter-2" },
+			},
+			after: {
+				value: {},
+				count: 1,
+				child: { $$exome_id: "Counter-2" },
+				profile: { name: "New", added: false },
+				addedOnly: { flag: null },
+				items: ["keep"],
+				changedRef: { $$exome_id: "Counter-3" },
+			},
 		};
 		connection.send({
 			event: "update",
@@ -78,12 +102,47 @@ try {
 		.getByRole("searchbox", { name: "Filter actions" })
 		.fill("increment,count=1");
 	await page.getByRole("button", { name: /Counter.*increment/s }).click();
+	const changes = page.locator('[aria-label="Action changes"]');
+	await changes.waitFor({ timeout: 3000 });
+	assert.equal(await changes.count(), 1);
+	const profile = changes.getByRole("button", { name: /"profile": ± Changed/ });
+	await profile.focus();
+	await page.keyboard.press("Enter");
+	assert.equal(await profile.getAttribute("aria-expanded"), "true");
+	for (const text of ['"gone"', '"Old"', '"New"', "false"]) {
+		await changes.getByText(text, { exact: true }).waitFor();
+	}
+	await page.keyboard.press("Space");
+	assert.equal(await profile.getAttribute("aria-expanded"), "false");
+	await profile.click();
+	await changes.getByRole("button", { name: /"addedOnly": \+ Added/ }).click();
+	await changes.getByText("null", { exact: true }).waitFor();
+	const items = changes.getByRole("button", { name: /"items": − Removed/ });
+	await items.click();
+	await changes.getByText('"removed item"', { exact: true }).waitFor();
+	await changes.getByRole("button", { name: /removed object value/ }).click();
+	await changes.getByText('"removed object value"', { exact: true }).waitFor();
+	for (const id of ["Counter-2", "Counter-3"]) {
+		await changes
+			.getByText(`${id} (reference; historical value not captured)`, {
+				exact: true,
+			})
+			.waitFor();
+	}
+	assert.equal((await changes.innerText()).includes("999"), false);
+	assert.match(await changes.innerText(), /− Before:/);
+	assert.match(await changes.innerText(), /\+ After:/);
+	if (process.env.EVIDENCE_DIR)
+		await page.screenshot({
+			path: `${process.env.EVIDENCE_DIR}/nested-diff.png`,
+		});
 	await page.getByRole("button", { name: "Before", exact: true }).click();
 	await page
 		.getByText("Counter-2 (reference; historical value not captured)")
+		.filter({ visible: true })
 		.first()
 		.waitFor({ state: "visible" });
-	assert.match(await page.locator("#root").innerText(), /Diff \(2\)/);
+	assert.match(await page.locator("#root").innerText(), /Diff \(9\)/);
 	assert.equal(
 		(await page.locator("#root").innerText()).includes("999"),
 		false,
