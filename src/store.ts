@@ -51,6 +51,11 @@ export class DevtoolsActionsStore extends Exome {
 		this.instances.set(name, structuredClone(state));
 	}
 
+	public removeInstance(name: string) {
+		// Action snapshots and statistics belong to the retained history window.
+		this.instances.delete(name);
+	}
+
 	public replaceSnapshot(
 		states: [string, Record<string, any>][],
 		actions: Action[],

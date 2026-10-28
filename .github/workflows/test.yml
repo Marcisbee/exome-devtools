@@ -19,3 +19,7 @@ jobs:
       - run: npm run test:browser
       - run: npm run test:compatibility
       - run: xvfb-run -a npm run test:extension
+      - run: xvfb-run -a npm run test:hmr
+      - run: xvfb-run -a npm run test:hmr
+        env:
+          HMR_EXOME: exome-v2_9_1

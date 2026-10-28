@@ -13,6 +13,8 @@ export interface DevtoolsExtensionInterface {
 export interface DevtoolsExtensionConnectionInterface {
 	disconnect(): void;
 
+	send(data: { event: "remove"; type: "state"; payload: string }): void;
+
 	send(data: {
 		event: "update";
 		type: "all";
