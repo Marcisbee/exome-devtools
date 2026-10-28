@@ -137,7 +137,6 @@ function Devtools() {
 						</svg>
 						{connections.length > 1 ? (
 							<label className={styles.connectionSelector}>
-								Connection
 								<select
 									aria-label="Connection"
 									value={connections.indexOf(active!)}

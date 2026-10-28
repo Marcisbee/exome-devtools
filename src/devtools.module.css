@@ -561,7 +561,7 @@ button.textWithIcon {
 	align-items: center;
 	gap: 8px;
 	min-width: 0;
-	flex: 0 1 360px;
+	flex: 0 1 auto;
 	color: #475467;
 	font-size: 12px;
 	select {
