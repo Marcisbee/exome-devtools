@@ -163,6 +163,107 @@ try {
 			.evaluate((el) => el.scrollWidth <= el.clientWidth),
 		true,
 	);
+
+	const timelineReport = {
+		...report,
+		samples: [
+			{
+				id: "parent",
+				instance: "Cart-1",
+				name: "checkout",
+				startMs: 1000,
+				durationMs: 100,
+				depth: 1,
+				failed: false,
+				trace: "checkout.ts:10",
+			},
+			{
+				id: "child",
+				instance: "Cart-1",
+				name: "calculate",
+				startMs: 1020,
+				durationMs: 30,
+				depth: 2,
+				failed: false,
+				trace: "cart.ts:12",
+			},
+			{
+				id: "overlap",
+				instance: "Stock-1",
+				name: "reserve",
+				startMs: 1030,
+				durationMs: 40,
+				depth: 1,
+				failed: false,
+				trace: "",
+			},
+			{
+				id: "waiting",
+				instance: "Cart-1",
+				name: "confirm",
+				startMs: 1100,
+				durationMs: null,
+				depth: 1,
+				failed: false,
+				trace: "",
+			},
+		],
+	};
+	await page
+		.getByLabel("Restore JSON", { exact: true })
+		.setInputFiles({
+			name: "timeline.json",
+			mimeType: "application/json",
+			buffer: Buffer.from(JSON.stringify(timelineReport)),
+		});
+	const timeline = page.getByRole("region", {
+		name: "Scrollable action timeline",
+		exact: true,
+	});
+	const parentBar = timeline.getByRole("button", { name: /^Cart-1.checkout,/ });
+	const childBar = timeline.getByRole("button", { name: /^Cart-1.calculate,/ });
+	const overlapBar = timeline.getByRole("button", {
+		name: /^Stock-1.reserve,/,
+	});
+	const parentBounds = await parentBar.boundingBox();
+	const childBounds = await childBar.boundingBox();
+	const overlapBounds = await overlapBar.boundingBox();
+	assert.ok(
+		Math.abs(childBounds.width / parentBounds.width - 0.3) < 0.02,
+		"bar width encodes duration",
+	);
+	assert.ok(
+		Math.abs((childBounds.x - parentBounds.x) / parentBounds.width - 0.2) <
+			0.02,
+		"bar offset encodes start",
+	);
+	assert.ok(childBounds.y > parentBounds.y, "nested depth has its own row");
+	assert.notEqual(
+		overlapBounds.y,
+		parentBounds.y,
+		"concurrent calls do not hide one another",
+	);
+	await childBar.focus();
+	await page.keyboard.press("Enter");
+	await page
+		.getByRole("region", { name: "Selected timeline action" })
+		.getByText("cart.ts:12", { exact: true })
+		.waitFor();
+	await page.getByRole("slider", { name: "Timeline zoom" }).fill("4");
+	assert.ok(
+		await timeline.evaluate((el) => el.scrollWidth > el.clientWidth * 3),
+		"zoom expands the scrollable time axis",
+	);
+	await timeline.evaluate((el) => (el.scrollLeft = 200));
+	assert.ok(
+		await timeline.evaluate((el) => el.scrollLeft > 0),
+		"timeline pans horizontally",
+	);
+	await page.getByRole("button", { name: "Fit timeline" }).click();
+	assert.ok(
+		await timeline.evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
+		"fit restores the entire time range",
+	);
 	await page.getByRole("button", { name: "Return to live" }).click();
 	await page.getByRole("button", { name: "Actions", exact: true }).click();
 

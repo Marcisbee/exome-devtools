@@ -175,3 +175,136 @@
 		font-size: 20px;
 	}
 }
+
+.timelineSection {
+	margin: 16px 0;
+	min-width: 0;
+}
+.timelineSection label {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+}
+.timelineSection input[type="range"] {
+	width: 120px;
+}
+.timelineScroll {
+	margin-top: 10px;
+	overflow: auto;
+	max-height: 320px;
+	border: 1px solid #ccd1d7;
+	background: #fafbfc;
+}
+.timelineCanvas {
+	position: relative;
+	min-width: 100%;
+	padding-bottom: 14px;
+}
+.ruler {
+	position: sticky;
+	top: 0;
+	height: 30px;
+	z-index: 2;
+	background: #f0f2f5;
+	border-bottom: 1px solid #ccd1d7;
+	overflow: hidden;
+}
+.ruler span {
+	position: absolute;
+	top: 0;
+	padding: 5px;
+	white-space: nowrap;
+	border-left: 1px solid #ccd1d7;
+	font-size: 11px;
+	font-variant-numeric: tabular-nums;
+}
+.ruler span:last-child {
+	transform: translateX(-100%);
+}
+.lane {
+	height: 48px;
+	position: relative;
+	border-bottom: 1px solid #e5e7eb;
+	background-image: linear-gradient(to right, #e5e7eb 1px, transparent 1px);
+	background-size: 10% 100%;
+}
+.depth {
+	position: sticky;
+	left: 4px;
+	top: 0;
+	color: #667085;
+	font-size: 10px;
+}
+.timelineBar {
+	position: absolute;
+	top: 19px;
+	height: 25px;
+	min-width: 4px;
+	max-width: 100%;
+	border: 1px solid #0002;
+	border-radius: 2px;
+	padding: 0;
+	text-align: left;
+	text-indent: 5px;
+	color: #20252b;
+	font: inherit;
+	font-size: 11px;
+	white-space: nowrap;
+	overflow: hidden;
+	cursor: pointer;
+}
+.timelineBar[aria-pressed="true"] {
+	outline: 2px solid #2558a7;
+	outline-offset: -2px;
+}
+.timelineBar:focus-visible {
+	outline: 2px solid #111;
+	z-index: 1;
+}
+.timelineBar[data-pending="true"] {
+	background-image: repeating-linear-gradient(
+		45deg,
+		transparent,
+		transparent 3px,
+		#0003 3px,
+		#0003 5px
+	);
+}
+.timelineCaption {
+	color: #667085;
+	font-size: 11px;
+	margin: 6px 0;
+}
+.selection {
+	padding: 12px;
+	background: #f8fafb;
+	border: 1px solid #dee2e6;
+	border-radius: 4px;
+	overflow-wrap: anywhere;
+}
+.selection .stats {
+	padding: 0;
+}
+.selection pre {
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+.metrics {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 24px;
+	border-top: 1px solid #eee;
+	padding-top: 12px;
+}
+.metrics > div {
+	display: flex;
+	align-items: baseline;
+	gap: 8px;
+	background: none;
+	border: 0;
+	padding: 0;
+}
+.metrics dd {
+	font-size: 16px;
+	margin: 0;
+}

@@ -126,3 +126,12 @@ source locations. Agents can read or compare files directly, for example:
 ```sh
 jq '.summary | sort_by(-.totalMs) | .[:10]' exome-performance.json
 ```
+
+The Performance page starts with a scrollable timeline. Bar positions show start
+times relative to the first retained call and widths show elapsed duration. Zoom
+expands the time axis; scroll horizontally to pan, or use **Fit timeline** to see
+the full retained range. Select a bar (or focus it and press Enter) for timings
+and its call trace. Depth and overlapping calls occupy separate rows; depth does
+not establish parent-child identity. Pending and zero-duration calls appear as
+minimum-width markers, without inventing an end time. Saved reports reconstruct
+the same timeline from their samples.

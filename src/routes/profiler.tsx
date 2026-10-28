@@ -10,6 +10,7 @@ import {
 	timingNotes,
 } from "../performance";
 import styles from "./profiler.module.css";
+import { PerformanceTimeline } from "./performance-timeline";
 
 const ms = (value: number | null) =>
 	value === null
@@ -107,6 +108,14 @@ export function RouteDevtoolsProfiler() {
 				<summary>Elapsed timings · how to interpret</summary>
 				<p>{timingNotes}</p>
 			</details>
+			<PerformanceTimeline
+				samples={report.samples}
+				onInspect={
+					performanceReport
+						? undefined
+						: (id) => router.navigate(`actions/${id}`, "actions")
+				}
+			/>
 			<dl className={styles.metrics}>
 				<div>
 					<dt>Completed</dt>
