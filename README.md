@@ -39,7 +39,7 @@ import { unstableExomeDevtools } from 'exome/devtools';
 addMiddleware(unstableExomeDevtools({ name: 'My application', maxAge: 60 }));
 ```
 
-Open Chrome DevTools and select **Exome**. If no connection appears, verify that the middleware runs in the inspected page and reload that page. Browser-internal pages cannot be inspected. Multiple connections can be selected from the Connection menu.
+Open Chrome DevTools and select **Exome**. If no connection appears, verify that the middleware runs in the inspected page and reload that page. Browser-internal pages cannot be inspected. When multiple applications connect, use the **Connection** selector above the panel to switch between them. Each connection keeps its own stores, action history, and counts, even when store or action IDs match. Inactive connections continue receiving updates. Switching opens that connection’s Actions view; disconnecting the selected connection selects another available connection. Connection labels include an ordinal to distinguish applications with the same name.
 
 After rebuilding, reload the extension in `chrome://extensions`, reload the inspected application, and reopen DevTools.
 

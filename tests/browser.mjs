@@ -109,6 +109,63 @@ try {
 		await page.locator("#root").innerText(),
 		/Retained completed actions: 1 \(1x\)/,
 	);
+	// Identical store/action IDs in two connections must remain independent.
+	await page.evaluate(() => {
+		window.second = window.__EXOME_DEVTOOLS_EXTENSION__.connect({
+			name: "Second",
+			maxAge: 3,
+			details: { version: "2.6.0" },
+		});
+		window.second.send({
+			event: "update",
+			type: "all",
+			payload: {
+				states: [["Counter-1", { count: 200 }]],
+				actions: [
+					{
+						id: "1",
+						name: "secondAction",
+						instance: "Counter-1",
+						depth: 1,
+						now: 0,
+						time: 8,
+						trace: "",
+						payload: [],
+						before: { count: 199 },
+						after: { count: 200 },
+					},
+				],
+			},
+		});
+	});
+	const selector = page.getByRole("combobox", { name: "Connection" });
+	await selector.selectOption({ label: "Second (2)" });
+	await page.getByRole("button", { name: /Counter.*secondAction/s }).waitFor();
+	assert.equal(
+		await page.getByRole("button", { name: /Counter.*increment/s }).count(),
+		0,
+	);
+	await page.getByRole("button", { name: "State", exact: true }).click();
+	await page.getByRole("button", { name: "Counter-1", exact: true }).click();
+	await page.getByText("200", { exact: true }).waitFor();
+	await page.evaluate(() =>
+		window.connection.send({
+			event: "update",
+			type: "state",
+			payload: ["Counter-1", { count: 42 }],
+		}),
+	);
+	assert.equal(await page.getByText("42", { exact: true }).count(), 0);
+	await selector.selectOption({ label: "Test app (1)" });
+	await page.getByRole("button", { name: /Counter.*increment/s }).waitFor();
+	assert.equal(
+		await page.getByRole("button", { name: /Counter.*secondAction/s }).count(),
+		0,
+	);
+	await page.getByRole("button", { name: "State", exact: true }).click();
+	await page.getByRole("button", { name: "Counter-1", exact: true }).click();
+	await page.getByText("42", { exact: true }).waitFor();
+
 	await page.evaluate(() =>
 		window.connection.send({
 			event: "update",
@@ -122,18 +179,13 @@ try {
 		0,
 	);
 	await page.evaluate(() => {
-		const second = window.__EXOME_DEVTOOLS_EXTENSION__.connect({
-			name: "Second",
-			maxAge: 3,
-			details: { version: "2.6.0" },
-		});
 		window.connection.disconnect();
 		window.connection.disconnect();
 	});
 	await page.getByText("Second", { exact: true }).waitFor();
 	assert.deepEqual(errors, []);
 	console.log(
-		"Production UI: filtering, diffs, snapshots, getters, keyboard, narrow panel, sync and connection disposal passed",
+		"Production UI: filtering, diffs, snapshots, getters, keyboard, narrow panel, sync, connection switching/isolation and disposal passed",
 	);
 } finally {
 	await browser.close();
