@@ -24,7 +24,7 @@ const context = await chromium.launchPersistentContext(profile, {
 	],
 });
 try {
-	const page = await context.newPage();
+	const page = context.pages()[0] || (await context.newPage());
 	await page.goto(url);
 	const cdp = await context.newCDPSession(page);
 	async function waitFor(check, label) {
@@ -36,17 +36,51 @@ try {
 	}
 	await waitFor(async () => {
 		const targets = (await cdp.send("Target.getTargets")).targetInfos;
-		const frontend = targets.find(
-			(t) => t.title === `DevTools - 127.0.0.1:${server.address().port}/`,
-		);
-		return (
-			frontend &&
-			targets.some(
-				(t) =>
-					t.parentId === frontend.targetId && t.url.endsWith("/devtools.html"),
-			)
+		return targets.some(
+			(target) =>
+				target.url.startsWith("chrome-extension://") &&
+				target.url.endsWith("/devtools.html"),
 		);
 	}, "extension DevTools page");
+	const frontend = (await cdp.send("Target.getTargets")).targetInfos.find((t) =>
+		t.url.startsWith("devtools://"),
+	);
+	const { sessionId } = await cdp.send("Target.attachToTarget", {
+		targetId: frontend.targetId,
+		flatten: false,
+	});
+	let requestId = 0;
+	const evaluateFrontend = (expression, targetSession = sessionId) =>
+		new Promise((resolve, reject) => {
+			const id = ++requestId;
+			const receive = ({ message }) => {
+				const result = JSON.parse(message);
+				if (result.id !== id) return;
+				cdp.off("Target.receivedMessageFromTarget", receive);
+				if (result.error || result.result?.exceptionDetails)
+					reject(Error(JSON.stringify(result)));
+				else resolve(result.result.result.value);
+			};
+			cdp.on("Target.receivedMessageFromTarget", receive);
+			cdp
+				.send("Target.sendMessageToTarget", {
+					sessionId: targetSession,
+					message: JSON.stringify({
+						id,
+						method: "Runtime.evaluate",
+						params: { expression, returnByValue: true, awaitPromise: true },
+					}),
+				})
+				.catch(reject);
+		});
+	const panelId = await evaluateFrontend(
+		`(async()=>{const UI=await import('./ui/legacy/legacy.js'); return UI.InspectorView.InspectorView.instance().tabbedPane.tabIds().find(id=>id.endsWith('🔶Exome'));})()`,
+	);
+	const showPanel = (id) =>
+		evaluateFrontend(
+			`(async()=>{const UI=await import('./ui/legacy/legacy.js'); await UI.InspectorView.InspectorView.instance().showPanel(${JSON.stringify(id)}); return true;})()`,
+		);
+
 	await page.waitForFunction(() => !!window.__EXOME_DEVTOOLS_EXTENSION__);
 	const connect = async (frame, name) =>
 		frame.evaluate((name) => {
@@ -98,6 +132,40 @@ try {
 		["A", "sync"],
 		["B", "sync"],
 	]);
+	await showPanel(panelId);
+	await waitFor(
+		async () =>
+			(await cdp.send("Target.getTargets")).targetInfos.some((t) =>
+				t.url.endsWith("/panel.html"),
+			),
+		"visible extension panel",
+	);
+	const panelTarget = (await cdp.send("Target.getTargets")).targetInfos.find(
+		(t) => t.url.endsWith("/panel.html"),
+	);
+	const panelSession = (
+		await cdp.send("Target.attachToTarget", {
+			targetId: panelTarget.targetId,
+			flatten: false,
+		})
+	).sessionId;
+	const panelOptions = () =>
+		evaluateFrontend(
+			`Array.from(document.querySelectorAll('select[aria-label="Connection"] option'), o=>o.textContent)`,
+			panelSession,
+		);
+	await waitFor(
+		async () => (await panelOptions()).length === 3,
+		"panel connections",
+	);
+	assert.deepEqual(await panelOptions(), ["A (1)", "B (2)", "Frame (3)"]);
+	await showPanel("elements");
+	await showPanel(panelId);
+	assert.deepEqual(await panelOptions(), ["A (1)", "B (2)", "Frame (3)"]);
+	await waitFor(
+		() => page.evaluate(() => window.syncs.length === 6),
+		"panel reopening sync",
+	);
 	// The same discovery message is sent when the panel opens or navigation completes.
 	await page.evaluate(() => {
 		window.syncs = [];

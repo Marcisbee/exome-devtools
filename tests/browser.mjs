@@ -58,7 +58,16 @@ try {
 			type: "all",
 			payload: {
 				states: [
-					["Counter-1", { count: 1, "$$exome_gt:double": null, list: [1, 2] }],
+					[
+						"Counter-1",
+						{
+							count: 1,
+							"$$exome_gt:double": null,
+							list: [1, 2],
+							big: { $$exome_bigint: "9007199254740993" },
+							cycle: { $$exome_circular: true },
+						},
+					],
 					["Counter-2", { count: 999 }],
 				],
 				actions: [action],
@@ -81,6 +90,8 @@ try {
 	);
 	await page.getByRole("button", { name: "State", exact: true }).click();
 	await page.getByRole("button", { name: "Counter-1", exact: true }).click();
+	await page.getByText("9007199254740993n", { exact: true }).waitFor();
+	await page.getByText("[Circular]", { exact: true }).waitFor();
 	await page.getByText("not evaluated", { exact: true }).waitFor();
 	const array = page.getByRole("button", {
 		name: "Array(2) [1, 2]",

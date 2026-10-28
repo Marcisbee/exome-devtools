@@ -156,6 +156,13 @@ export function ExploreObject({
 		);
 	}
 
+	if (typeof value.$$exome_bigint === "string") {
+		return <span>{value.$$exome_bigint}n</span>;
+	}
+	if (value.$$exome_circular === true) {
+		return <span>[Circular]</span>;
+	}
+
 	if (value.$$exome_id && historical) {
 		return (
 			<span>{value.$$exome_id} (reference; historical value not captured)</span>
@@ -359,6 +366,10 @@ export function safeStringify(value: any, depth = 0): string {
 		if (value instanceof Date) {
 			return "Date { " + value.toISOString() + " }";
 		}
+
+		if (typeof value.$$exome_bigint === "string")
+			return `${value.$$exome_bigint}n`;
+		if (value.$$exome_circular === true) return "[Circular]";
 
 		if (value.$$exome_class) {
 			return `${value.$$exome_class} {...}`;

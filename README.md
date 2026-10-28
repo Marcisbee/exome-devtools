@@ -23,7 +23,7 @@ npm run test:extension
 
 `test:browser` exercises the built UI. `test:extension` launches Chromium with the unpacked extension and needs a display; on headless Linux run `xvfb-run -a npm run test:extension`. `CHROME_PATH` can select an existing browser executable. Use Chromium or Chrome for Testing for extension tests; branded Chrome may disallow command-line extension loading.
 
-The extension tests cover connection isolation, frame routing, rediscovery, repeated disconnect, and page navigation. Also check opening DevTools after the application starts and hiding/showing the Exome panel when validating a release.
+The extension tests cover connection isolation, frame routing, rediscovery, repeated disconnect, and page navigation. The real panel is also opened and hidden/shown to verify that connections render without duplication. Check opening DevTools after the application starts when validating a release.
 
 ## Load the extension
 
@@ -68,7 +68,7 @@ Embedding replaces the page's extension hook. Use either the embedded UI or the 
 
 ## Dependency and release status
 
-This checkout uses Exome 2.6.0. Its middleware can discard too much history at the retention limit and serialize BigInt, cyclic plain objects, and null-prototype dictionaries as undefined. Those upstream fixes and adoption of a corrected release are still pending; a UI fix alone cannot recover data already lost by the producer.
+This checkout uses Exome 2.6.0. Its middleware can discard too much history at the retention limit and serialize BigInt, cyclic plain objects, and null-prototype dictionaries as undefined. The upstream fixes are prepared in Exome PR #33 for 2.9.1; publication and adoption are pending; a UI fix alone cannot recover data already lost by the producer.
 
 The Profiler remains disabled and unfinished.
 
