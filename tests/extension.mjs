@@ -73,9 +73,13 @@ try {
 				})
 				.catch(reject);
 		});
-	const panelId = await evaluateFrontend(
-		`(async()=>{const UI=await import('./ui/legacy/legacy.js'); return UI.InspectorView.InspectorView.instance().tabbedPane.tabIds().find(id=>id.endsWith('🔶Exome'));})()`,
-	);
+	let panelId;
+	await waitFor(async () => {
+		panelId = await evaluateFrontend(
+			`(async()=>{const UI=await import('./ui/legacy/legacy.js'); return UI.InspectorView.InspectorView.instance().tabbedPane.tabIds().find(id=>id.endsWith('🔶Exome'));})()`,
+		);
+		return Boolean(panelId);
+	}, "Exome tab registration");
 	const showPanel = (id) =>
 		evaluateFrontend(
 			`(async()=>{const UI=await import('./ui/legacy/legacy.js'); await UI.InspectorView.InspectorView.instance().showPanel(${JSON.stringify(id)}); return true;})()`,
