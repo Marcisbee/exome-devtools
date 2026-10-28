@@ -1,0 +1,98 @@
+name: Release extension
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Upload and submit to Chrome Web Store (otherwise only build ZIP)
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: chrome-web-store-release
+  cancel-in-progress: false
+jobs:
+  test:
+    uses: ./.github/workflows/test.yml
+  package:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Verify release source and version
+        env:
+          RELEASE_REF: ${{ github.ref }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor HEAD origin/main
+          if [[ "$RELEASE_REF" == refs/tags/* ]]; then
+            node -e 'if (process.env.RELEASE_TAG !== "v" + require("./package.json").version) throw Error("Tag must match package version")'
+          elif [[ "$RELEASE_REF" != refs/heads/main ]]; then
+            echo 'Run manual releases from main.' >&2
+            exit 1
+          fi
+      - run: npm ci
+      - run: npm run build
+      - name: Package extension
+        run: |
+          node -e 'if (require("./extension/dist/manifest.json").version !== require("./package.json").version) throw Error("Manifest version mismatch")'
+          cd extension/dist
+          zip -r ../../extension.zip .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: chrome-extension
+          path: extension.zip
+          if-no-files-found: error
+  publish:
+    needs: package
+    if: startsWith(github.ref, 'refs/tags/') || inputs.publish == true
+    runs-on: ubuntu-latest
+    environment: chrome-web-store
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v4
+        with:
+          name: chrome-extension
+      - name: Check publisher configuration
+        env:
+          PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
+          PUBLISHER: ${{ vars.CWS_PUBLISHER_ID }}
+          ITEM: ${{ vars.CWS_EXTENSION_ID }}
+        run: |
+          test -n "$PROVIDER" && test -n "$ACCOUNT" && test -n "$PUBLISHER" && test -n "$ITEM" || {
+            echo 'Complete the Chrome Web Store setup documented in README.md.' >&2
+            exit 1
+          }
+      - id: auth
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/chromewebstore
+          create_credentials_file: false
+      - name: Upload and submit for review
+        env:
+          CWS_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+          CWS_PUBLISHER_ID: ${{ vars.CWS_PUBLISHER_ID }}
+          CWS_EXTENSION_ID: ${{ vars.CWS_EXTENSION_ID }}
+        run: node scripts/publish-extension.mjs

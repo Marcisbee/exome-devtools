@@ -79,3 +79,16 @@ The older middleware can discard retained history at its limit and omit BigInt, 
 The Profiler remains disabled and unfinished.
 
 `npm run build` packages the embedded UI in `dist` and the unpacked extension in `extension/dist`; it does not publish either artifact. The extension version comes from the root package version. Before release, run the tests, validate the real panel lifecycle, and verify compatibility with the intended Exome version.
+
+## Automated Chrome Web Store releases
+
+The **Release extension** GitHub Actions workflow runs the full test suite (including the compatibility matrix), builds the extension, and saves `extension.zip` as a workflow artifact. A `vX.Y.Z` tag submits the ZIP to Chrome Web Store review. Manual runs from `main` default to packaging only; select **publish** to upload and submit. Release commits must be on `main`, and a tag must match the root package version. Bump that version before releasing; Chrome rejects reused version numbers.
+
+Publishing uses the Chrome Web Store API v2 and Google's official authentication action with short-lived credentials. One-time publisher-owner setup:
+
+1. Enable the Chrome Web Store API in a Google Cloud project. Create a service account and link its email in the Chrome Web Store Developer Dashboard's Account section. See [Google's service-account instructions](https://developer.chrome.com/docs/webstore/service-accounts).
+2. Configure GitHub OIDC Workload Identity Federation and grant the repository principal `roles/iam.workloadIdentityUser` on that service account. Restrict the provider to `Marcisbee/exome-devtools` and the `repo:Marcisbee/exome-devtools:environment:chrome-web-store` subject. Follow the [official authentication action setup](https://github.com/google-github-actions/auth#workload-identity-federation-through-a-service-account). No service-account key or refresh token is stored in this repository.
+3. Create the GitHub environment `chrome-web-store`. Add environment variables `GCP_WORKLOAD_IDENTITY_PROVIDER` (full provider resource name), `GCP_SERVICE_ACCOUNT` (email), `CWS_PUBLISHER_ID` (from Publisher settings), and `CWS_EXTENSION_ID` (the existing store item's ID). Restrict deployment branches/tags to `main` and release tags; configure environment reviewers if desired.
+4. Complete the existing listing and privacy declarations in the publisher dashboard. Merge this workflow, run it once with **publish** unchecked to inspect its artifact, then release a new version with a matching tag or a publishing manual run.
+
+Uploads must finish successfully before submission. A retry skips versions already published or awaiting review and refuses to replace a different pending submission. The workflow reports the API's resulting state: **PENDING_REVIEW is not a live release**. Google still controls review and approval. See [Chrome Web Store API publishing](https://developer.chrome.com/docs/webstore/using-api/).
