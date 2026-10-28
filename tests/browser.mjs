@@ -130,8 +130,7 @@ try {
 			.waitFor();
 	}
 	assert.equal((await changes.innerText()).includes("999"), false);
-	assert.match(await changes.innerText(), /− Before/);
-	assert.match(await changes.innerText(), /\+ After/);
+	assert.match(await changes.innerText(), /=>/);
 	if (process.env.EVIDENCE_DIR)
 		await page.screenshot({
 			path: `${process.env.EVIDENCE_DIR}/nested-diff.png`,

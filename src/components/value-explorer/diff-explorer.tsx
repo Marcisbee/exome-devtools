@@ -58,11 +58,7 @@ export function DiffExplorer({
 	for (const [path, before, after] of diff.edited)
 		insert(path, { kind: "edited", before, after });
 	return (
-		<div aria-label="Action changes" className={styles.diff}>
-			<div className={styles.legend}>
-				<span>− Before</span>
-				<span>+ After</span>
-			</div>
+		<div aria-label="Action changes" className={styles.root}>
 			<DiffNode node={root} />
 		</div>
 	);
@@ -80,6 +76,23 @@ function DiffNode({ node, label }: { node: Node; label?: string }) {
 				:{" "}
 			</>
 		);
+	if (change?.kind === "edited") {
+		return (
+			<div className={styles.editRow}>
+				{prefix}
+				<div
+					className={`${styles.inlineValue} ${styles.removed}`}
+					title="Before"
+				>
+					<ExploreValue value={change.before} />
+				</div>
+				{" => "}
+				<div className={`${styles.inlineValue} ${styles.added}`} title="After">
+					<ExploreValue value={change.after} />
+				</div>
+			</div>
+		);
+	}
 	if (change) {
 		return (
 			<>

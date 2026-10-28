@@ -1,23 +1,13 @@
-.diff {
-	line-height: 1.7;
-}
-.legend {
-	display: flex;
-	gap: 1.5em;
-	padding-bottom: 6px;
-	margin-bottom: 6px;
-	border-bottom: 1px solid #e8ebee;
-	color: #667085;
-}
 .row {
 	display: flex;
 	position: relative;
-	padding-right: 6px;
+	width: fit-content;
+	max-width: 100%;
 }
 .marker {
 	flex: none;
 	display: inline-block;
-	width: 1.6em;
+	width: 1.2em;
 	text-align: center;
 	user-select: none;
 }
@@ -27,9 +17,18 @@
 	overflow-wrap: anywhere;
 	padding-left: 1em;
 }
+.inlineValue {
+	display: inline-block;
+	position: relative;
+	vertical-align: top;
+	max-width: 100%;
+}
+.editRow {
+	padding-left: 2.2em;
+	overflow-wrap: anywhere;
+}
 .toggle {
 	display: block;
-	width: 100%;
 	position: relative;
 	font: inherit;
 	line-height: inherit;
@@ -40,45 +39,43 @@
 	text-align: left;
 	color: inherit;
 }
-.toggle:hover {
-	background: #eef1f4;
-}
 .toggle:focus-visible {
 	outline: 2px solid #f5841b;
-	outline-offset: -2px;
+	outline-offset: 1px;
 }
 .chevron {
 	display: inline-block;
 	width: 1em;
-	color: #667085;
+	color: inherit;
+	opacity: 0.5;
 }
 .children {
-	padding-left: 1.6em;
-}
-.label {
-	color: var(--data-type-label);
-}
-.bracket {
-	color: #667085;
+	padding-left: 1em;
 }
 .branch > .bracket {
-	padding-left: 2.6em;
+	padding-left: 2.2em;
+}
+.root > .branch > .bracket {
+	padding-left: 0;
 }
 .added {
-	color: #287138;
+	background-color: rgba(139, 195, 74, 0.25);
+	color: #1b420b;
 }
 .removed {
-	color: #b13c37;
+	background-color: rgba(244, 67, 54, 0.1);
+	color: #940707;
 }
+.label,
+.bracket,
 .edited {
-	color: #8a6b27;
+	color: inherit;
 }
-.row.added {
-	background: rgba(46, 160, 67, 0.07);
-}
-.row.removed {
-	background: rgba(248, 81, 73, 0.06);
-}
-.value {
-	color: var(--gray-color-200, #344054);
+.value div,
+.value span,
+.value i,
+.inlineValue div,
+.inlineValue span,
+.inlineValue i {
+	color: inherit;
 }
