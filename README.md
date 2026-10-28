@@ -66,9 +66,15 @@ Embedding replaces the page's extension hook. Use either the embedded UI or the 
 - Historical nested Exome references are marked **historical value not captured**. They are not expanded using current store values. Use the State tab for current values.
 - Expand objects and arrays with a click, Enter, or Space. Narrow panels stack the list above the inspector.
 
-## Dependency and release status
+## Exome compatibility
 
-This checkout uses Exome 2.6.0. Its middleware can discard too much history at the retention limit and serialize BigInt, cyclic plain objects, and null-prototype dictionaries as undefined. The upstream fixes are prepared in Exome PR #33 for 2.9.1; publication and adoption are pending; a UI fix alone cannot recover data already lost by the producer.
+This checkout builds with Exome 2.9.1. Inspected applications can keep older Exome versions: the dedicated protocol is available from 2.4.0 through `unstableExomeDevtools` from `exome/devtools`.
+
+`npm run test:compatibility` uses pinned, published Exome 2.4.0, 2.4.4, 2.5.0, 2.6.0, 2.7.0, 2.8.1, 2.9.0, and 2.9.1 packages against the built UI. It checks initial snapshots, state updates, asynchronous actions, mixed-version connection switching, and updates while a connection is inactive. This is a tested version matrix, not a claim that every historical patch has been tested. The aliases are test-only dependencies and are excluded from release packages.
+
+Exome versions before 2.4.0 provide Redux DevTools integration rather than this dedicated protocol. Use Redux DevTools for those versions, or upgrade Exome to use this extension.
+
+The older middleware can discard retained history at its limit and omit BigInt, cyclic plain objects, or null-prototype dictionaries. Devtools cannot recover data that the producer never sends. Exome 2.9.1 fixes those cases; upgrading is recommended for complete data capture.
 
 The Profiler remains disabled and unfinished.
 

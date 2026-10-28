@@ -16,4 +16,5 @@ jobs:
       - run: npm run build
       - run: npx playwright install --with-deps chromium
       - run: npm run test:browser
+      - run: npm run test:compatibility
       - run: xvfb-run -a npm run test:extension
