@@ -60,7 +60,6 @@ export function PerformanceTimeline({
 				<button type="button" onClick={() => setZoom(1)}>
 					Fit timeline
 				</button>
-				<span className={styles.note}>Scroll horizontally to pan</span>
 			</div>
 			{!samples.length ? (
 				<p>No actions to display.</p>
@@ -112,12 +111,6 @@ export function PerformanceTimeline({
 							))}
 						</div>
 					</div>
-					<p className={styles.timelineCaption}>
-						Relative to first retained action · {formatMs(end - start)} span ·
-						Bars show elapsed time, including async waits. Pending and
-						zero-duration calls are markers. Rows separate depth and overlapping
-						calls.
-					</p>
 					{selected ? (
 						<div
 							className={styles.selection}
@@ -165,9 +158,7 @@ export function PerformanceTimeline({
 							{selected.trace && <pre>{selected.trace}</pre>}
 						</div>
 					) : (
-						<p className={styles.note}>
-							Select a bar to inspect its timing and call trace.
-						</p>
+						<p className={styles.note}>Select a call.</p>
 					)}
 				</>
 			)}

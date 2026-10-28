@@ -104,10 +104,6 @@ export function RouteDevtoolsProfiler() {
 					{error}
 				</p>
 			)}
-			<details className={styles.note}>
-				<summary>Elapsed timings · how to interpret</summary>
-				<p>{timingNotes}</p>
-			</details>
 			<PerformanceTimeline
 				samples={report.samples}
 				onInspect={
@@ -134,12 +130,6 @@ export function RouteDevtoolsProfiler() {
 					<dd>{report.samples.filter((s) => s.failed).length}</dd>
 				</div>
 			</dl>
-			<p className={styles.note}>
-				History limit: {report.connection.historyLimit} actions · Exome{" "}
-				{report.connection.exomeVersion}
-				{performanceReport &&
-					` · Captured ${new Date(report.capturedAt).toLocaleString()}`}
-			</p>
 			<div className={styles.controls}>
 				<input
 					type="search"
@@ -170,12 +160,6 @@ export function RouteDevtoolsProfiler() {
 				</p>
 			) : (
 				<>
-					<p className={styles.note}>
-						Start with high total elapsed time for repeated work, high P95 for
-						slow calls, and failures for error paths. Inspect the trace and use
-						a browser CPU profile to distinguish computation from async waits.
-						P95 uses nearest rank and is sensitive to small samples.
-					</p>
 					{!filtered.length && <p>No matching actions.</p>}
 					<div className={styles.groups}>
 						{filtered.map((g) => (
@@ -246,6 +230,27 @@ export function RouteDevtoolsProfiler() {
 					</div>
 				</>
 			)}
+			<details className={styles.note}>
+				<summary>About these timings</summary>
+				<p>{timingNotes}</p>
+				<p className={styles.note}>
+					History limit: {report.connection.historyLimit} actions · Exome{" "}
+					{report.connection.exomeVersion}
+					{performanceReport &&
+						` · Captured ${new Date(report.capturedAt).toLocaleString()}`}
+				</p>
+				<p className={styles.note}>
+					Start with high total elapsed time for repeated work, high P95 for
+					slow calls, and failures for error paths. Inspect the trace and use a
+					browser CPU profile to distinguish computation from async waits. P95
+					uses nearest rank and is sensitive to small samples.
+				</p>
+				<p>
+					Zoom and scroll horizontally to pan. Times are relative to the first
+					retained action. Pending and zero-duration calls are markers; rows
+					separate depth and overlapping calls.
+				</p>
+			</details>
 		</section>
 	);
 }
