@@ -79,3 +79,39 @@
 .inlineValue i {
 	color: inherit;
 }
+
+.root {
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+.toggle {
+	max-width: 100%;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.value,
+.inlineValue {
+	max-width: 100%;
+}
+/* Keep collapsed object previews compact, while expanded values can wrap. */
+.root [role="button"] {
+	display: inline-block;
+	max-width: 100%;
+	vertical-align: top;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.root [role="button"][aria-expanded="true"] {
+	display: block;
+}
+.root [role="button"] > i:first-child {
+	position: static;
+	margin: 0;
+}
+.value div,
+.inlineValue div {
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}

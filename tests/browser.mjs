@@ -294,6 +294,89 @@ try {
 	await page.getByRole("button", { name: "Counter-1", exact: true }).click();
 	await page.getByText("42", { exact: true }).waitFor();
 
+	// Large snapshots must remain inspectable without widening the action panel.
+	await page.evaluate(() => {
+		const large = {
+			longValue: "x".repeat(600),
+			nested: { message: "nested".repeat(100) },
+		};
+		window.connection.send({
+			event: "update",
+			type: "all",
+			payload: {
+				states: [],
+				actions: [
+					{
+						id: "large",
+						name: "inspectLarge",
+						instance: "Counter-1",
+						depth: 1,
+						now: 0,
+						time: 1,
+						trace: "",
+						payload: [],
+						before: { removed: large, edited: large },
+						after: {
+							added: large,
+							edited: null,
+							["longKey".repeat(40)]: { leaf: true },
+						},
+					},
+				],
+			},
+		});
+	});
+	await page.getByRole("button", { name: "Actions", exact: true }).click();
+	await page.getByRole("searchbox", { name: "Filter actions" }).fill("");
+	await page.getByRole("button", { name: /inspectLarge/ }).click();
+	await page.getByRole("button", { name: /Diff/ }).click();
+	const largeChanges = page.locator('[aria-label="Action changes"]');
+	for (const width of [1000, 380]) {
+		await page.setViewportSize({ width, height: 900 });
+		assert.equal(
+			await largeChanges.evaluate((el) => {
+				for (let current = el; current; current = current.parentElement) {
+					if (current.scrollWidth > current.clientWidth + 1) return false;
+				}
+				return true;
+			}),
+			true,
+			`large diff must fit at ${width}px`,
+		);
+	}
+	const largePreview = largeChanges
+		.getByRole("button", { name: /longValue/ })
+		.first();
+	assert.equal(
+		await largePreview.evaluate((el) => getComputedStyle(el).textOverflow),
+		"ellipsis",
+	);
+	assert.equal(
+		await largePreview.evaluate((el) => el.scrollWidth > el.clientWidth),
+		true,
+		"large collapsed preview is truncated",
+	);
+	await largePreview.focus();
+	await page.keyboard.press("Enter");
+	assert.equal(
+		await page.evaluate(() =>
+			document.activeElement.getAttribute("aria-expanded"),
+		),
+		"true",
+	);
+	await largeChanges
+		.getByText('"' + "x".repeat(600) + '"', { exact: true })
+		.first()
+		.waitFor();
+	assert.equal(
+		await largeChanges.evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
+		true,
+	);
+	if (process.env.EVIDENCE_DIR)
+		await page.screenshot({
+			path: `${process.env.EVIDENCE_DIR}/large-diff.png`,
+		});
+
 	await page.evaluate(() =>
 		window.connection.send({
 			event: "update",
