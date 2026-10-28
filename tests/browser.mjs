@@ -139,6 +139,8 @@ try {
 		});
 	});
 	const selector = page.getByRole("combobox", { name: "Connection" });
+	await selector.click({ timeout: 1500 });
+	await page.keyboard.press("Escape");
 	await selector.selectOption({ label: "Second (2)" });
 	await page.getByRole("button", { name: /Counter.*secondAction/s }).waitFor();
 	assert.equal(

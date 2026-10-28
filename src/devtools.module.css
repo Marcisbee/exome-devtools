@@ -549,3 +549,18 @@ button.textWithIcon {
 		max-height: 100%;
 	}
 }
+
+.connectionSelector {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	min-width: 0;
+	font-size: 12px;
+	select {
+		min-width: 0;
+		max-width: 220px;
+		width: 100%;
+		font: inherit;
+		padding: 4px;
+	}
+}

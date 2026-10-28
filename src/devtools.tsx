@@ -45,6 +45,7 @@ const routes = {
 function Devtools() {
 	// const [isOpen, setIsOpen] = useState(false);
 	const { name } = useStore(useContext(devtoolsContext));
+	const { active, connections, setActive } = useStore(connectionsStore);
 	const router = useMemo(() => new RouterStore("actions"), []);
 	const { urlChunks, navigateMemoFirst } = useStore(router);
 	// const maxHeight = useMemo(() => window.innerHeight / 1.5, []);
@@ -134,7 +135,26 @@ function Devtools() {
 								</clipPath>
 							</defs>
 						</svg>
-						<strong>{name}</strong>
+						{connections.length > 1 ? (
+							<label className={styles.connectionSelector}>
+								Connection
+								<select
+									aria-label="Connection"
+									value={connections.indexOf(active!)}
+									onChange={(event) =>
+										setActive(connections[Number(event.currentTarget.value)])
+									}
+								>
+									{connections.map((connection, index) => (
+										<option key={getExomeId(connection)} value={index}>
+											{connection.name} ({index + 1})
+										</option>
+									))}
+								</select>
+							</label>
+						) : (
+							<strong>{name}</strong>
+						)}
 						<HistoryButtonBack />
 						<HistoryButtonNext />
 					</div>
@@ -356,7 +376,7 @@ export function renderUI(target: HTMLElement) {
 	}
 
 	function ConnectionApp() {
-		const { active, connections, setActive } = useStore(connectionsStore);
+		const { active } = useStore(connectionsStore);
 
 		if (!active) {
 			return (
@@ -399,24 +419,6 @@ export function renderUI(target: HTMLElement) {
 
 		return (
 			<devtoolsContext.Provider value={active}>
-				{connections.length > 1 && (
-					<label>
-						Connection{" "}
-						<select
-							aria-label="Connection"
-							value={connections.indexOf(active)}
-							onChange={(event) =>
-								setActive(connections[Number(event.currentTarget.value)])
-							}
-						>
-							{connections.map((connection, index) => (
-								<option value={index}>
-									{connection.name} ({index + 1})
-								</option>
-							))}
-						</select>
-					</label>
-				)}
 				<Devtools key={getExomeId(active)} />
 			</devtoolsContext.Provider>
 		);
