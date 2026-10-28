@@ -105,7 +105,7 @@ try {
 	const changes = page.locator('[aria-label="Action changes"]');
 	await changes.waitFor({ timeout: 3000 });
 	assert.equal(await changes.count(), 1);
-	const profile = changes.getByRole("button", { name: /"profile": ± Changed/ });
+	const profile = changes.getByRole("button", { name: "profile: changed" });
 	await profile.focus();
 	await page.keyboard.press("Enter");
 	assert.equal(await profile.getAttribute("aria-expanded"), "true");
@@ -115,9 +115,9 @@ try {
 	await page.keyboard.press("Space");
 	assert.equal(await profile.getAttribute("aria-expanded"), "false");
 	await profile.click();
-	await changes.getByRole("button", { name: /"addedOnly": \+ Added/ }).click();
+	await changes.getByRole("button", { name: "addedOnly: added" }).click();
 	await changes.getByText("null", { exact: true }).waitFor();
-	const items = changes.getByRole("button", { name: /"items": − Removed/ });
+	const items = changes.getByRole("button", { name: "items: removed" });
 	await items.click();
 	await changes.getByText('"removed item"', { exact: true }).waitFor();
 	await changes.getByRole("button", { name: /removed object value/ }).click();
@@ -130,8 +130,8 @@ try {
 			.waitFor();
 	}
 	assert.equal((await changes.innerText()).includes("999"), false);
-	assert.match(await changes.innerText(), /− Before:/);
-	assert.match(await changes.innerText(), /\+ After:/);
+	assert.match(await changes.innerText(), /− Before/);
+	assert.match(await changes.innerText(), /\+ After/);
 	if (process.env.EVIDENCE_DIR)
 		await page.screenshot({
 			path: `${process.env.EVIDENCE_DIR}/nested-diff.png`,

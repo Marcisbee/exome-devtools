@@ -8,7 +8,7 @@ type Change = {
 	before?: any;
 	after?: any;
 };
-type Node = { children: Map<string, Node>; change?: Change };
+type Node = { children: Map<string, Node>; change?: Change; array?: boolean };
 
 export function DiffExplorer({
 	diff,
@@ -39,10 +39,15 @@ export function DiffExplorer({
 			b = b?.[path[index]];
 		}
 		let node = root;
+		a = before;
+		b = after;
 		for (const key of path) {
+			a = a?.[key];
+			b = b?.[key];
 			if (!node.children.has(key))
 				node.children.set(key, { children: new Map() });
 			node = node.children.get(key)!;
+			node.array = Array.isArray(b ?? a);
 		}
 		node.change = change;
 	}
@@ -53,7 +58,11 @@ export function DiffExplorer({
 	for (const [path, before, after] of diff.edited)
 		insert(path, { kind: "edited", before, after });
 	return (
-		<div aria-label="Action changes">
+		<div aria-label="Action changes" className={styles.diff}>
+			<div className={styles.legend}>
+				<span>− Before</span>
+				<span>+ After</span>
+			</div>
 			<DiffNode node={root} />
 		</div>
 	);
@@ -65,26 +74,38 @@ function DiffNode({ node, label }: { node: Node; label?: string }) {
 	const prefix =
 		label === undefined ? null : (
 			<>
-				<span className={styles.label}>{JSON.stringify(label)}</span>:{" "}
+				<span className={styles.label}>
+					{/^[\w$]+$/.test(label) ? label : JSON.stringify(label)}
+				</span>
+				:{" "}
 			</>
 		);
 	if (change) {
 		return (
-			<div className={styles.change}>
-				{prefix}
+			<>
 				{change.kind !== "added" && (
-					<div className={styles.removed}>
-						<span>− Before: </span>
-						<ExploreValue value={change.before} />
+					<div className={`${styles.row} ${styles.removed}`}>
+						<span className={styles.marker} aria-label="Before">
+							−
+						</span>
+						<div className={styles.value}>
+							{prefix}
+							<ExploreValue value={change.before} />
+						</div>
 					</div>
 				)}
 				{change.kind !== "removed" && (
-					<div className={styles.added}>
-						<span>+ After: </span>
-						<ExploreValue value={change.after} />
+					<div className={`${styles.row} ${styles.added}`}>
+						<span className={styles.marker} aria-label="After">
+							+
+						</span>
+						<div className={styles.value}>
+							{prefix}
+							<ExploreValue value={change.after} />
+						</div>
 					</div>
 				)}
-			</div>
+			</>
 		);
 	}
 	const kinds = new Set<string>();
@@ -95,34 +116,46 @@ function DiffNode({ node, label }: { node: Node; label?: string }) {
 	collect(node);
 	const kind = kinds.size === 1 ? [...kinds][0] : "edited";
 	const open = label === undefined || expanded;
+	const start = node.array ? "[" : "{";
+	const end = node.array ? "]" : "}";
+	if (!node.children.size) return <i>No changes</i>;
 	return (
 		<div className={styles.branch}>
-			{label !== undefined && (
+			{label !== undefined ? (
 				<button
 					type="button"
-					className={styles[kind]}
+					className={styles.toggle}
+					aria-label={`${label}: ${kind === "edited" ? "changed" : kind}`}
 					aria-expanded={expanded}
 					onClick={() => setExpanded(!expanded)}
 				>
-					{expanded ? "▾ " : "▸ "}
+					<span
+						className={`${styles.marker} ${styles[kind]}`}
+						aria-hidden="true"
+					>
+						{kind === "added" ? "+" : kind === "removed" ? "−" : "±"}
+					</span>
+					<span className={styles.chevron} aria-hidden="true">
+						{expanded ? "▾" : "▸"}
+					</span>
 					{prefix}
-					{kind === "added"
-						? "+ Added"
-						: kind === "removed"
-							? "− Removed"
-							: "± Changed"}
+					<span className={styles.bracket}>
+						{start}
+						{open ? "" : `…${end}`}
+					</span>
 				</button>
+			) : (
+				<div className={styles.bracket}>{start}</div>
 			)}
 			{open && (
-				<div className={label === undefined ? undefined : styles.children}>
-					{node.children.size ? (
-						[...node.children].map(([key, child]) => (
+				<>
+					<div className={styles.children}>
+						{[...node.children].map(([key, child]) => (
 							<DiffNode key={key} label={key} node={child} />
-						))
-					) : (
-						<i>No changes</i>
-					)}
-				</div>
+						))}
+					</div>
+					<div className={styles.bracket}>{end}</div>
+				</>
 			)}
 		</div>
 	);

@@ -1,41 +1,84 @@
-.branch,
-.change {
-	position: relative;
-	margin: 2px 0;
+.diff {
+	line-height: 1.7;
 }
-.branch > button {
+.legend {
+	display: flex;
+	gap: 1.5em;
+	padding-bottom: 6px;
+	margin-bottom: 6px;
+	border-bottom: 1px solid #e8ebee;
+	color: #667085;
+}
+.row {
+	display: flex;
+	position: relative;
+	padding-right: 6px;
+}
+.marker {
+	flex: none;
+	display: inline-block;
+	width: 1.6em;
+	text-align: center;
+	user-select: none;
+}
+.value {
+	position: relative;
+	min-width: 0;
+	overflow-wrap: anywhere;
+	padding-left: 1em;
+}
+.toggle {
+	display: block;
+	width: 100%;
+	position: relative;
 	font: inherit;
+	line-height: inherit;
 	border: 0;
-	padding: 2px 6px;
+	padding: 0;
+	background: none;
 	cursor: pointer;
 	text-align: left;
+	color: inherit;
 }
-.branch > button:focus-visible {
+.toggle:hover {
+	background: #eef1f4;
+}
+.toggle:focus-visible {
 	outline: 2px solid #f5841b;
-	outline-offset: 2px;
+	outline-offset: -2px;
+}
+.chevron {
+	display: inline-block;
+	width: 1em;
+	color: #667085;
 }
 .children {
-	padding-left: 1.5em;
-	border-left: 1px solid #d0d5dd;
+	padding-left: 1.6em;
 }
 .label {
 	color: var(--data-type-label);
 }
+.bracket {
+	color: #667085;
+}
+.branch > .bracket {
+	padding-left: 2.6em;
+}
 .added {
-	background: #e5f2dd;
-	color: #1b420b;
+	color: #287138;
 }
 .removed {
-	background: #fce8e6;
-	color: #940707;
+	color: #b13c37;
 }
 .edited {
-	background: #fff2d5;
-	color: #634400;
+	color: #8a6b27;
 }
-.change > div {
-	position: relative;
-	padding: 2px 1em;
-	white-space: pre-wrap;
-	overflow-wrap: anywhere;
+.row.added {
+	background: rgba(46, 160, 67, 0.07);
+}
+.row.removed {
+	background: rgba(248, 81, 73, 0.06);
+}
+.value {
+	color: var(--gray-color-200, #344054);
 }
