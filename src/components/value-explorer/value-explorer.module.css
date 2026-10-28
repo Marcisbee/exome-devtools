@@ -19,6 +19,42 @@
 	overflow: hidden;
 }
 
+.wrapDiffAdded {
+	background-color: #dcedc8;
+	/* box-shadow: 0 0 0 3px #dcedc8; */
+
+	&::before {
+		position: absolute;
+		content: "+";
+		left: 0;
+		color: #689f38;
+	}
+}
+
+.wrapDiffRemoved {
+	background-color: #ffcdd2;
+	/* box-shadow: 0 0 0 3px #ffcdd2; */
+
+	&::before {
+		position: absolute;
+		content: "-";
+		left: 0;
+		color: #f44336;
+	}
+}
+
+.wrapDiffEdited {
+	background-color: #FFF3E0;
+	/* box-shadow: 0 0 0 3px #ffcdd2; */
+
+	&::before {
+		position: absolute;
+		content: "±";
+		left: 0;
+		color: #ff9800;
+	}
+}
+
 .expanded {
 	display: block;
 	padding-left: 1em;

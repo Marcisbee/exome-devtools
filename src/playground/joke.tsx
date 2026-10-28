@@ -51,6 +51,7 @@ export class JokeStore extends Exome {
 		this.joke = await fetch("https://api.chucknorris.io/jokes/random").then(
 			(response) => response.json(),
 		);
+		this.poop = new PoopStore();
 	}
 
 	public async getError() {

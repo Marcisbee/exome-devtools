@@ -170,6 +170,9 @@ export function RouteDevtoolsActions() {
 function DiffObject({ diff }: { diff: Diff }) {
 	return (
 		<pre className={styles.preCode}>
+			<ExploreObject value={after} diff={diff} forceOpen />
+			<br />
+			<br />
 			{"{\n"}
 			{!!diff.added?.length && (
 				<>
