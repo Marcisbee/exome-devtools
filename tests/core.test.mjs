@@ -139,3 +139,95 @@ test("late completion does not restore an evicted action or overwrite live state
 	}
 	assert.deepEqual(store.count.get("Counter-1.increment"), [1]);
 });
+
+const {
+	capturePerformance,
+	summarizePerformance,
+	serializePerformance,
+	parsePerformance,
+} = await source("src/performance.ts");
+test("performance reports preserve timing evidence and distinguish pending, zero and failed calls", () => {
+	const store = {
+		name: "App",
+		maxAge: 20,
+		details: { version: "2.9.1" },
+		actions: {
+			actions: [
+				action("1", {
+					time: 0,
+					payload: ["secret"],
+					before: { token: "secret" },
+				}),
+				action("2", { time: 10, error: "failure" }),
+				action("3"),
+				action("4", {
+					time: 40,
+					instance: "Counter-2",
+					depth: 2,
+					trace: "caller.ts:10",
+				}),
+			],
+		},
+	};
+	const report = capturePerformance(store);
+	const json = serializePerformance(report);
+	assert.equal(json.includes("secret"), false);
+	const restored = parsePerformance(json);
+	assert.deepEqual(
+		restored.samples.map((s) => s.durationMs),
+		[0, 10, null, 40],
+	);
+	assert.equal(restored.samples[3].trace, "caller.ts:10");
+	const groups = summarizePerformance(restored.samples);
+	assert.equal(groups[0].instance, "Counter-2");
+	const group = groups[1];
+	assert.deepEqual(
+		[
+			group.calls,
+			group.completed,
+			group.pending,
+			group.failures,
+			group.totalMs,
+			group.meanMs,
+			group.p95Ms,
+			group.maxMs,
+		],
+		[3, 2, 1, 1, 10, 5, 10, 10],
+	);
+	assert.equal(JSON.parse(json).summary[1].pending, 1);
+	for (const mutate of [
+		(r) => (r.version = 2),
+		(r) => (r.samples[0].durationMs = -1),
+		(r) => (r.samples[0].startMs = "0"),
+		(r) => (r.samples[0].depth = 0.5),
+		(r) => (r.samples[1].id = r.samples[0].id),
+		(r) => (r.connection = null),
+	]) {
+		const invalid = JSON.parse(json);
+		mutate(invalid);
+		assert.throws(() => parsePerformance(JSON.stringify(invalid)));
+	}
+	assert.throws(() => parsePerformance("not JSON"));
+	assert.equal(
+		summarizePerformance([{ ...restored.samples[2] }])[0].meanMs,
+		null,
+	);
+});
+
+test("performance P95 uses nearest rank across completed samples", () => {
+	const samples = Array.from({ length: 20 }, (_, index) => ({
+		id: String(index),
+		instance: "Store-1",
+		name: "run",
+		startMs: index * 50,
+		durationMs: index + 1,
+		depth: 1,
+		failed: false,
+		trace: "",
+	}));
+	const [group] = summarizePerformance(samples);
+	assert.deepEqual(
+		[group.totalMs, group.meanMs, group.p95Ms, group.maxMs],
+		[210, 10.5, 19, 20],
+	);
+});

@@ -308,7 +308,6 @@ function Devtools() {
 							onClick={() => {
 								navigateMemoFirst("profiler", "profiler");
 							}}
-							disabled
 						>
 							<span>
 								<svg
@@ -328,7 +327,7 @@ function Devtools() {
 										<path d="M22 12A10 10 0 0 0 12 2v10z"></path>
 									</g>
 								</svg>
-								Profiler (WIP)
+								Performance
 							</span>
 						</button>
 					</div>
