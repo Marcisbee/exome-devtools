@@ -1,0 +1,87 @@
+.page {
+	flex: 1;
+	min-height: 0;
+	overflow: auto;
+	padding: 16px 18px;
+	font-size: 14px;
+	line-height: 1.4;
+}
+
+.overview {
+	max-width: 720px;
+}
+
+.metrics {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 10px;
+	margin: 16px 0 24px;
+}
+
+.metrics > div {
+	display: grid;
+	grid-template-rows: 1fr auto;
+	min-width: 0;
+	padding: 14px;
+	border: 1px solid #dee2e6;
+	border-radius: 5px;
+	background: #f8fafb;
+}
+
+.metrics dt {
+	color: #444;
+	font-size: 13px;
+}
+
+.metrics small {
+	display: block;
+	color: #666;
+	font-size: 11px;
+}
+
+.metrics dd {
+	margin: 12px 0 0;
+	font-size: 28px;
+	line-height: 1;
+	font-variant-numeric: tabular-nums;
+	overflow-wrap: anywhere;
+}
+
+.versions {
+	margin: 0;
+	font-size: 12px;
+}
+
+.versions > div {
+	display: flex;
+	gap: 16px;
+	padding: 6px 0;
+}
+
+.versions dt {
+	width: 100px;
+	color: #606060;
+}
+
+.versions dd {
+	margin: 0;
+}
+
+@container (max-width: 520px) {
+	.metrics {
+		grid-template-columns: 1fr;
+	}
+
+	.metrics > div {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 16px;
+		padding: 10px 12px;
+	}
+
+	.metrics dd {
+		margin: 0;
+		font-size: 24px;
+	}
+}

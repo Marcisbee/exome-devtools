@@ -116,9 +116,27 @@ try {
 		.boundingBox();
 	assert.ok(stateBox.y > listBox.y, "narrow panel stacks list above inspector");
 	await page.getByRole("button", { name: "Details", exact: true }).click();
-	assert.match(
-		await page.locator("#root").innerText(),
-		/Retained completed actions: 1 \(1x\)/,
+	const overview = page.getByRole("region", { name: "Connection overview" });
+	for (const [label, value] of [
+		["Store instances", "2"],
+		["Completed actions", "1"],
+		["Distinct actions", "1"],
+	]) {
+		assert.equal(
+			await overview
+				.locator("dl > div")
+				.filter({ hasText: label })
+				.locator("dd")
+				.innerText(),
+			value,
+		);
+	}
+	assert.equal(
+		await overview.evaluate(
+			(element) => element.scrollWidth <= element.clientWidth,
+		),
+		true,
+		"Details must fit a narrow panel without horizontal scrolling",
 	);
 	// Identical store/action IDs in two connections must remain independent.
 	await page.evaluate(() => {

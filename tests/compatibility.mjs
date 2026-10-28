@@ -106,7 +106,10 @@ try {
 		await selector.selectOption({ label: `Exome ${version} (${index + 1})` });
 		await page.getByRole("button", { name: "Details", exact: true }).click();
 		await page
-			.getByText(`Exome version: v${version}`, { exact: true })
+			.getByRole("region", { name: "Connection overview" })
+			.locator("dl > div")
+			.filter({ has: page.getByText("Exome version", { exact: true }) })
+			.getByText(`v${version}`, { exact: true })
 			.waitFor();
 		await page.getByRole("button", { name: "State", exact: true }).click();
 		await page.getByRole("button", { name: /^Counter-/ }).click();
