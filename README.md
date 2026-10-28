@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Open http://127.0.0.1:8000 for the counter and asynchronous-action playground. Set `PORT` to use another port. The server binds to loopback.
+Open http://127.0.0.1:8000 for the full-panel connection demo with labeled Shop and Admin sample data. Use the Connection selector to inspect each app's separate stores and actions. The Live playground link opens the counter and asynchronous-action middleware playground. Set `PORT` to use another port. The server binds to loopback.
 
 ```sh
 npm test

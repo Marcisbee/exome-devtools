@@ -3,7 +3,7 @@ import { addMiddleware } from "exome";
 
 import { unstableExomeDevtools } from "exome/devtools";
 
-// import { inlineDevtools } from "./devtools";
+import { startConnectionDemo } from "./playground/connections-demo";
 import { Playground } from "./playground/playground";
 import "./index.css";
 
@@ -12,21 +12,37 @@ import { renderUI } from "./devtools";
 // Render devtools UI
 renderUI(document.getElementById("devtools")!);
 
-addMiddleware(
-	unstableExomeDevtools({
-		name: "Exome Devtools Playground",
-		maxAge: 60,
-		ignoreListStores: [
-			"ConnectionsStore",
-			"DevtoolsActionsStore",
-			"DevtoolsStore",
-			"DevtoolsEventStore",
-			"RouterStore",
-			"HistoryStore",
-		],
-	}),
+const live = new URLSearchParams(location.search).has("playground");
+document.body.classList.toggle("live-playground", live);
+render(
+	<header className="preview-bar">
+		<span>{live ? "Live middleware playground" : "Connection demo · Sample data"}</span>
+		<a href={live ? "?" : "?playground"}>
+			{live ? "Connection demo" : "Live playground"}
+		</a>
+	</header>,
+	document.getElementById("root")!,
 );
 
-const container = document.getElementById("root") as HTMLElement;
+if (live) {
+	addMiddleware(
+		unstableExomeDevtools({
+			name: "Exome Devtools Playground",
+			maxAge: 60,
+			ignoreListStores: [
+				"ConnectionsStore",
+				"DevtoolsActionsStore",
+				"DevtoolsStore",
+				"DevtoolsEventStore",
+				"RouterStore",
+				"HistoryStore",
+			],
+		}),
+	);
 
-render(<Playground />, container);
+	const container = document.getElementById("playground") as HTMLElement;
+
+	render(<Playground />, container);
+} else {
+	startConnectionDemo();
+}
