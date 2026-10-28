@@ -14,6 +14,7 @@ const packages = [
 	"exome-v2_7",
 	"exome-v2_8",
 	"exome-v2_9",
+	"exome-v2_9_1",
 	"exome",
 ];
 const assets = new Map([

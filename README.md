@@ -68,13 +68,17 @@ Embedding replaces the page's extension hook. Use either the embedded UI or the 
 
 ## Exome compatibility
 
-This checkout builds with Exome 2.9.1. Inspected applications can keep older Exome versions: the dedicated protocol is available from 2.4.0 through `unstableExomeDevtools` from `exome/devtools`.
+This checkout builds with Exome 2.9.2. Inspected applications can keep older Exome versions: the dedicated protocol is available from 2.4.0 through `unstableExomeDevtools` from `exome/devtools`.
 
-`npm run test:compatibility` uses pinned, published Exome 2.4.0, 2.4.4, 2.5.0, 2.6.0, 2.7.0, 2.8.1, 2.9.0, and 2.9.1 packages against the built UI. It checks initial snapshots, state updates, asynchronous actions, mixed-version connection switching, and updates while a connection is inactive. This is a tested version matrix, not a claim that every historical patch has been tested. The aliases are test-only dependencies and are excluded from release packages.
+`npm run test:compatibility` uses pinned, published Exome 2.4.0, 2.4.4, 2.5.0, 2.6.0, 2.7.0, 2.8.1, 2.9.0, 2.9.1, and 2.9.2 packages against the built UI. It checks initial snapshots, state updates, asynchronous actions, mixed-version connection switching, and updates while a connection is inactive. This is a tested version matrix, not a claim that every historical patch has been tested. The aliases are test-only dependencies and are excluded from release packages.
 
 Exome versions before 2.4.0 provide Redux DevTools integration rather than this dedicated protocol. Use Redux DevTools for those versions, or upgrade Exome to use this extension.
 
 The older middleware can discard retained history at its limit and omit BigInt, cyclic plain objects, or null-prototype dictionaries. Devtools cannot recover data that the producer never sends. Exome 2.9.1 fixes those cases; upgrading is recommended for complete data capture.
+
+Exome 2.9.2 reports stores after garbage collection so this panel can remove them from State and the live instance count. Retained actions and their before/after snapshots remain inspectable. Collection timing is controlled by the browser; stores still referenced by the application (including exported module singletons) remain live. Older middleware cannot report removals, and older panels ignore the new event; both combinations still support state and action inspection.
+
+After building, `xvfb-run -a npm run test:hmr` checks three real Vite module updates through the unpacked Chrome extension, explicitly collecting garbage between updates. `HMR_EXOME=exome-v2_9_1` checks older middleware; `OLD_EXTENSION_PATH=/path/to/previous/extension/dist` checks the current middleware against a separately built older panel. The updated pair must return to one live store while preserving historical snapshots. Mixed versions retain stale entries but must keep state updates and history working.
 
 The Profiler remains disabled and unfinished.
 

@@ -11,6 +11,7 @@
 		"icons": "node scripts/build.icons.mjs",
 		"test": "node --test tests/*.test.mjs",
 		"test:browser": "node tests/browser.mjs",
+		"test:hmr": "node tests/hmr.mjs",
 		"test:extension": "node tests/extension.mjs",
 		"test:compatibility": "node tests/compatibility.mjs"
 	},
@@ -18,7 +19,7 @@
 		"@biomejs/biome": "^1.9.4",
 		"@types/chrome": "^0.0.253",
 		"esbuild": "^0.28.1",
-		"exome": "^2.9.1",
+		"exome": "^2.9.2",
 		"exome-v2_4": "npm:exome@2.4.4",
 		"exome-v2_4_0": "npm:exome@2.4.0",
 		"exome-v2_5": "npm:exome@2.5.0",
@@ -26,8 +27,10 @@
 		"exome-v2_7": "npm:exome@2.7.0",
 		"exome-v2_8": "npm:exome@2.8.1",
 		"exome-v2_9": "npm:exome@2.9.0",
+		"exome-v2_9_1": "npm:exome@2.9.1",
 		"playwright": "^1.64.1",
 		"preact": "^10.25.1",
+		"vite": "^7.3.7",
 		"webext-bridge": "^6.0.1"
 	},
 	"repository": {

@@ -454,6 +454,10 @@ export function renderUI(target: HTMLElement) {
 			},
 			send(data) {
 				if (!connected) return;
+				if (data.event === "remove" && data.type === "state") {
+					store.actions.removeInstance(data.payload);
+					return;
+				}
 				if (data.event === "send") {
 					if (data.type === "states") {
 						for (const [name, state] of data.payload) {
