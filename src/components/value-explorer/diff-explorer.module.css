@@ -1,0 +1,117 @@
+.row {
+	display: flex;
+	position: relative;
+	width: fit-content;
+	max-width: 100%;
+}
+.marker {
+	flex: none;
+	display: inline-block;
+	width: 1.2em;
+	text-align: center;
+	user-select: none;
+}
+.value {
+	position: relative;
+	min-width: 0;
+	overflow-wrap: anywhere;
+	padding-left: 1em;
+}
+.inlineValue {
+	display: inline-block;
+	position: relative;
+	vertical-align: top;
+	max-width: 100%;
+}
+.editRow {
+	padding-left: 2.2em;
+	overflow-wrap: anywhere;
+}
+.toggle {
+	display: block;
+	position: relative;
+	font: inherit;
+	line-height: inherit;
+	border: 0;
+	padding: 0;
+	background: none;
+	cursor: pointer;
+	text-align: left;
+	color: inherit;
+}
+.toggle:focus-visible {
+	outline: 2px solid #f5841b;
+	outline-offset: 1px;
+}
+.chevron {
+	display: inline-block;
+	width: 1em;
+	color: inherit;
+	opacity: 0.5;
+}
+.children {
+	padding-left: 1em;
+}
+.branch > .bracket {
+	padding-left: 2.2em;
+}
+.root > .branch > .bracket {
+	padding-left: 0;
+}
+.added {
+	background-color: rgba(139, 195, 74, 0.25);
+	color: #1b420b;
+}
+.removed {
+	background-color: rgba(244, 67, 54, 0.1);
+	color: #940707;
+}
+.label,
+.bracket,
+.edited {
+	color: inherit;
+}
+.value div,
+.value span,
+.value i,
+.inlineValue div,
+.inlineValue span,
+.inlineValue i {
+	color: inherit;
+}
+
+.root {
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+.toggle {
+	max-width: 100%;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.value,
+.inlineValue {
+	max-width: 100%;
+}
+/* Keep collapsed object previews compact, while expanded values can wrap. */
+.root [role="button"] {
+	display: inline-block;
+	max-width: 100%;
+	vertical-align: top;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.root [role="button"][aria-expanded="true"] {
+	display: block;
+}
+.root [role="button"] > i:first-child {
+	position: static;
+	margin: 0;
+}
+.value div,
+.inlineValue div {
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}

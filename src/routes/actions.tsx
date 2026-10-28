@@ -11,14 +11,14 @@ import { onAction } from "exome";
 import {
 	ExploreExomeObject,
 	ExploreObject,
-	safeStringify,
 	historicalContext,
 } from "../components/value-explorer/value-explorer2";
+import { DiffExplorer } from "../components/value-explorer/diff-explorer";
 import styles from "../devtools.module.css";
 import { RouterOutlet, routerContext } from "../devtools/router";
 import { DevtoolsActionsStore, devtoolsContext } from "../store";
 import { cc } from "../utils/cc";
-import { type Diff, getDiff, getShallowExomeJson } from "../utils/get-diff";
+import { getDiff, getShallowExomeJson } from "../utils/get-diff";
 import { getTimingColor } from "../utils/get-timing-color";
 import { useQueryFilter } from "../utils/use-query-filter";
 import { useResize } from "../utils/use-resize";
@@ -164,71 +164,6 @@ export function RouteDevtoolsActions() {
 
 			<RouterOutlet routes={routes} />
 		</div>
-	);
-}
-
-function DiffObject({ diff }: { diff: Diff }) {
-	return (
-		<pre className={styles.preCode}>
-			{"{\n"}
-			{!!diff.added?.length && (
-				<>
-					{diff.added.map(([path, a]) => (
-						<span
-							style={{
-								backgroundColor: "rgba(139,195,74,0.25)",
-								color: "#1b420b",
-							}}
-						>
-							+ {path.join(".")}: {safeStringify(a)},{"\n"}
-						</span>
-					))}
-				</>
-			)}
-			{!!diff.removed?.length && (
-				<>
-					{diff.removed.map(([path, a]) => (
-						<span
-							style={{
-								color: "#940707",
-								backgroundColor: "rgba(244,67,54,0.1)",
-							}}
-						>
-							- {path.join(".")}: {safeStringify(a)},{"\n"}
-						</span>
-					))}
-				</>
-			)}
-			{!!diff.edited?.length && (
-				<>
-					{diff.edited.map(([path, a, b]) => (
-						<>
-							{" "}
-							{path.join(".")}:{" "}
-							<span
-								style={{
-									color: "#940707",
-									backgroundColor: "rgba(244,67,54,0.1)",
-								}}
-							>
-								{safeStringify(a)}
-							</span>{" "}
-							{"=>"}{" "}
-							<span
-								style={{
-									backgroundColor: "rgba(139,195,74,0.25)",
-									color: "#1b420b",
-								}}
-							>
-								{safeStringify(b)}
-							</span>
-							,{"\n"}
-						</>
-					))}
-				</>
-			)}
-			{"}"}
-		</pre>
 	);
 }
 
@@ -481,7 +416,14 @@ function DevtoolsActionsContent() {
 							<i>Action is still pending...</i>
 						</pre>
 					) : (
-						<DiffObject diff={sateDiff} />
+						<pre className={styles.preCode}>
+							<DiffExplorer
+								key={action.id}
+								diff={sateDiff}
+								before={stateBefore}
+								after={stateAfter}
+							/>
+						</pre>
 					)}
 				</div>
 

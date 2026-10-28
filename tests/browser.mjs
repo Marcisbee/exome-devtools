@@ -24,14 +24,22 @@ await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
 const browser = await chromium.launch({
 	executablePath: process.env.CHROME_PATH || undefined,
 	headless: true,
+	slowMo: process.env.EVIDENCE_DIR ? 150 : 0,
 });
 try {
 	const page = await browser.newPage({
-		viewport: { width: 1000, height: 700 },
+		viewport: { width: 1000, height: process.env.EVIDENCE_DIR ? 1000 : 700 },
+		recordVideo: process.env.EVIDENCE_DIR
+			? { dir: process.env.EVIDENCE_DIR, size: { width: 1000, height: 1000 } }
+			: undefined,
 	});
 	const errors = [];
 	page.on("pageerror", (error) => errors.push(error.message));
 	await page.goto(`http://127.0.0.1:${server.address().port}`);
+	if (process.env.EVIDENCE_DIR)
+		await page.locator("#root").evaluate((el) => {
+			el.style.height = "950px";
+		});
 	await page.evaluate(async () => {
 		const { renderUI } = await import("/devtools.js");
 		renderUI(document.getElementById("root"));
@@ -50,8 +58,24 @@ try {
 			time: 5,
 			trace: "",
 			payload: [],
-			before: { value: [], child: { $$exome_id: "Counter-2" } },
-			after: { value: {}, count: 1, child: { $$exome_id: "Counter-2" } },
+			before: {
+				value: [],
+				child: { $$exome_id: "Counter-2" },
+				profile: { name: "Old", deleted: "gone" },
+				addedOnly: {},
+				removed: { nested: "removed object value" },
+				items: ["keep", "removed item"],
+				changedRef: { $$exome_id: "Counter-2" },
+			},
+			after: {
+				value: {},
+				count: 1,
+				child: { $$exome_id: "Counter-2" },
+				profile: { name: "New", added: false },
+				addedOnly: { flag: null },
+				items: ["keep"],
+				changedRef: { $$exome_id: "Counter-3" },
+			},
 		};
 		connection.send({
 			event: "update",
@@ -78,12 +102,46 @@ try {
 		.getByRole("searchbox", { name: "Filter actions" })
 		.fill("increment,count=1");
 	await page.getByRole("button", { name: /Counter.*increment/s }).click();
+	const changes = page.locator('[aria-label="Action changes"]');
+	await changes.waitFor({ timeout: 3000 });
+	assert.equal(await changes.count(), 1);
+	const profile = changes.getByRole("button", { name: "profile: changed" });
+	await profile.focus();
+	await page.keyboard.press("Enter");
+	assert.equal(await profile.getAttribute("aria-expanded"), "true");
+	for (const text of ['"gone"', '"Old"', '"New"', "false"]) {
+		await changes.getByText(text, { exact: true }).waitFor();
+	}
+	await page.keyboard.press("Space");
+	assert.equal(await profile.getAttribute("aria-expanded"), "false");
+	await profile.click();
+	await changes.getByRole("button", { name: "addedOnly: added" }).click();
+	await changes.getByText("null", { exact: true }).waitFor();
+	const items = changes.getByRole("button", { name: "items: removed" });
+	await items.click();
+	await changes.getByText('"removed item"', { exact: true }).waitFor();
+	await changes.getByRole("button", { name: /removed object value/ }).click();
+	await changes.getByText('"removed object value"', { exact: true }).waitFor();
+	for (const id of ["Counter-2", "Counter-3"]) {
+		await changes
+			.getByText(`${id} (reference; historical value not captured)`, {
+				exact: true,
+			})
+			.waitFor();
+	}
+	assert.equal((await changes.innerText()).includes("999"), false);
+	assert.match(await changes.innerText(), /=>/);
+	if (process.env.EVIDENCE_DIR)
+		await page.screenshot({
+			path: `${process.env.EVIDENCE_DIR}/nested-diff.png`,
+		});
 	await page.getByRole("button", { name: "Before", exact: true }).click();
 	await page
 		.getByText("Counter-2 (reference; historical value not captured)")
+		.filter({ visible: true })
 		.first()
 		.waitFor({ state: "visible" });
-	assert.match(await page.locator("#root").innerText(), /Diff \(2\)/);
+	assert.match(await page.locator("#root").innerText(), /Diff \(9\)/);
 	assert.equal(
 		(await page.locator("#root").innerText()).includes("999"),
 		false,
@@ -235,6 +293,89 @@ try {
 	await page.getByRole("button", { name: "State", exact: true }).click();
 	await page.getByRole("button", { name: "Counter-1", exact: true }).click();
 	await page.getByText("42", { exact: true }).waitFor();
+
+	// Large snapshots must remain inspectable without widening the action panel.
+	await page.evaluate(() => {
+		const large = {
+			longValue: "x".repeat(600),
+			nested: { message: "nested".repeat(100) },
+		};
+		window.connection.send({
+			event: "update",
+			type: "all",
+			payload: {
+				states: [],
+				actions: [
+					{
+						id: "large",
+						name: "inspectLarge",
+						instance: "Counter-1",
+						depth: 1,
+						now: 0,
+						time: 1,
+						trace: "",
+						payload: [],
+						before: { removed: large, edited: large },
+						after: {
+							added: large,
+							edited: null,
+							["longKey".repeat(40)]: { leaf: true },
+						},
+					},
+				],
+			},
+		});
+	});
+	await page.getByRole("button", { name: "Actions", exact: true }).click();
+	await page.getByRole("searchbox", { name: "Filter actions" }).fill("");
+	await page.getByRole("button", { name: /inspectLarge/ }).click();
+	await page.getByRole("button", { name: /Diff/ }).click();
+	const largeChanges = page.locator('[aria-label="Action changes"]');
+	for (const width of [1000, 380]) {
+		await page.setViewportSize({ width, height: 900 });
+		assert.equal(
+			await largeChanges.evaluate((el) => {
+				for (let current = el; current; current = current.parentElement) {
+					if (current.scrollWidth > current.clientWidth + 1) return false;
+				}
+				return true;
+			}),
+			true,
+			`large diff must fit at ${width}px`,
+		);
+	}
+	const largePreview = largeChanges
+		.getByRole("button", { name: /longValue/ })
+		.first();
+	assert.equal(
+		await largePreview.evaluate((el) => getComputedStyle(el).textOverflow),
+		"ellipsis",
+	);
+	assert.equal(
+		await largePreview.evaluate((el) => el.scrollWidth > el.clientWidth),
+		true,
+		"large collapsed preview is truncated",
+	);
+	await largePreview.focus();
+	await page.keyboard.press("Enter");
+	assert.equal(
+		await page.evaluate(() =>
+			document.activeElement.getAttribute("aria-expanded"),
+		),
+		"true",
+	);
+	await largeChanges
+		.getByText('"' + "x".repeat(600) + '"', { exact: true })
+		.first()
+		.waitFor();
+	assert.equal(
+		await largeChanges.evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
+		true,
+	);
+	if (process.env.EVIDENCE_DIR)
+		await page.screenshot({
+			path: `${process.env.EVIDENCE_DIR}/large-diff.png`,
+		});
 
 	await page.evaluate(() =>
 		window.connection.send({
