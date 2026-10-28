@@ -49,7 +49,6 @@ export function RouteDevtoolsProfiler() {
 		<section className={styles.page} aria-label="Store performance">
 			<header className={styles.header}>
 				<div>
-					<h2>Store performance</h2>
 					<p>
 						{performanceReport ? "Saved snapshot" : "Live retained history"} ·{" "}
 						{report.connection.name}

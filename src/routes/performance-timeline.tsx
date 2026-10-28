@@ -1,6 +1,7 @@
 import { useState } from "preact/hooks";
 import type { PerformanceSample } from "../performance";
 import styles from "./profiler.module.css";
+import sharedStyles from "../devtools.module.css";
 
 const formatMs = (n: number) =>
 	`${n.toLocaleString(undefined, { maximumFractionDigits: 3 })} ms`;
@@ -38,7 +39,7 @@ export function PerformanceTimeline({
 	);
 	const span = Math.max(1, end - start);
 	const lanes = lanesFor(samples);
-	const colors = ["#f5cc78", "#9dd3ee", "#b9dca1", "#d3b9ed", "#f0b9b3"];
+	const colors = ["#f9cf9f", "#b8d4e7", "#c7d9b7", "#d2c5e1", "#e8c3bf"];
 	const stores = [...new Set(samples.map((s) => s.instance))];
 	return (
 		<section className={styles.timelineSection} aria-label="Action timeline">
@@ -117,9 +118,10 @@ export function PerformanceTimeline({
 							role="region"
 							aria-label="Selected timeline action"
 						>
-							<strong>
-								{selected.instance}.{selected.name}
-							</strong>
+							<h3 className={styles.selectionTitle}>
+								<span>{selected.instance}</span>
+								{selected.name}
+							</h3>
 							<dl className={styles.stats}>
 								<div>
 									<dt>Start</dt>
@@ -155,7 +157,9 @@ export function PerformanceTimeline({
 									</button>
 								</div>
 							)}
-							{selected.trace && <pre>{selected.trace}</pre>}
+							{selected.trace && (
+								<pre className={sharedStyles.preCode}>{selected.trace}</pre>
+							)}
 						</div>
 					) : (
 						<p className={styles.note}>Select a call.</p>
