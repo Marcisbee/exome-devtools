@@ -1,3 +1,4 @@
+import type { PerformanceReport } from "./performance";
 import { Exome } from "exome";
 import { createContext } from "preact";
 
@@ -90,6 +91,11 @@ export class DevtoolsEventStore extends Exome {
 
 export class DevtoolsStore extends Exome {
 	public events = new DevtoolsEventStore();
+	public performanceReport: PerformanceReport | null = null;
+
+	public setPerformanceReport(report: PerformanceReport | null) {
+		this.performanceReport = report;
+	}
 	public actions: DevtoolsActionsStore;
 
 	constructor(

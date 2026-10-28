@@ -92,3 +92,37 @@ Publishing uses the Chrome Web Store API v2 and Google's official authentication
 4. Complete the existing listing and privacy declarations in the publisher dashboard. Merge this workflow, run it once with **publish** unchecked to inspect its artifact, then release a new version with a matching tag or a publishing manual run.
 
 Uploads must finish successfully before submission. A retry skips versions already published or awaiting review and refuses to replace a different pending submission. The workflow reports the API's resulting state: **PENDING_REVIEW is not a live release**. Google still controls review and approval. See [Chrome Web Store API publishing](https://developer.chrome.com/docs/webstore/using-api/).
+
+### Store performance reports
+
+Open **Performance** to monitor the selected connection's retained action history.
+Groups keep store instance IDs distinct and show call count, completed/pending
+counts, failures, total elapsed time, mean, nearest-rank P95, and maximum duration.
+Filter by store or action and sort to find frequent or slow work. Expand a group
+for individual samples and call traces; **Inspect action** opens live action details.
+
+Timings come from Exome middleware in milliseconds. They include async waits and
+nested calls, not just CPU work. Totals overlap and are not wall time, render time,
+or proof of a bottleneck. Use traces and a browser CPU profile to investigate.
+Only retained history (the connection's `maxAge`) is available; older actions are
+not recoverable. Pending calls do not contribute to duration statistics.
+
+**Freeze snapshot** keeps a stable report while live collection continues.
+**Save JSON** downloads the current report. **Restore JSON** validates and displays
+one without replaying actions or replacing application state. **Return to live**
+resumes the current history view. Restored/frozen reports survive tab navigation
+within the connection; save to disk to preserve them across reloads/disconnects.
+Restore is available in a connected Devtools panel, including the local demo.
+
+For agents, the UTF-8 JSON format is `exome-performance`, version `1`. `connection`
+identifies the source and history limit; `capturedAt` is an ISO timestamp. `samples`
+contain `id`, `instance`, `name`, `startMs` (source monotonic clock), `durationMs`
+(number or `null` for pending), `depth`, `failed`, and `trace`. `summary` contains
+per-instance/action aggregates. Import recalculates summaries from samples rather
+than trusting supplied aggregates. Files are limited to 10 MB and 100,000 samples.
+Reports omit state, arguments, results and error messages; traces still contain
+source locations. Agents can read or compare files directly, for example:
+
+```sh
+jq '.summary | sort_by(-.totalMs) | .[:10]' exome-performance.json
+```

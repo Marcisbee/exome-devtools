@@ -1,44 +1,177 @@
-.row {
-	white-space: nowrap;
-	background-color: #f0f0f0;
-	padding: 10px;
-	overflow: scroll hidden;
-	position: relative;
-	height: 30px;
+.page {
+	flex: 1;
+	min-height: 0;
+	overflow: auto;
+	padding: 16px 18px;
+	font-size: 13px;
+	line-height: 1.5;
 }
-
-.action {
-	display: block;
-	position: absolute;
-	height: 10px;
-	font-size: 9px;
-	min-width: 10px;
-	width: 3px;
-	overflow: hidden;
-	border: 2px solid #f0f0f0;
-	background-color: #f5841b;
-	border-radius: 10px;
+.header {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	gap: 12px;
+	align-items: center;
+}
+.header h2 {
+	font-size: 18px;
+	margin: 0;
+}
+.header p {
+	margin: 4px 0;
+	color: #555;
+}
+.controls {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	align-items: center;
+}
+.controls button,
+.controls select,
+.controls input[type="search"],
+.import,
+.samples button {
+	font: inherit;
+	border: 1px solid #ccd1d7;
+	border-radius: 4px;
+	background: #fff;
+	color: #222;
+	padding: 6px 10px;
+}
+.controls button,
+.import,
+.samples button {
 	cursor: pointer;
-	color: transparent;
-
-	&:hover {
-		background-color: #df4d09;
-		border-color: #df4d09;
-		z-index: 2;
-		box-shadow: 0 0 0 2px #f0f0f0;
+}
+.controls button:active,
+.samples button:active {
+	transform: scale(0.97);
+}
+.controls input[type="search"] {
+	min-width: 0;
+	width: 220px;
+	max-width: 100%;
+}
+.import {
+	position: relative;
+	overflow: hidden;
+}
+.import input {
+	position: absolute;
+	inset: 0;
+	opacity: 0;
+	width: 100%;
+	cursor: pointer;
+}
+.import:focus-within {
+	outline: 2px solid #3767b1;
+	outline-offset: 2px;
+}
+.note {
+	color: #555;
+	overflow-wrap: anywhere;
+}
+.metrics {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 10px;
+}
+.metrics > div {
+	background: #f8fafb;
+	border: 1px solid #dee2e6;
+	border-radius: 5px;
+	padding: 12px;
+}
+.metrics dt {
+	color: #555;
+}
+.metrics dd {
+	margin: 6px 0 0;
+	font-size: 24px;
+	font-variant-numeric: tabular-nums;
+}
+.groups {
+	display: grid;
+	gap: 8px;
+}
+.group {
+	border: 1px solid #dee2e6;
+	border-radius: 5px;
+}
+.group > summary {
+	padding: 12px;
+	cursor: pointer;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 24px;
+	justify-content: space-between;
+	background: #f8fafb;
+}
+.group > summary::before {
+	content: "▸";
+}
+.group[open] > summary::before {
+	content: "▾";
+}
+.name {
+	flex: 1;
+	min-width: 120px;
+	overflow-wrap: anywhere;
+}
+.name strong {
+	display: block;
+}
+.stats {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px 24px;
+	padding: 0 12px;
+	font-variant-numeric: tabular-nums;
+}
+.stats dt {
+	color: #555;
+}
+.stats dd {
+	margin: 0;
+	font-weight: bold;
+}
+.samples {
+	padding: 0 12px;
+	list-style: none;
+}
+.samples li {
+	padding: 10px 0;
+	border-top: 1px solid #eee;
+	overflow-wrap: anywhere;
+}
+.samples pre {
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+.samples summary {
+	cursor: pointer;
+	margin-top: 6px;
+}
+.error {
+	color: #a51c30;
+}
+@container (max-width: 520px) {
+	.metrics {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 }
 
-.increase {
-	animation: increase linear 1s forwards;
+.note > summary {
+	cursor: pointer;
+	margin: 12px 0;
 }
-
-@keyframes increase {
-	0% {
-		width: calc(0px * var(--profiler-scale, 1));
+@container (max-width: 520px) {
+	.metrics > div {
+		padding: 8px;
 	}
-
-	100% {
-		width: calc(100px * var(--profiler-scale, 1));
+	.metrics dd {
+		margin-top: 2px;
+		font-size: 20px;
 	}
 }

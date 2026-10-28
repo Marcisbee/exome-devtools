@@ -74,6 +74,98 @@ try {
 			},
 		});
 	});
+	await page.getByRole("button", { name: "Performance", exact: true }).click();
+	await page
+		.getByText("Live retained history · Test app", { exact: true })
+		.waitFor();
+	await page.locator("summary").filter({ hasText: "Counter-1" }).click();
+	await page
+		.getByRole("button", { name: "Inspect action", exact: true })
+		.waitFor();
+
+	// A live completion replaces the pending sample, including zero durations.
+	await page.evaluate(() =>
+		window.connection.send({
+			event: "send",
+			type: "action",
+			payload: {
+				id: "pending",
+				name: "load",
+				instance: "Loader-1",
+				now: 10,
+				depth: 1,
+				trace: "",
+				payload: [],
+				before: {},
+			},
+		}),
+	);
+	await page.locator("summary").filter({ hasText: "Loader-1" }).click();
+	await page.getByText("Pending", { exact: true }).last().waitFor();
+	await page.evaluate(() =>
+		window.connection.send({
+			event: "update",
+			type: "action",
+			payload: {
+				id: "pending",
+				name: "load",
+				instance: "Loader-1",
+				now: 10,
+				time: 0,
+				depth: 1,
+				trace: "",
+				payload: [],
+				before: {},
+				after: {},
+			},
+		}),
+	);
+	await page.getByText("1 calls · 0 ms total", { exact: true }).waitFor();
+	const downloadPromise = page.waitForEvent("download");
+	await page.getByRole("button", { name: "Save JSON", exact: true }).click();
+	const download = await downloadPromise;
+	const reportText = await readFile(await download.path(), "utf8");
+	const report = JSON.parse(reportText);
+	assert.equal(report.format, "exome-performance");
+	assert.equal(report.summary[0].totalMs, 5);
+	assert.equal(report.samples[0].instance, "Counter-1");
+	await page.getByRole("button", { name: "Freeze snapshot" }).click();
+	await page.getByText("Saved snapshot · Test app", { exact: true }).waitFor();
+	assert.equal(
+		await page.getByRole("button", { name: "Inspect action" }).count(),
+		0,
+	);
+	await page.getByLabel("Restore JSON", { exact: true }).setInputFiles({
+		name: "broken.json",
+		mimeType: "application/json",
+		buffer: Buffer.from('{"version":2}'),
+	});
+	await page.getByRole("alert").waitFor();
+	await page.getByText("Saved snapshot · Test app", { exact: true }).waitFor();
+	report.connection.name = "Offline recording";
+	await page.getByLabel("Restore JSON", { exact: true }).setInputFiles({
+		name: "report.json",
+		mimeType: "application/json",
+		buffer: Buffer.from(JSON.stringify(report)),
+	});
+	await page
+		.getByText("Saved snapshot · Offline recording", { exact: true })
+		.waitFor();
+	await page.getByRole("button", { name: "Actions", exact: true }).click();
+	await page.getByRole("button", { name: "Performance", exact: true }).click();
+	await page
+		.getByText("Saved snapshot · Offline recording", { exact: true })
+		.waitFor();
+	await page.setViewportSize({ width: 380, height: 700 });
+	assert.equal(
+		await page
+			.getByRole("region", { name: "Store performance" })
+			.evaluate((el) => el.scrollWidth <= el.clientWidth),
+		true,
+	);
+	await page.getByRole("button", { name: "Return to live" }).click();
+	await page.getByRole("button", { name: "Actions", exact: true }).click();
+
 	await page
 		.getByRole("searchbox", { name: "Filter actions" })
 		.fill("increment,count=1");
@@ -119,8 +211,8 @@ try {
 	const overview = page.getByRole("region", { name: "Connection overview" });
 	for (const [label, value] of [
 		["Store instances", "2"],
-		["Completed actions", "1"],
-		["Distinct actions", "1"],
+		["Completed actions", "2"],
+		["Distinct actions", "2"],
 	]) {
 		assert.equal(
 			await overview
